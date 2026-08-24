@@ -5,7 +5,7 @@ import cncharInput from 'cnchar-input';
 import cncharPoly from 'cnchar-poly';
 import cncharWords from 'cnchar-words';
 import { pinyin } from 'pinyin-pro';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 cnchar.use(cncharInput, cncharWords, cncharPoly);
 
@@ -284,9 +284,14 @@ export default function Home() {
     key: '', characters: [],
   });
   const [audioSpeed, setAudioSpeed] = useState<'natural' | 'slow'>('natural');
+  const [audioLoop, setAudioLoop] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [audioMessage, setAudioMessage] = useState('');
   const [copied, setCopied] = useState(false);
+  const speechRun = useRef(0);
+  const loopEnabled = useRef(false);
+  const speedSetting = useRef<'natural' | 'slow'>('natural');
+  const loopTimer = useRef<number | null>(null);
   const pinyinDetected = isPinyinInput(phrase);
   const pinyinResolution = useMemo(() => resolvePinyin(phrase), [phrase]);
   const defaultCharacters = pinyinResolution?.choices.map((choice) => choice.selected) ?? [];
@@ -299,6 +304,12 @@ export default function Home() {
   const pinyinLine = syllables.map((item) => item.pinyin).join(' ');
   const portugueseLine = syllables.map((item) => `${item.portuguese} (${item.tone})`).join(' ');
 
+  useEffect(() => () => {
+    speechRun.current += 1;
+    if (loopTimer.current) window.clearTimeout(loopTimer.current);
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  }, []);
+
   function chooseCharacter(index: number, character: string) {
     if (!pinyinResolution) return;
     const nextCharacters = [...selectedCharacters];
@@ -306,28 +317,92 @@ export default function Home() {
     setPinyinSelection({ key: pinyinResolution.key, characters: nextCharacters });
   }
 
+  function stopSpeaking() {
+    speechRun.current += 1;
+    if (loopTimer.current) {
+      window.clearTimeout(loopTimer.current);
+      loopTimer.current = null;
+    }
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    setAudioMessage('');
+  }
+
+  function changePhrase(value: string) {
+    if (isSpeaking) stopSpeaking();
+    setPhrase(value);
+  }
+
+  function changeSpeed(speed: 'natural' | 'slow') {
+    speedSetting.current = speed;
+    setAudioSpeed(speed);
+  }
+
+  function toggleLoop() {
+    const nextValue = !audioLoop;
+    loopEnabled.current = nextValue;
+    setAudioLoop(nextValue);
+
+    if (!nextValue && loopTimer.current) {
+      window.clearTimeout(loopTimer.current);
+      loopTimer.current = null;
+      speechRun.current += 1;
+      setIsSpeaking(false);
+    }
+  }
+
   function speak() {
+    if (isSpeaking) {
+      stopSpeaking();
+      return;
+    }
+
     if (!resolvedPhrase.trim() || !('speechSynthesis' in window)) {
       setAudioMessage('O áudio não está disponível neste navegador.');
       return;
     }
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(resolvedPhrase);
-    const voices = window.speechSynthesis.getVoices();
-    const mandarinVoice = voices.find((voice) => voice.lang.toLowerCase() === 'zh-cn')
-      ?? voices.find((voice) => voice.lang.toLowerCase().startsWith('zh'));
 
-    utterance.lang = 'zh-CN';
-    utterance.rate = audioSpeed === 'slow' ? 0.55 : 0.88;
-    utterance.pitch = 1;
-    if (mandarinVoice) utterance.voice = mandarinVoice;
-    utterance.onstart = () => { setIsSpeaking(true); setAudioMessage(''); };
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => {
-      setIsSpeaking(false);
-      setAudioMessage('Não foi possível iniciar a voz em mandarim neste dispositivo.');
+    window.speechSynthesis.cancel();
+    const runId = speechRun.current + 1;
+    speechRun.current = runId;
+
+    const playPhrase = () => {
+      if (speechRun.current !== runId) return;
+
+      const utterance = new SpeechSynthesisUtterance(resolvedPhrase);
+      const voices = window.speechSynthesis.getVoices();
+      const mandarinVoice = voices.find((voice) => voice.lang.toLowerCase() === 'zh-cn')
+        ?? voices.find((voice) => voice.lang.toLowerCase().startsWith('zh'));
+
+      utterance.lang = 'zh-CN';
+      utterance.rate = speedSetting.current === 'slow' ? 0.55 : 0.88;
+      utterance.pitch = 1;
+      if (mandarinVoice) utterance.voice = mandarinVoice;
+      utterance.onstart = () => {
+        if (speechRun.current !== runId) return;
+        setIsSpeaking(true);
+        setAudioMessage('');
+      };
+      utterance.onend = () => {
+        if (speechRun.current !== runId) return;
+        if (loopEnabled.current) {
+          loopTimer.current = window.setTimeout(() => {
+            loopTimer.current = null;
+            playPhrase();
+          }, 1000);
+          return;
+        }
+        setIsSpeaking(false);
+      };
+      utterance.onerror = () => {
+        if (speechRun.current !== runId) return;
+        setIsSpeaking(false);
+        setAudioMessage('Não foi possível iniciar a voz em mandarim neste dispositivo.');
+      };
+      window.speechSynthesis.speak(utterance);
     };
-    window.speechSynthesis.speak(utterance);
+
+    playPhrase();
   }
 
   async function copyResult() {
@@ -371,11 +446,11 @@ export default function Home() {
           <div className="input-wrap">
             <textarea
               id="phrase" value={phrase} maxLength={120}
-              onChange={(event) => setPhrase(event.target.value)}
+              onChange={(event) => changePhrase(event.target.value)}
               placeholder="Ex.: 你好, ni hao ou nǐ hǎo" spellCheck={false}
               className={pinyinDetected ? 'pinyin-input' : ''}
             />
-            <button className="clear-button" type="button" onClick={() => setPhrase('')}
+            <button className="clear-button" type="button" onClick={() => changePhrase('')}
               aria-label="Limpar frase" hidden={!phrase}>×</button>
             <span className="counter">{phrase.length}/120</span>
           </div>
@@ -426,7 +501,7 @@ export default function Home() {
           <div className="examples" aria-label="Exemplos rápidos">
             <span>Experimente:</span>
             {EXAMPLES.map((example) => (
-              <button key={example.phrase} type="button" onClick={() => setPhrase(example.phrase)}>
+              <button key={example.phrase} type="button" onClick={() => changePhrase(example.phrase)}>
                 {example.label}
               </button>
             ))}
@@ -435,13 +510,20 @@ export default function Home() {
           <div className="audio-row">
             <button className="play-button" type="button" onClick={speak} disabled={!syllables.length}>
               <span className="play-icon" aria-hidden="true">{isSpeaking ? '◼' : '▶'}</span>
-              {isSpeaking ? 'Ouvindo…' : 'Ouvir em mandarim'}
+              {isSpeaking ? 'Parar áudio' : 'Ouvir em mandarim'}
             </button>
-            <div className="speed-control" aria-label="Velocidade do áudio">
-              <button type="button" className={audioSpeed === 'natural' ? 'active' : ''}
-                onClick={() => setAudioSpeed('natural')} aria-pressed={audioSpeed === 'natural'}>Natural</button>
-              <button type="button" className={audioSpeed === 'slow' ? 'active' : ''}
-                onClick={() => setAudioSpeed('slow')} aria-pressed={audioSpeed === 'slow'}>Devagar <span>0,6×</span></button>
+            <div className="audio-options">
+              <div className="speed-control" aria-label="Velocidade do áudio">
+                <button type="button" className={audioSpeed === 'natural' ? 'active' : ''}
+                  onClick={() => changeSpeed('natural')} aria-pressed={audioSpeed === 'natural'}>Natural</button>
+                <button type="button" className={audioSpeed === 'slow' ? 'active' : ''}
+                  onClick={() => changeSpeed('slow')} aria-pressed={audioSpeed === 'slow'}>Devagar <span>0,6×</span></button>
+              </div>
+              <button className={`loop-control ${audioLoop ? 'active' : ''}`} type="button"
+                onClick={toggleLoop} aria-pressed={audioLoop} aria-label="Repetir frase em loop"
+                title="Repetir frase continuamente">
+                <span aria-hidden="true">↻</span> Loop
+              </button>
             </div>
           </div>
           {audioMessage && <p className="audio-message" role="status">{audioMessage}</p>}
