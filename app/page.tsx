@@ -1,7 +1,13 @@
 'use client';
 
+import cnchar from 'cnchar';
+import cncharInput from 'cnchar-input';
+import cncharPoly from 'cnchar-poly';
+import cncharWords from 'cnchar-words';
 import { pinyin } from 'pinyin-pro';
 import { useMemo, useState } from 'react';
+
+cnchar.use(cncharInput, cncharWords, cncharPoly);
 
 type Syllable = {
   hanzi: string;
@@ -11,12 +17,88 @@ type Syllable = {
   portuguese: string;
 };
 
+type PinyinChoice = {
+  syllable: string;
+  options: string[];
+  selected: string;
+};
+
+type PinyinResolution = {
+  key: string;
+  choices: PinyinChoice[];
+};
+
 const EXAMPLES = [
   { label: 'Bom dia', phrase: '早上好' },
   { label: 'Obrigado', phrase: '谢谢你' },
   { label: 'Mais devagar', phrase: '请慢一点说' },
   { label: 'Até mais', phrase: '再见' },
+  { label: 'Pinyin: olá', phrase: 'ni hao' },
 ];
+
+const COMMON_PINYIN_PHRASES: Record<string, string> = {
+  nihao: '你好',
+  ninhao: '您好',
+  nimenhao: '你们好',
+  dajiahao: '大家好',
+  tongxuemenhao: '同学们好',
+  zaoshanghao: '早上好',
+  wanshanghao: '晚上好',
+  zaijian: '再见',
+  xiexie: '谢谢',
+  xiexieni: '谢谢你',
+  bukeqi: '不客气',
+  duibuqi: '对不起',
+  meiguanxi: '没关系',
+  qingwen: '请问',
+  qingzuo: '请坐',
+  qingnidu: '请你读',
+  qingdakaishu: '请打开书',
+  qingzaiduyibian: '请再读一遍',
+  qingzaishuoyibian: '请再说一遍',
+  qingmandianshuo: '请慢点说',
+  qingmanyidianshuo: '请慢一点说',
+  laoshiqingmandianshuo: '老师请慢点说',
+  xianzaishangke: '现在上课',
+  xiake: '下课',
+  zheshishenme: '这是什么',
+  jintianxuexidiyike: '今天学习第一课',
+  woaini: '我爱你',
+  wobuzhidao: '我不知道',
+};
+
+const COMMON_PINYIN_WORDS: Record<string, string> = {
+  wo: '我', ni: '你', nin: '您', ta: '他', women: '我们', nimen: '你们', tamen: '他们',
+  shi: '是', de: '的', le: '了', zai: '在', you: '有', bu: '不', mei: '没', hen: '很',
+  ye: '也', dou: '都', ma: '吗', ne: '呢', ba: '吧', ge: '个', zhe: '这', na: '那',
+  shenme: '什么', weishenme: '为什么', zenme: '怎么', zenmeyang: '怎么样',
+  duoshao: '多少', nage: '哪个', zheli: '这里', nali: '哪里',
+  nihao: '你好', zaijian: '再见', xiexie: '谢谢', qingwen: '请问',
+  duibuqi: '对不起', meiguanxi: '没关系', bukeqi: '不客气',
+  xihuan: '喜欢', xuexi: '学习', hanyu: '汉语', zhongwen: '中文', yingyu: '英语',
+  shuohua: '说话', tingdong: '听懂', zhidao: '知道', renshi: '认识', mingbai: '明白',
+  zaizuo: '在做', zuoshenme: '做什么', xiangchi: '想吃', chifan: '吃饭',
+  heshui: '喝水', shuijiao: '睡觉', gongzuo: '工作', huijia: '回家',
+  jintian: '今天', mingtian: '明天', zuotian: '昨天', xianzai: '现在',
+  zaoshang: '早上', wanshang: '晚上', shijian: '时间', dianzhong: '点钟',
+  mingzi: '名字', jiao: '叫', laoshi: '老师', xuesheng: '学生', tongxue: '同学',
+  pengyou: '朋友', jiaren: '家人', baba: '爸爸', mama: '妈妈',
+  zhongguo: '中国', beijing: '北京', shanghai: '上海', baxi: '巴西',
+  dongxi: '东西', shu: '书', fan: '饭', shui: '水', cha: '茶', qian: '钱',
+  keyi: '可以', xiangyao: '想要', xuyao: '需要', yinggai: '应该',
+  dakai: '打开', guanbi: '关闭', jinlai: '进来', chuqu: '出去',
+};
+
+const HANZI_PATTERN = /[\u3400-\u9fff]/u;
+const PINYIN_PATTERN = /[a-zA-ZüÜāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/u;
+const PINYIN_MARKS: Record<string, string> = {
+  ā: 'a', á: 'a', ǎ: 'a', à: 'a',
+  ē: 'e', é: 'e', ě: 'e', è: 'e',
+  ī: 'i', í: 'i', ǐ: 'i', ì: 'i',
+  ō: 'o', ó: 'o', ǒ: 'o', ò: 'o',
+  ū: 'u', ú: 'u', ǔ: 'u', ù: 'u',
+  ǖ: 'v', ǘ: 'v', ǚ: 'v', ǜ: 'v', ü: 'v',
+};
 
 const INITIALS = [
   ['zh', 'dj'], ['ch', 'tch'], ['sh', 'sh'],
@@ -46,6 +128,103 @@ const TONE_LABELS = ['neutro e leve', 'alto e constante', 'sobe', 'desce e sobe'
 
 function plainPinyin(value: string) {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/v/g, 'ü').toLowerCase();
+}
+
+function isPinyinInput(value: string) {
+  const text = value.trim();
+  return Boolean(text) && !HANZI_PATTERN.test(text) && PINYIN_PATTERN.test(text);
+}
+
+function normalizePinyinInput(value: string) {
+  return Array.from(value.toLowerCase())
+    .map((character) => PINYIN_MARKS[character] ?? character)
+    .join('')
+    .replace(/u:/g, 'v')
+    .replace(/5/g, '0')
+    .replace(/[^a-zv0-4]/g, '');
+}
+
+function hanziCharacters(value: string) {
+  return Array.from(value).filter((character) => HANZI_PATTERN.test(character));
+}
+
+function uniqueHanzi(value: string) {
+  return Array.from(new Set(hanziCharacters(value)));
+}
+
+function applyCommonPinyinWords(split: string[], characters: string[]) {
+  const plainSyllables = split.map((syllable) => syllable.replace(/[0-4]/g, ''));
+  let index = 0;
+
+  while (index < plainSyllables.length) {
+    let matchedLength = 0;
+    for (let length = Math.min(4, plainSyllables.length - index); length >= 1; length -= 1) {
+      const key = plainSyllables.slice(index, index + length).join('');
+      const word = COMMON_PINYIN_WORDS[key];
+      const wordCharacters = word ? Array.from(word) : [];
+      if (wordCharacters.length !== length) continue;
+
+      wordCharacters.forEach((character, offset) => {
+        characters[index + offset] = character;
+      });
+      matchedLength = length;
+      break;
+    }
+    index += matchedLength || 1;
+  }
+}
+
+function resolvePinyin(value: string): PinyinResolution | null {
+  if (!isPinyinInput(value)) return null;
+
+  const normalized = normalizePinyinInput(value);
+  if (!normalized || normalized.length > 80) return null;
+
+  const plainKey = normalized.replace(/[0-4]/g, '');
+  const preferredPhrase = COMMON_PINYIN_PHRASES[plainKey];
+  const preferredCharacters = preferredPhrase ? Array.from(preferredPhrase) : [];
+
+  try {
+    const results = cnchar.input(normalized, { associate: true });
+    const usable = results.filter((result) => (
+      result.split.length > 0
+      && result.words.length === result.split.length
+      && result.words.every((word) => hanziCharacters(word).length > 0)
+    ));
+
+    if (!usable.length) return null;
+
+    const matchingPreferredLength = preferredCharacters.length
+      ? usable.filter((result) => result.split.length === preferredCharacters.length)
+      : [];
+    const candidates = matchingPreferredLength.length ? matchingPreferredLength : usable;
+    const best = [...candidates].sort((a, b) => a.split.length - b.split.length)[0];
+    const contextualCharacters = best.words.map((word) => hanziCharacters(word)[0] ?? '');
+
+    best.association.forEach((association, index) => {
+      const associatedWord = association?.split(/\s+/)[0];
+      if (!associatedWord || associatedWord === '-') return;
+      hanziCharacters(associatedWord).forEach((character, offset) => {
+        if (index + offset < contextualCharacters.length) {
+          contextualCharacters[index + offset] = character;
+        }
+      });
+    });
+
+    applyCommonPinyinWords(best.split, contextualCharacters);
+
+    const choices = best.split.map((syllable, index) => {
+      const selected = preferredCharacters[index] ?? contextualCharacters[index];
+      const options = uniqueHanzi(`${selected}${best.words[index]}`).slice(0, 22);
+      return { syllable, options, selected };
+    });
+
+    return choices.every((choice) => choice.selected)
+      ? { key: `${normalized}:${best.split.join('-')}`, choices }
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 function toPortuguese(raw: string) {
@@ -101,21 +280,39 @@ function analyze(text: string): Syllable[] {
 
 export default function Home() {
   const [phrase, setPhrase] = useState('今天学习第一课');
+  const [pinyinSelection, setPinyinSelection] = useState<{ key: string; characters: string[] }>({
+    key: '', characters: [],
+  });
   const [audioSpeed, setAudioSpeed] = useState<'natural' | 'slow'>('natural');
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [audioMessage, setAudioMessage] = useState('');
   const [copied, setCopied] = useState(false);
-  const syllables = useMemo(() => analyze(phrase), [phrase]);
+  const pinyinDetected = isPinyinInput(phrase);
+  const pinyinResolution = useMemo(() => resolvePinyin(phrase), [phrase]);
+  const defaultCharacters = pinyinResolution?.choices.map((choice) => choice.selected) ?? [];
+  const selectedCharacters = pinyinResolution && pinyinSelection.key === pinyinResolution.key
+    && pinyinSelection.characters.length === pinyinResolution.choices.length
+    ? pinyinSelection.characters
+    : defaultCharacters;
+  const resolvedPhrase = pinyinResolution ? selectedCharacters.join('') : phrase;
+  const syllables = useMemo(() => analyze(resolvedPhrase), [resolvedPhrase]);
   const pinyinLine = syllables.map((item) => item.pinyin).join(' ');
   const portugueseLine = syllables.map((item) => `${item.portuguese} (${item.tone})`).join(' ');
 
+  function chooseCharacter(index: number, character: string) {
+    if (!pinyinResolution) return;
+    const nextCharacters = [...selectedCharacters];
+    nextCharacters[index] = character;
+    setPinyinSelection({ key: pinyinResolution.key, characters: nextCharacters });
+  }
+
   function speak() {
-    if (!phrase.trim() || !('speechSynthesis' in window)) {
+    if (!resolvedPhrase.trim() || !('speechSynthesis' in window)) {
       setAudioMessage('O áudio não está disponível neste navegador.');
       return;
     }
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(phrase);
+    const utterance = new SpeechSynthesisUtterance(resolvedPhrase);
     const voices = window.speechSynthesis.getVoices();
     const mandarinVoice = voices.find((voice) => voice.lang.toLowerCase() === 'zh-cn')
       ?? voices.find((voice) => voice.lang.toLowerCase().startsWith('zh'));
@@ -136,7 +333,7 @@ export default function Home() {
   async function copyResult() {
     if (!syllables.length) return;
     try {
-      await navigator.clipboard.writeText(`${phrase.trim()}\n${pinyinLine}\n${portugueseLine}`);
+      await navigator.clipboard.writeText(`${resolvedPhrase.trim()}\n${pinyinLine}\n${portugueseLine}`);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1600);
     } catch { setCopied(false); }
@@ -157,7 +354,7 @@ export default function Home() {
           <div className="eyebrow"><span>中文</span> Pronúncia sem mistério</div>
           <h1>Escreva em chinês.<br /><em>Escute e pronuncie.</em></h1>
           <p className="hero-description">
-            Transforme qualquer frase em mandarim em pinyin com tons e numa aproximação fonética pensada para quem fala português.
+            Digite em ideogramas ou em pinyin. Veja os tons e uma aproximação fonética pensada para quem fala português.
           </p>
           <div className="tone-key" aria-label="Legenda dos tons">
             {[1, 2, 3, 4].map((tone) => (
@@ -167,17 +364,64 @@ export default function Home() {
         </div>
 
         <div className="workspace-card">
-          <label htmlFor="phrase">Sua frase em chinês</label>
+          <div className="workspace-heading">
+            <label htmlFor="phrase">Sua frase em chinês ou pinyin</label>
+            {pinyinDetected && <span className="input-kind">Pinyin detectado</span>}
+          </div>
           <div className="input-wrap">
             <textarea
               id="phrase" value={phrase} maxLength={120}
               onChange={(event) => setPhrase(event.target.value)}
-              placeholder="Digite ou cole uma frase…" spellCheck={false}
+              placeholder="Ex.: 你好, ni hao ou nǐ hǎo" spellCheck={false}
+              className={pinyinDetected ? 'pinyin-input' : ''}
             />
             <button className="clear-button" type="button" onClick={() => setPhrase('')}
               aria-label="Limpar frase" hidden={!phrase}>×</button>
             <span className="counter">{phrase.length}/120</span>
           </div>
+
+          {pinyinResolution && (
+            <div className="pinyin-resolver">
+              <div className="resolver-main">
+                <span>Interpretação em ideogramas</span>
+                <strong lang="zh-CN">{resolvedPhrase}</strong>
+              </div>
+              <details className="candidate-details">
+                <summary>Corrigir ideogramas</summary>
+                <p>O mesmo pinyin pode formar palavras diferentes. Escolha o caractere desejado:</p>
+                <div className="candidate-grid">
+                  {pinyinResolution.choices.map((choice, index) => (
+                    <div className="candidate-row" key={`${choice.syllable}-${index}`}>
+                      <span>{choice.syllable}</span>
+                      <div className="candidate-options">
+                        {choice.options.map((character) => (
+                          <button key={character} type="button"
+                            className={selectedCharacters[index] === character ? 'selected' : ''}
+                            onClick={() => chooseCharacter(index, character)}
+                            aria-pressed={selectedCharacters[index] === character}>
+                            {character}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            </div>
+          )}
+
+          {pinyinDetected && !pinyinResolution && (
+            <p className="input-warning" role="status">
+              Não reconheci esse pinyin. Separe as sílabas com espaços ou confira a escrita.
+            </p>
+          )}
+
+          {syllables.length > 0 && (
+            <div className="inline-result" aria-live="polite">
+              <div><span>Pinyin com tons</span><strong>{pinyinLine}</strong></div>
+              <div><span>Pronúncia em português</span><strong>{portugueseLine}</strong></div>
+            </div>
+          )}
 
           <div className="examples" aria-label="Exemplos rápidos">
             <span>Experimente:</span>
@@ -219,7 +463,7 @@ export default function Home() {
           <div className="result-card">
             <div className="result-block hanzi-block">
               <span className="result-label"><i>1</i> Ideogramas</span>
-              <p lang="zh-CN">{phrase.trim()}</p>
+              <p lang="zh-CN">{resolvedPhrase.trim()}</p>
             </div>
             <div className="result-block">
               <span className="result-label"><i>2</i> Pinyin com tons</span>
@@ -249,8 +493,8 @@ export default function Home() {
         ) : (
           <div className="empty-state">
             <span aria-hidden="true">你</span>
-            <h3>Comece com uma frase em chinês</h3>
-            <p>Os ideogramas, o pinyin e a pronúncia aproximada aparecerão aqui.</p>
+            <h3>Comece com ideogramas ou pinyin</h3>
+            <p>A interpretação, o pinyin com tons e a pronúncia aproximada aparecerão aqui.</p>
           </div>
         )}
       </section>
