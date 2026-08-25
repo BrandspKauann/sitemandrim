@@ -128,6 +128,9 @@ const FINALS: Record<string, string> = {
 };
 
 const TONE_LABELS = ['neutro e leve', 'alto e constante', 'sobe', 'desce e sobe', 'cai forte'];
+const DEFAULT_LOOP_GAP = 1;
+const MIN_LOOP_GAP = 1;
+const MAX_LOOP_GAP = 30;
 
 function plainPinyin(value: string) {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/v/g, 'ü').toLowerCase();
@@ -289,13 +292,17 @@ export default function Home() {
   });
   const [audioSpeed, setAudioSpeed] = useState<'natural' | 'slow'>('natural');
   const [audioLoop, setAudioLoop] = useState(false);
+  const [loopGapDraft, setLoopGapDraft] = useState(DEFAULT_LOOP_GAP);
+  const [savedLoopGap, setSavedLoopGap] = useState(DEFAULT_LOOP_GAP);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [audioMessage, setAudioMessage] = useState('');
   const [copied, setCopied] = useState(false);
   const speechRun = useRef(0);
   const loopEnabled = useRef(false);
   const speedSetting = useRef<'natural' | 'slow'>('natural');
+  const loopGapSetting = useRef(DEFAULT_LOOP_GAP);
   const loopTimer = useRef<number | null>(null);
+  const loopReplay = useRef<(() => void) | null>(null);
   const pinyinDetected = isPinyinInput(phrase);
   const pinyinResolution = useMemo(() => resolvePinyin(phrase), [phrase]);
   const defaultCharacters = pinyinResolution?.choices.map((choice) => choice.selected) ?? [];
@@ -311,8 +318,22 @@ export default function Home() {
   useEffect(() => () => {
     speechRun.current += 1;
     if (loopTimer.current) window.clearTimeout(loopTimer.current);
+    loopReplay.current = null;
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   }, []);
+
+  useEffect(() => {
+    if (!sessionId) return;
+    try {
+      const stored = Number(window.sessionStorage.getItem(`tons-de-mandarim:loop-gap:${sessionId}`));
+      if (!Number.isInteger(stored) || stored < MIN_LOOP_GAP || stored > MAX_LOOP_GAP) return;
+      loopGapSetting.current = stored;
+      queueMicrotask(() => {
+        setLoopGapDraft(stored);
+        setSavedLoopGap(stored);
+      });
+    } catch { /* The timer still works without browser persistence. */ }
+  }, [sessionId]);
 
   function chooseCharacter(index: number, character: string) {
     if (!pinyinResolution) return;
@@ -327,6 +348,7 @@ export default function Home() {
       window.clearTimeout(loopTimer.current);
       loopTimer.current = null;
     }
+    loopReplay.current = null;
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     setIsSpeaking(false);
     setAudioMessage('');
@@ -350,8 +372,27 @@ export default function Home() {
     if (!nextValue && loopTimer.current) {
       window.clearTimeout(loopTimer.current);
       loopTimer.current = null;
+      loopReplay.current = null;
       speechRun.current += 1;
       setIsSpeaking(false);
+    }
+  }
+
+  function saveLoopGap() {
+    const seconds = Math.min(MAX_LOOP_GAP, Math.max(MIN_LOOP_GAP, Math.round(loopGapDraft)));
+    loopGapSetting.current = seconds;
+    setLoopGapDraft(seconds);
+    setSavedLoopGap(seconds);
+    try { window.sessionStorage.setItem(`tons-de-mandarim:loop-gap:${sessionId}`, String(seconds)); } catch { /* Saving in memory is enough for this visit. */ }
+
+    if (loopTimer.current && loopReplay.current) {
+      window.clearTimeout(loopTimer.current);
+      loopTimer.current = window.setTimeout(() => {
+        loopTimer.current = null;
+        const replay = loopReplay.current;
+        loopReplay.current = null;
+        replay?.();
+      }, seconds * 1000);
     }
   }
 
@@ -390,10 +431,13 @@ export default function Home() {
       utterance.onend = () => {
         if (speechRun.current !== runId) return;
         if (loopEnabled.current) {
+          loopReplay.current = playPhrase;
           loopTimer.current = window.setTimeout(() => {
             loopTimer.current = null;
-            playPhrase();
-          }, 1000);
+            const replay = loopReplay.current;
+            loopReplay.current = null;
+            replay?.();
+          }, loopGapSetting.current * 1000);
           return;
         }
         setIsSpeaking(false);
@@ -534,6 +578,21 @@ export default function Home() {
                 onClick={toggleLoop} aria-pressed={audioLoop} aria-label="Repetir frase em loop"
                 title="Repetir frase continuamente">
                 <span aria-hidden="true">↻</span> Loop
+              </button>
+            </div>
+          </div>
+          <div className="loop-timer-control">
+            <div className="loop-timer-heading">
+              <label htmlFor="loop-gap">Pausa entre as repetições do loop</label>
+              <output htmlFor="loop-gap">{loopGapDraft} {loopGapDraft === 1 ? 'segundo' : 'segundos'}</output>
+            </div>
+            <input id="loop-gap" type="range" min={MIN_LOOP_GAP} max={MAX_LOOP_GAP} step="1"
+              value={loopGapDraft} onChange={(event) => setLoopGapDraft(Number(event.target.value))}
+              aria-label="Segundos de pausa entre as repetições" />
+            <div className="loop-timer-footer">
+              <span>Em uso: {savedLoopGap}s</span>
+              <button type="button" onClick={saveLoopGap} disabled={loopGapDraft === savedLoopGap}>
+                {loopGapDraft === savedLoopGap ? '✓ Salvo' : 'Salvar intervalo'}
               </button>
             </div>
           </div>
