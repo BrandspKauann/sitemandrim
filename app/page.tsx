@@ -7,6 +7,7 @@ import cncharWords from 'cnchar-words';
 import Link from 'next/link';
 import { pinyin } from 'pinyin-pro';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import PracticeRecorder from './components/PracticeRecorder';
 
 cnchar.use(cncharInput, cncharWords, cncharPoly);
 
@@ -531,6 +532,12 @@ export default function Home() {
             </div>
           </div>
           {audioMessage && <p className="audio-message" role="status">{audioMessage}</p>}
+
+          <PracticeRecorder
+            phrase={resolvedPhrase.trim()}
+            pinyin={pinyinLine}
+            onBeforeRecord={stopSpeaking}
+          />
         </div>
       </section>
 
