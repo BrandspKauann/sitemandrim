@@ -8,6 +8,7 @@ type ClientSessionValue = {
 };
 
 const SESSION_KEY = 'tons-de-mandarim:private-session';
+const SESSION_CHANNEL = 'tons-de-mandarim:session-check';
 const ClientSessionContext = createContext<ClientSessionValue>({ sessionId: '', shortId: '' });
 let fallbackSessionId = '';
 
@@ -28,16 +29,46 @@ function serverSessionSnapshot() {
   return '';
 }
 
+function storeSessionId(sessionId: string) {
+  fallbackSessionId = sessionId;
+  try { window.sessionStorage.setItem(SESSION_KEY, sessionId); } catch { /* Memory fallback keeps this visit isolated. */ }
+}
+
 function subscribeToSession(onStoreChange: () => void) {
   let active = true;
   if (!sessionSnapshot()) {
-    fallbackSessionId = newSessionId();
-    try { window.sessionStorage.setItem(SESSION_KEY, fallbackSessionId); } catch { /* Memory fallback keeps this visit isolated. */ }
+    storeSessionId(newSessionId());
     queueMicrotask(() => {
       if (active) onStoreChange();
     });
   }
-  return () => { active = false; };
+
+  const tabId = newSessionId();
+  let channel: BroadcastChannel | null = null;
+  try {
+    channel = new BroadcastChannel(SESSION_CHANNEL);
+    channel.onmessage = (event: MessageEvent<{ type?: string; sessionId?: string; tabId?: string; targetTabId?: string }>) => {
+      const data = event.data;
+      const currentSession = sessionSnapshot();
+      if (data.type === 'probe' && data.sessionId === currentSession && data.tabId !== tabId) {
+        channel?.postMessage({ type: 'occupied', sessionId: currentSession, targetTabId: data.tabId });
+      }
+      if (data.type === 'occupied' && data.targetTabId === tabId && data.sessionId === currentSession) {
+        storeSessionId(newSessionId());
+        onStoreChange();
+      }
+    };
+    queueMicrotask(() => {
+      if (active) channel?.postMessage({ type: 'probe', sessionId: sessionSnapshot(), tabId });
+    });
+  } catch {
+    channel = null;
+  }
+
+  return () => {
+    active = false;
+    channel?.close();
+  };
 }
 
 export function ClientSessionProvider({ children }: Readonly<{ children: React.ReactNode }>) {
