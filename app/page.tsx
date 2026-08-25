@@ -4,6 +4,7 @@ import cnchar from 'cnchar';
 import cncharInput from 'cnchar-input';
 import cncharPoly from 'cnchar-poly';
 import cncharWords from 'cnchar-words';
+import Link from 'next/link';
 import { pinyin } from 'pinyin-pro';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -421,7 +422,10 @@ export default function Home() {
           <span className="brand-mark" aria-hidden="true">声</span>
           <span>Tons de Mandarim</span>
         </a>
-        <a className="how-link" href="#como-funciona">Como funciona</a>
+        <nav className="topnav" aria-label="Navegação principal">
+          <Link className="syllables-link" href="/letras-e-silabas">Letras e sílabas</Link>
+          <a className="how-link" href="#como-funciona">Como funciona</a>
+        </nav>
       </header>
 
       <section className="hero" id="top">

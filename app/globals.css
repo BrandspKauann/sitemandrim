@@ -41,6 +41,9 @@ button { color: inherit; }
   width: 36px; height: 36px; display: grid; place-items: center; color: #fff8ed; background: var(--red);
   border-radius: 4px; font-family: 'Noto Serif SC', 'Songti SC', SimSun, serif; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 26%);
 }
+.topnav { display: flex; align-items: center; gap: 8px; }
+.syllables-link { padding: 9px 12px; background: var(--ink); color: #fff8ed; border-radius: 3px; text-decoration: none; font-size: 12px; font-weight: 700; }
+.syllables-link:hover { background: var(--red); }
 .how-link { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 650; }
 .how-link:hover { color: var(--red); }
 
@@ -175,6 +178,7 @@ footer p { max-width: 620px; margin: 0; color: #8d8280; font-size: 11px; line-he
   .topbar, .hero, .method-section, footer { width: min(100% - 30px, 1180px); }
   .topbar { height: 70px; }
   .how-link { display: none; }
+  .syllables-link { padding: 8px 10px; font-size: 10px; }
   .hero { padding: 48px 0 66px; gap: 45px; }
   h1 { font-size: 44px; }
   .workspace-card { padding: 22px 17px; box-shadow: 8px 8px 0 rgb(117 85 67 / 7%); }
