@@ -5,11 +5,13 @@ import { useEffect, useRef, useState } from 'react';
 type PracticeRecorderProps = {
   phrase: string;
   pinyin: string;
+  sessionId: string;
   onBeforeRecord?: () => void;
 };
 
 type StoredRecording = {
   id: string;
+  sessionId?: string;
   blob: Blob;
   createdAt: number;
   phrase: string;
@@ -93,7 +95,7 @@ function recorderOptions() {
   return mimeType ? { mimeType } : undefined;
 }
 
-export default function PracticeRecorder({ phrase, pinyin, onBeforeRecord }: PracticeRecorderProps) {
+export default function PracticeRecorder({ phrase, pinyin, sessionId, onBeforeRecord }: PracticeRecorderProps) {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [preview, setPreview] = useState<Recording | null>(null);
   const [status, setStatus] = useState<RecorderStatus>('idle');
@@ -133,17 +135,33 @@ export default function PracticeRecorder({ phrase, pinyin, onBeforeRecord }: Pra
   }
 
   useEffect(() => {
+    if (!sessionId) return;
     mountedRef.current = true;
     const recordingUrls = urlsRef.current;
     let cancelled = false;
     loadRecordings()
       .then((saved) => {
         if (cancelled) return;
-        const restored = saved
+        const sessionRecordings = saved.filter((recording) => (
+          recording.sessionId === sessionId || !recording.sessionId
+        ));
+        const restored = sessionRecordings
           .sort((a, b) => a.createdAt - b.createdAt)
           .slice(-MAX_RECORDINGS)
-          .map((recording) => ({ ...recording, url: makeUrl(recording.blob) }));
+          .map((recording) => ({ ...recording, sessionId, url: makeUrl(recording.blob) }));
         setRecordings(restored);
+        restored
+          .filter((recording) => !sessionRecordings.find((savedRecording) => savedRecording.id === recording.id)?.sessionId)
+          .forEach((recording) => {
+            void persistRecording({
+              id: recording.id,
+              sessionId,
+              blob: recording.blob,
+              createdAt: recording.createdAt,
+              phrase: recording.phrase,
+              pinyin: recording.pinyin,
+            });
+          });
       })
       .catch(() => {
         if (!cancelled) setMessage('As gravações funcionarão nesta sessão, mas este navegador não permitiu guardá-las após atualizar a página.');
@@ -159,9 +177,13 @@ export default function PracticeRecorder({ phrase, pinyin, onBeforeRecord }: Pra
       recordingUrls.forEach((url) => URL.revokeObjectURL(url));
       recordingUrls.clear();
     };
-  }, []);
+  }, [sessionId]);
 
   async function startRecording() {
+    if (!sessionId) {
+      setMessage('Aguarde um instante enquanto sua sessão privada é preparada.');
+      return;
+    }
     if (recordings.length >= MAX_RECORDINGS) {
       setMessage('Você já salvou 3 tentativas. Exclua uma para gravar novamente.');
       return;
@@ -215,6 +237,7 @@ export default function PracticeRecorder({ phrase, pinyin, onBeforeRecord }: Pra
         const captured = contextRef.current;
         setPreview({
           id: typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : `${Date.now()}`,
+          sessionId,
           blob,
           url: makeUrl(blob),
           createdAt: Date.now(),
@@ -280,6 +303,7 @@ export default function PracticeRecorder({ phrase, pinyin, onBeforeRecord }: Pra
     if (!preview || recordings.length >= MAX_RECORDINGS) return;
     const stored: StoredRecording = {
       id: preview.id,
+      sessionId,
       blob: preview.blob,
       createdAt: preview.createdAt,
       phrase: preview.phrase,
@@ -386,7 +410,10 @@ export default function PracticeRecorder({ phrase, pinyin, onBeforeRecord }: Pra
       )}
 
       {message && <p className="recorder-message" role="status">{message}</p>}
-      <p className="privacy-note">As gravações ficam privadas e salvas somente neste navegador.</p>
+      <p className="privacy-note">
+        {sessionId ? `Sessão ${sessionId.replaceAll('-', '').slice(0, 8).toUpperCase()} · ` : ''}
+        As gravações ficam privadas e salvas somente neste navegador.
+      </p>
     </section>
   );
 }

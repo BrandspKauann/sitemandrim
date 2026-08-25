@@ -7,6 +7,7 @@ import cncharWords from 'cnchar-words';
 import Link from 'next/link';
 import { pinyin } from 'pinyin-pro';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useClientSession } from './components/ClientSession';
 import PracticeRecorder from './components/PracticeRecorder';
 
 cnchar.use(cncharInput, cncharWords, cncharPoly);
@@ -281,6 +282,7 @@ function analyze(text: string): Syllable[] {
 }
 
 export default function Home() {
+  const { sessionId, shortId } = useClientSession();
   const [phrase, setPhrase] = useState('今天学习第一课');
   const [pinyinSelection, setPinyinSelection] = useState<{ key: string; characters: string[] }>({
     key: '', characters: [],
@@ -424,6 +426,10 @@ export default function Home() {
           <span>Tons de Mandarim</span>
         </a>
         <nav className="topnav" aria-label="Navegação principal">
+          <span className="session-badge" title="Esta sessão não compartilha dados com outros visitantes">
+            <i aria-hidden="true" />
+            <span>Sessão {shortId || 'privada'}</span>
+          </span>
           <Link className="syllables-link" href="/letras-e-silabas">Letras e sílabas</Link>
           <a className="how-link" href="#como-funciona">Como funciona</a>
         </nav>
@@ -536,6 +542,7 @@ export default function Home() {
           <PracticeRecorder
             phrase={resolvedPhrase.trim()}
             pinyin={pinyinLine}
+            sessionId={sessionId}
             onBeforeRecord={stopSpeaking}
           />
         </div>

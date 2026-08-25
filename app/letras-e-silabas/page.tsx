@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { useClientSession } from '../components/ClientSession';
 import styles from './page.module.css';
 
 type SoundItem = {
@@ -225,6 +226,7 @@ const SYLLABLE_ITEMS = SYLLABLE_ROWS.flatMap((row) => row.items);
 const ALL_ITEMS = [...INITIALS, ...FINAL_ITEMS, ...SYLLABLE_ITEMS];
 
 export default function LettersAndSyllablesPage() {
+  const { shortId } = useClientSession();
   const [status, setStatus] = useState<'idle' | 'playing' | 'paused'>('idle');
   const [currentItem, setCurrentItem] = useState<SoundItem | null>(null);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
@@ -385,6 +387,10 @@ export default function LettersAndSyllablesPage() {
           <span>Tons de Mandarim</span>
         </Link>
         <nav className={styles.nav} aria-label="Navegação principal">
+          <span className="session-badge" title="Esta sessão não compartilha dados com outros visitantes">
+            <i aria-hidden="true" />
+            <span>Sessão {shortId || 'privada'}</span>
+          </span>
           <Link href="/">Frases</Link>
           <Link className={styles.activeNav} href="/letras-e-silabas">Letras e sílabas</Link>
         </nav>
