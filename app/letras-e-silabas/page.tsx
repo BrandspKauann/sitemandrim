@@ -125,6 +125,22 @@ const INITIAL_ROWS: InitialRow[] = [
   { initial: 'w', values: 'wa wai wan wang wei wen weng wo wu'.split(' ') },
 ];
 
+const FINAL_SEQUENCE = [
+  'a', 'o', 'e', 'i', 'u', 'ü',
+  'ai', 'ei', 'ui', 'ao', 'ou', 'iu', 'ie', 'üe',
+  'er', 'an', 'en', 'in', 'un', 'ün', 'ang', 'eng', 'ing', 'ong',
+];
+
+const Y_FINAL_KEYS: Record<string, string> = {
+  ya: 'a', yo: 'o', yi: 'i', yu: 'ü', yao: 'ao', you: 'ou', ye: 'ie', yue: 'üe',
+  yan: 'an', yin: 'in', yun: 'ün', yang: 'ang', ying: 'ing', yong: 'ong',
+};
+
+const W_FINAL_KEYS: Record<string, string> = {
+  wa: 'a', wo: 'o', wu: 'u', wai: 'ai', wei: 'ui',
+  wan: 'an', wen: 'en', wang: 'ang', weng: 'eng',
+};
+
 const GROUP_DEFINITIONS = [
   { id: 'bpmf', title: 'B, P, M e F', initials: ['b', 'p', 'm', 'f'] },
   { id: 'dtnl', title: 'D, T, N e L', initials: ['d', 't', 'n', 'l'] },
@@ -205,15 +221,28 @@ function noteFor(syllable: string) {
   return notes.join(' · ') || undefined;
 }
 
+function sequenceKey(initial: string, syllable: string) {
+  if (initial === 'y') return Y_FINAL_KEYS[syllable] ?? '';
+  if (initial === 'w') return W_FINAL_KEYS[syllable] ?? '';
+
+  let final = syllable.slice(initial.length);
+  if (['j', 'q', 'x'].includes(initial) && final.startsWith('u')) final = `ü${final.slice(1)}`;
+  return final;
+}
+
 const SYLLABLE_ROWS = INITIAL_ROWS.map((row) => ({
   ...row,
-  items: row.values.map((pinyin) => ({
-    id: `syllable-${pinyin}`,
-    pinyin,
-    portuguese: portugueseFor(pinyin),
-    audio: zhuyinFor(pinyin),
-    note: noteFor(pinyin),
-  })),
+  items: row.values
+    .map((pinyin) => ({ pinyin, order: FINAL_SEQUENCE.indexOf(sequenceKey(row.initial, pinyin)) }))
+    .filter(({ order }) => order >= 0)
+    .sort((a, b) => a.order - b.order)
+    .map(({ pinyin }) => ({
+      id: `syllable-${pinyin}`,
+      pinyin,
+      portuguese: portugueseFor(pinyin),
+      audio: zhuyinFor(pinyin),
+      note: noteFor(pinyin),
+    })),
 }));
 
 const SYLLABLE_GROUPS = GROUP_DEFINITIONS.map((group) => ({
@@ -478,7 +507,9 @@ export default function LettersAndSyllablesPage() {
           <div><span>02 · Tabela completa</span><h2>Sílabas por grupo</h2></div>
           <button type="button" onClick={() => startQueue(SYLLABLE_ITEMS)}>▶ Ouvir todas as sílabas</button>
         </div>
-        <p className={styles.sectionIntro}>Clique numa sílaba para ouvi-la sozinha, no botão da letra para reproduzir a linha ou em “Ouvir grupo” para percorrer a coluna inteira.</p>
+        <p className={styles.sectionIntro}>
+          Cada letra segue a ordem <strong>a · o · e · i · u · ü · ai · ei · ui · ao · ou · iu · ie · üe · er · an · en · in · un · ün · ang · eng · ing · ong</strong>. Combinações que não existem em mandarim são puladas automaticamente.
+        </p>
 
         <div className={styles.groupGrid}>
           {SYLLABLE_GROUPS.map((group) => {
