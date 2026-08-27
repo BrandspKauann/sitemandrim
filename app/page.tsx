@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { pinyin } from 'pinyin-pro';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useClientSession } from './components/ClientSession';
+import PhraseSequence, { type PhraseSequenceHandle, type PhraseStudyItem } from './components/PhraseSequence';
 import PracticeRecorder from './components/PracticeRecorder';
 
 cnchar.use(cncharInput, cncharWords, cncharPoly);
@@ -37,6 +38,27 @@ const EXAMPLES = [
   { label: 'Mais devagar', phrase: '请慢一点说' },
   { label: 'Até mais', phrase: '再见' },
   { label: 'Pinyin: olá', phrase: 'ni hao' },
+];
+
+const CLASSROOM_PHRASES = [
+  { hanzi: '今天学习第一课', translation: 'Hoje vamos estudar a primeira lição.' },
+  { hanzi: '请你读', translation: 'Por favor, leia.' },
+  { hanzi: '请坐', translation: 'Por favor, sente-se.' },
+  { hanzi: '现在上课', translation: 'Agora vamos começar a aula.' },
+  { hanzi: '这是什么？', translation: 'O que é isto?' },
+  { hanzi: '请打开书', translation: 'Por favor, abra o livro.' },
+  { hanzi: '请问', translation: 'Com licença, posso perguntar?' },
+  { hanzi: '下课', translation: 'Fim da aula.' },
+  { hanzi: '老师请慢点说', translation: 'Professor(a), por favor, fale mais devagar.' },
+  { hanzi: '请再读一遍', translation: 'Por favor, leia mais uma vez.' },
+  { hanzi: '请再说一遍', translation: 'Por favor, diga mais uma vez.' },
+  { hanzi: '您好', translation: 'Olá — forma respeitosa.' },
+  { hanzi: '你好', translation: 'Olá.' },
+  { hanzi: '你们', translation: 'Vocês.' },
+  { hanzi: '他们', translation: 'Eles.' },
+  { hanzi: '大家好', translation: 'Olá a todos.' },
+  { hanzi: '同学们好', translation: 'Olá, colegas de classe.' },
+  { hanzi: '再见', translation: 'Até logo.' },
 ];
 
 const COMMON_PINYIN_PHRASES: Record<string, string> = {
@@ -303,6 +325,7 @@ export default function Home() {
   const loopGapSetting = useRef(DEFAULT_LOOP_GAP);
   const loopTimer = useRef<number | null>(null);
   const loopReplay = useRef<(() => void) | null>(null);
+  const phraseSequenceRef = useRef<PhraseSequenceHandle | null>(null);
   const pinyinDetected = isPinyinInput(phrase);
   const pinyinResolution = useMemo(() => resolvePinyin(phrase), [phrase]);
   const defaultCharacters = pinyinResolution?.choices.map((choice) => choice.selected) ?? [];
@@ -314,6 +337,16 @@ export default function Home() {
   const syllables = useMemo(() => analyze(resolvedPhrase), [resolvedPhrase]);
   const pinyinLine = syllables.map((item) => item.pinyin).join(' ');
   const portugueseLine = syllables.map((item) => `${item.portuguese} (${item.tone})`).join(' ');
+  const studyPhrases = useMemo<PhraseStudyItem[]>(() => CLASSROOM_PHRASES.map((item, index) => {
+    const reading = analyze(item.hanzi);
+    return {
+      id: index + 1,
+      hanzi: item.hanzi,
+      translation: item.translation,
+      pinyin: reading.map((syllable) => syllable.pinyin).join(' '),
+      portuguese: reading.map((syllable) => `${syllable.portuguese} (${syllable.tone})`).join(' '),
+    };
+  }), []);
 
   useEffect(() => () => {
     speechRun.current += 1;
@@ -401,6 +434,8 @@ export default function Home() {
       stopSpeaking();
       return;
     }
+
+    phraseSequenceRef.current?.stop();
 
     if (!resolvedPhrase.trim() || !('speechSynthesis' in window)) {
       setAudioMessage('O áudio não está disponível neste navegador.');
@@ -602,10 +637,16 @@ export default function Home() {
             phrase={resolvedPhrase.trim()}
             pinyin={pinyinLine}
             sessionId={sessionId}
-            onBeforeRecord={stopSpeaking}
+            onBeforeRecord={() => {
+              stopSpeaking();
+              phraseSequenceRef.current?.stop();
+            }}
           />
         </div>
       </section>
+
+      <PhraseSequence ref={phraseSequenceRef} items={studyPhrases} sessionId={sessionId}
+        onBeforePlay={stopSpeaking} />
 
       <section className="result-section" aria-live="polite">
         <div className="section-heading">
