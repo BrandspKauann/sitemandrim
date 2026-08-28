@@ -6,6 +6,7 @@ type PracticeRecorderProps = {
   phrase: string;
   pinyin: string;
   sessionId: string;
+  storageScope?: string;
   onBeforeRecord?: () => void;
 };
 
@@ -16,6 +17,7 @@ type StoredRecording = {
   createdAt: number;
   phrase: string;
   pinyin: string;
+  scope?: string;
 };
 
 type Recording = StoredRecording & {
@@ -95,7 +97,13 @@ function recorderOptions() {
   return mimeType ? { mimeType } : undefined;
 }
 
-export default function PracticeRecorder({ phrase, pinyin, sessionId, onBeforeRecord }: PracticeRecorderProps) {
+export default function PracticeRecorder({
+  phrase,
+  pinyin,
+  sessionId,
+  storageScope = 'phrases',
+  onBeforeRecord,
+}: PracticeRecorderProps) {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [preview, setPreview] = useState<Recording | null>(null);
   const [status, setStatus] = useState<RecorderStatus>('idle');
@@ -142,9 +150,12 @@ export default function PracticeRecorder({ phrase, pinyin, sessionId, onBeforeRe
     loadRecordings()
       .then((saved) => {
         if (cancelled) return;
-        const sessionRecordings = saved.filter((recording) => (
-          recording.sessionId === sessionId || !recording.sessionId
-        ));
+        const sessionRecordings = saved.filter((recording) => {
+          const sameSession = recording.sessionId === sessionId || !recording.sessionId;
+          const sameScope = recording.scope === storageScope
+            || (!recording.scope && storageScope === 'phrases');
+          return sameSession && sameScope;
+        });
         const restored = sessionRecordings
           .sort((a, b) => a.createdAt - b.createdAt)
           .slice(-MAX_RECORDINGS)
@@ -160,6 +171,7 @@ export default function PracticeRecorder({ phrase, pinyin, sessionId, onBeforeRe
               createdAt: recording.createdAt,
               phrase: recording.phrase,
               pinyin: recording.pinyin,
+              scope: storageScope,
             });
           });
       })
@@ -177,7 +189,7 @@ export default function PracticeRecorder({ phrase, pinyin, sessionId, onBeforeRe
       recordingUrls.forEach((url) => URL.revokeObjectURL(url));
       recordingUrls.clear();
     };
-  }, [sessionId]);
+  }, [sessionId, storageScope]);
 
   async function startRecording() {
     if (!sessionId) {
@@ -243,6 +255,7 @@ export default function PracticeRecorder({ phrase, pinyin, sessionId, onBeforeRe
           createdAt: Date.now(),
           phrase: captured.phrase,
           pinyin: captured.pinyin,
+          scope: storageScope,
         });
         setStatus('preview');
         setMessage('Ouça sua gravação. Você pode salvar ou descartar esta tentativa.');
@@ -308,6 +321,7 @@ export default function PracticeRecorder({ phrase, pinyin, sessionId, onBeforeRe
       createdAt: preview.createdAt,
       phrase: preview.phrase,
       pinyin: preview.pinyin,
+      scope: storageScope,
     };
     try {
       await persistRecording(stored);

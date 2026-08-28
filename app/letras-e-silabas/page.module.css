@@ -80,6 +80,7 @@
 .recordedControls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
 .recordedControls button { min-height: 42px; padding: 0 14px; border: 1px solid #d7c8b7; background: transparent; color: #655958; border-radius: 3px; font-size: 10px; font-weight: 760; cursor: pointer; }
 .recordedControls .recordedPlay { border-color: var(--red); background: var(--red); color: #fff; }
+.recordedControls .recordedOptionActive { border-color: var(--ink); background: var(--ink); color: #fff8ef; }
 .recordedPlay span { display: inline-block; min-width: 13px; margin-right: 7px; font-size: 9px; }
 .recordedAudio { width: 100%; height: 38px; margin-top: 12px; accent-color: var(--red); }
 .vowelToneBoard { padding: 23px; background: var(--ink); color: #fff8ef; border-top: 4px solid var(--red); box-shadow: 10px 10px 0 rgb(117 85 67 / 9%); }
@@ -90,9 +91,14 @@
 .vowelToneGroup { padding: 11px; border: 1px solid rgb(255 255 255 / 10%); background: rgb(255 255 255 / 3%); }
 .vowelName { display: block; margin-bottom: 8px; color: #8f807e; font-size: 9px; font-weight: 760; text-transform: uppercase; }
 .vowelToneGroup > div { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
-.vowelToneGroup > div span { min-height: 33px; display: grid; place-items: center; border-radius: 2px; color: #f4e9df; font-family: Georgia, 'Times New Roman', serif; font-size: 21px; transition: color .18s, background .18s, transform .18s; }
+.vowelToneGroup > div .toneCell { min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 2px; color: #f4e9df; transition: color .18s, background .18s, transform .18s; }
+.toneCell b { font-family: Arial, 'Noto Sans', sans-serif; font-size: 22px; font-weight: 600; line-height: 1; letter-spacing: 0; font-synthesis: none; }
+.toneCell small { color: #8f807e; font-family: Arial, sans-serif; font-size: 7px; font-weight: 700; line-height: 1; }
 .vowelToneGroup > div .activeTone { background: var(--red); color: #fff; transform: translateY(-2px) scale(1.06); box-shadow: 0 5px 16px rgb(0 0 0 / 20%); animation: recorded-tone-pulse .6s ease-in-out infinite alternate; }
+.vowelToneGroup > div .activeTone small { color: #fff1e9; }
 .vowelToneBoard > p { margin: 16px 0 0; color: #9f9290; font-size: 9px; line-height: 1.5; }
+.vowelRecorder { grid-column: 1 / -1; padding: 4px 4px 0; }
+.vowelRecorder :global(.practice-recorder) { margin-top: 0; padding-top: 30px; }
 
 @keyframes recorded-tone-pulse {
   to { box-shadow: 0 5px 22px rgb(186 63 54 / 55%); }

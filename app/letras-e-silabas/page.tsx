@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useClientSession } from '../components/ClientSession';
+import PracticeRecorder from '../components/PracticeRecorder';
 import styles from './page.module.css';
 
 type SoundItem = {
@@ -268,7 +269,7 @@ const SYLLABLE_ITEMS = SYLLABLE_ROWS.flatMap((row) => row.items);
 const ALL_ITEMS = [...INITIALS, ...FINAL_ITEMS, ...SYLLABLE_ITEMS];
 
 export default function LettersAndSyllablesPage() {
-  const { shortId } = useClientSession();
+  const { sessionId, shortId } = useClientSession();
   const [status, setStatus] = useState<'idle' | 'playing' | 'paused'>('idle');
   const [currentItem, setCurrentItem] = useState<SoundItem | null>(null);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
@@ -276,6 +277,7 @@ export default function LettersAndSyllablesPage() {
   const [repeat, setRepeat] = useState(false);
   const [message, setMessage] = useState('');
   const [recordedAudioPlaying, setRecordedAudioPlaying] = useState(false);
+  const [recordedAudioLoop, setRecordedAudioLoop] = useState(false);
   const [activeVowelTone, setActiveVowelTone] = useState(-1);
 
   const queue = useRef<SoundItem[]>([]);
@@ -539,11 +541,20 @@ export default function LettersAndSyllablesPage() {
               {recordedAudioPlaying ? 'Pausar gravação' : 'Reproduzir vogais'}
             </button>
             <button type="button" onClick={() => toggleRecordedVowels(true)}>↺ Ouvir do começo</button>
+            <button
+              className={recordedAudioLoop ? styles.recordedOptionActive : ''}
+              type="button"
+              onClick={() => setRecordedAudioLoop((current) => !current)}
+              aria-pressed={recordedAudioLoop}
+            >
+              ↻ Loop {recordedAudioLoop ? 'ligado' : 'desligado'}
+            </button>
           </div>
           <audio
             ref={vowelAudioRef}
             className={styles.recordedAudio}
             controls
+            loop={recordedAudioLoop}
             preload="metadata"
             src="/audio/vogais-mandarim-quatro-tons.m4a"
             onPlay={() => {
@@ -579,11 +590,13 @@ export default function LettersAndSyllablesPage() {
                     const toneIndex = VOWEL_TONES.findIndex((item) => item.label === label);
                     return (
                       <span
-                        className={toneIndex === activeVowelTone ? styles.activeTone : ''}
+                        className={`${styles.toneCell} ${toneIndex === activeVowelTone ? styles.activeTone : ''}`}
                         key={label}
                         title={`${tone}º tom`}
+                        aria-label={`${label}, ${tone}º tom`}
                       >
-                        {label}
+                        <b>{label}</b>
+                        <small>{tone}º</small>
                       </span>
                     );
                   })}
@@ -592,6 +605,19 @@ export default function LettersAndSyllablesPage() {
             ))}
           </div>
           <p>O destaque acompanha cada som para você saber qual vogal e qual tom estão sendo pronunciados.</p>
+        </div>
+
+        <div className={styles.vowelRecorder}>
+          <PracticeRecorder
+            phrase="Vogais a, o, e, i, u e ü nos quatro tons"
+            pinyin="ā á ǎ à · ō ó ǒ ò · ē é ě è · ī í ǐ ì · ū ú ǔ ù · ǖ ǘ ǚ ǜ"
+            sessionId={sessionId}
+            storageScope="vowel-tones"
+            onBeforeRecord={() => {
+              stopPlayback();
+              stopRecordedVowels();
+            }}
+          />
         </div>
       </section>
 
