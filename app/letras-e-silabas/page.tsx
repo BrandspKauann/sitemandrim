@@ -20,6 +20,19 @@ type InitialRow = {
 
 const SEQUENCE_GAP = 1000;
 
+const VOWEL_TONE_GROUPS = [
+  { vowel: 'a', tones: [['ā', 1, 0.595], ['á', 2, 1.884], ['ǎ', 3, 3.163], ['à', 4, 4.45]] },
+  { vowel: 'o', tones: [['ō', 1, 5.853], ['ó', 2, 6.95], ['ǒ', 3, 8.058], ['ò', 4, 9.225]] },
+  { vowel: 'e', tones: [['ē', 1, 10.55], ['é', 2, 11.506], ['ě', 3, 12.523], ['è', 4, 13.595]] },
+  { vowel: 'i', tones: [['ī', 1, 15.004], ['í', 2, 15.98], ['ǐ', 3, 17.078], ['ì', 4, 18.104]] },
+  { vowel: 'u', tones: [['ū', 1, 19.242], ['ú', 2, 20.33], ['ǔ', 3, 21.29], ['ù', 4, 22.291]] },
+  { vowel: 'ü', tones: [['ǖ', 1, 23.465], ['ǘ', 2, 24.462], ['ǚ', 3, 25.525], ['ǜ', 4, 26.601]] },
+] as const;
+
+const VOWEL_TONES = VOWEL_TONE_GROUPS.flatMap((group) =>
+  group.tones.map(([label, tone, start]) => ({ vowel: group.vowel, label, tone, start })),
+);
+
 const ZHUYIN_INITIALS: Record<string, string> = {
   b: 'ㄅ', p: 'ㄆ', m: 'ㄇ', f: 'ㄈ', d: 'ㄉ', t: 'ㄊ', n: 'ㄋ', l: 'ㄌ',
   g: 'ㄍ', k: 'ㄎ', h: 'ㄏ', j: 'ㄐ', q: 'ㄑ', x: 'ㄒ',
@@ -262,6 +275,8 @@ export default function LettersAndSyllablesPage() {
   const [speed, setSpeed] = useState<'natural' | 'slow'>('natural');
   const [repeat, setRepeat] = useState(false);
   const [message, setMessage] = useState('');
+  const [recordedAudioPlaying, setRecordedAudioPlaying] = useState(false);
+  const [activeVowelTone, setActiveVowelTone] = useState(-1);
 
   const queue = useRef<SoundItem[]>([]);
   const queueIndex = useRef(0);
@@ -271,12 +286,23 @@ export default function LettersAndSyllablesPage() {
   const speedRef = useRef<'natural' | 'slow'>('natural');
   const repeatRef = useRef(false);
   const timer = useRef<number | null>(null);
+  const vowelAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => () => {
     runId.current += 1;
     if (timer.current) window.clearTimeout(timer.current);
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    vowelAudioRef.current?.pause();
   }, []);
+
+  function stopRecordedVowels(reset = true) {
+    const audio = vowelAudioRef.current;
+    if (!audio) return;
+    audio.pause();
+    if (reset) audio.currentTime = 0;
+    setRecordedAudioPlaying(false);
+    setActiveVowelTone(-1);
+  }
 
   function resetPlayback() {
     setStatus('idle');
@@ -355,6 +381,7 @@ export default function LettersAndSyllablesPage() {
       setMessage('O áudio não está disponível neste navegador.');
       return;
     }
+    stopRecordedVowels();
     stopPlayback();
     queue.current = items;
     queueIndex.current = 0;
@@ -393,6 +420,33 @@ export default function LettersAndSyllablesPage() {
     const nextValue = !repeat;
     repeatRef.current = nextValue;
     setRepeat(nextValue);
+  }
+
+  async function toggleRecordedVowels(fromStart = false) {
+    const audio = vowelAudioRef.current;
+    if (!audio) return;
+
+    stopPlayback();
+    if (!audio.paused && !fromStart) {
+      audio.pause();
+      return;
+    }
+    if (fromStart) audio.currentTime = 0;
+    try {
+      await audio.play();
+      setMessage('');
+    } catch {
+      setMessage('Não foi possível reproduzir o áudio gravado neste navegador.');
+    }
+  }
+
+  function followRecordedVowels(currentTime: number) {
+    let nextIndex = -1;
+    for (let index = 0; index < VOWEL_TONES.length; index += 1) {
+      if (currentTime >= VOWEL_TONES[index].start) nextIndex = index;
+      else break;
+    }
+    setActiveVowelTone(nextIndex);
   }
 
   function soundButton(item: SoundItem) {
@@ -472,6 +526,73 @@ export default function LettersAndSyllablesPage() {
       <section className={styles.notice}>
         <strong>Importante:</strong>
         <p>Os acentos na versão em português indicam apenas como aproximar a leitura e não representam os quatro tons. O áudio usa símbolos fonéticos chineses para evitar a leitura em inglês, mas a voz pode acrescentar entonação natural. Há uma pausa de 1 segundo entre os itens.</p>
+      </section>
+
+      <section className={styles.vowelAudioSection} id="vogais-com-tons">
+        <div className={styles.vowelAudioCopy}>
+          <span className={styles.eyebrow}>Áudio real · quatro tons</span>
+          <h2>Acompanhe as vogais em mandarim.</h2>
+          <p>O som foi extraído do vídeo enviado. A reprodução segue a ordem <strong>a, o, e, i, u e ü</strong>, passando pelos quatro tons de cada vogal.</p>
+          <div className={styles.recordedControls}>
+            <button className={styles.recordedPlay} type="button" onClick={() => toggleRecordedVowels()}>
+              <span aria-hidden="true">{recordedAudioPlaying ? 'Ⅱ' : '▶'}</span>
+              {recordedAudioPlaying ? 'Pausar gravação' : 'Reproduzir vogais'}
+            </button>
+            <button type="button" onClick={() => toggleRecordedVowels(true)}>↺ Ouvir do começo</button>
+          </div>
+          <audio
+            ref={vowelAudioRef}
+            className={styles.recordedAudio}
+            controls
+            preload="metadata"
+            src="/audio/vogais-mandarim-quatro-tons.m4a"
+            onPlay={() => {
+              stopPlayback();
+              setRecordedAudioPlaying(true);
+            }}
+            onPause={() => setRecordedAudioPlaying(false)}
+            onEnded={() => {
+              setRecordedAudioPlaying(false);
+              setActiveVowelTone(-1);
+            }}
+            onTimeUpdate={(event) => followRecordedVowels(event.currentTarget.currentTime)}
+          >
+            Seu navegador não consegue reproduzir este áudio.
+          </audio>
+        </div>
+
+        <div className={`${styles.vowelToneBoard} ${recordedAudioPlaying ? styles.vowelBoardPlaying : ''}`}>
+          <div className={styles.vowelBoardTop}>
+            <span>{recordedAudioPlaying ? 'A voz está pronunciando' : 'Sequência da gravação'}</span>
+            <strong aria-live="polite">
+              {activeVowelTone >= 0
+                ? `${VOWEL_TONES[activeVowelTone].label} · ${VOWEL_TONES[activeVowelTone].tone}º tom`
+                : '24 sons'}
+            </strong>
+          </div>
+          <div className={styles.vowelToneGroups}>
+            {VOWEL_TONE_GROUPS.map((group) => (
+              <div className={styles.vowelToneGroup} key={group.vowel}>
+                <span className={styles.vowelName}>{group.vowel}</span>
+                <div>
+                  {group.tones.map(([label, tone]) => {
+                    const toneIndex = VOWEL_TONES.findIndex((item) => item.label === label);
+                    return (
+                      <span
+                        className={toneIndex === activeVowelTone ? styles.activeTone : ''}
+                        key={label}
+                        title={`${tone}º tom`}
+                      >
+                        {label}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+          <p>O destaque acompanha cada som para você saber qual vogal e qual tom estão sendo pronunciados.</p>
+        </div>
       </section>
 
       <section className={styles.contentSection} id="sons-basicos">
