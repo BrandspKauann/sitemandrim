@@ -478,6 +478,7 @@ export default function LettersAndSyllablesPage() {
           </span>
           <Link href="/">Frases</Link>
           <Link className={styles.activeNav} href="/letras-e-silabas">Letras e sílabas</Link>
+          <Link href="/exercicios">Exercícios</Link>
         </nav>
       </header>
 
