@@ -8,6 +8,8 @@ type PracticeRecorderProps = {
   sessionId: string;
   storageScope?: string;
   onBeforeRecord?: () => void;
+  onRecordingStart?: () => void;
+  onRecordingStop?: () => void;
 };
 
 type StoredRecording = {
@@ -103,6 +105,8 @@ export default function PracticeRecorder({
   sessionId,
   storageScope = 'phrases',
   onBeforeRecord,
+  onRecordingStart,
+  onRecordingStop,
 }: PracticeRecorderProps) {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [preview, setPreview] = useState<Recording | null>(null);
@@ -236,6 +240,7 @@ export default function PracticeRecorder({
         clearTimer();
         releaseMicrophone();
         recorderRef.current = null;
+        onRecordingStop?.();
         if (!mountedRef.current || discardRef.current) return;
 
         const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
@@ -264,6 +269,7 @@ export default function PracticeRecorder({
         clearTimer();
         releaseMicrophone();
         recorderRef.current = null;
+        onRecordingStop?.();
         setStatus('idle');
         setMessage('A gravação foi interrompida pelo navegador. Tente novamente.');
       };
@@ -273,6 +279,7 @@ export default function PracticeRecorder({
       setStatus('recording');
       setMessage('Gravando sua pronúncia…');
       recorder.start(250);
+      onRecordingStart?.();
       timerRef.current = window.setInterval(() => {
         const elapsed = Math.min(MAX_SECONDS, Math.floor((Date.now() - startedAtRef.current) / 1000));
         setSeconds(elapsed);
@@ -296,7 +303,10 @@ export default function PracticeRecorder({
     discardRef.current = true;
     clearTimer();
     if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
-    else releaseMicrophone();
+    else {
+      releaseMicrophone();
+      onRecordingStop?.();
+    }
     recorderRef.current = null;
     chunksRef.current = [];
     setSeconds(0);

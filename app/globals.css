@@ -112,12 +112,17 @@ textarea::placeholder { color: #c5bcb3; font-size: 20px; }
 .examples button { padding: 6px 10px; border: 1px solid #ddd2c4; background: transparent; border-radius: 100px; color: #6e6263; font-size: 11px; cursor: pointer; transition: .18s ease; }
 .examples button:hover { border-color: var(--red); color: var(--red); }
 .audio-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.primary-audio-actions { display: flex; align-items: stretch; gap: 8px; }
 .play-button {
   display: flex; align-items: center; gap: 10px; min-height: 45px; padding: 0 18px; border: 0; background: var(--red); color: white;
   border-radius: 3px; font-size: 13px; font-weight: 720; cursor: pointer; box-shadow: 0 8px 20px rgb(145 39 35 / 18%);
 }
 .play-button:hover { background: var(--red-dark); }
-.play-button:disabled, .copy-button:disabled { opacity: .4; cursor: not-allowed; }
+.silent-guide-button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 45px; padding: 0 15px; border: 1px solid #d6c8b9; background: #fffaf3; color: #655a59; border-radius: 3px; font-size: 11px; font-weight: 740; cursor: pointer; transition: .18s ease; }
+.silent-guide-button:hover { border-color: var(--red); color: var(--red); }
+.silent-guide-button.active { border-color: var(--green); background: rgb(61 128 98 / 10%); color: #2f6e52; box-shadow: inset 0 0 0 1px rgb(61 128 98 / 10%); }
+.silent-guide-button span { font-size: 11px; }
+.play-button:disabled, .silent-guide-button:disabled, .copy-button:disabled { opacity: .4; cursor: not-allowed; }
 .play-icon { font-size: 11px; }
 .audio-options { display: flex; align-items: center; gap: 7px; }
 .speed-control { display: flex; padding: 3px; background: #f1ebe2; border-radius: 4px; }
@@ -319,6 +324,7 @@ footer p { max-width: 620px; margin: 0; color: #8d8280; font-size: 11px; line-he
   .inline-result > div { grid-template-columns: 1fr; gap: 2px; }
   .resolver-main { align-items: flex-start; }
   .audio-row { align-items: stretch; flex-direction: column; }
+  .primary-audio-actions { display: grid; grid-template-columns: 1fr; }
   .play-button { justify-content: center; }
   .audio-options { display: grid; grid-template-columns: 1fr 82px; }
   .speed-control { display: grid; grid-template-columns: 1fr 1fr; }

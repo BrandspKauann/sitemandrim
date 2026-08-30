@@ -317,6 +317,7 @@ export default function Home() {
   const [loopGapDraft, setLoopGapDraft] = useState(DEFAULT_LOOP_GAP);
   const [savedLoopGap, setSavedLoopGap] = useState(DEFAULT_LOOP_GAP);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isSilentGuiding, setIsSilentGuiding] = useState(false);
   const [activeSyllableRange, setActiveSyllableRange] = useState<{ start: number; end: number } | null>(null);
   const [audioMessage, setAudioMessage] = useState('');
   const [copied, setCopied] = useState(false);
@@ -329,6 +330,9 @@ export default function Home() {
   const syncStartTimer = useRef<number | null>(null);
   const syncStepTimer = useRef<number | null>(null);
   const boundarySeen = useRef(false);
+  const silentGuideRun = useRef(0);
+  const silentStepTimer = useRef<number | null>(null);
+  const silentLoopTimer = useRef<number | null>(null);
   const phraseSequenceRef = useRef<PhraseSequenceHandle | null>(null);
   const pinyinDetected = isPinyinInput(phrase);
   const pinyinResolution = useMemo(() => resolvePinyin(phrase), [phrase]);
@@ -376,6 +380,9 @@ export default function Home() {
     if (loopTimer.current) window.clearTimeout(loopTimer.current);
     if (syncStartTimer.current) window.clearTimeout(syncStartTimer.current);
     if (syncStepTimer.current) window.clearInterval(syncStepTimer.current);
+    if (silentStepTimer.current) window.clearTimeout(silentStepTimer.current);
+    if (silentLoopTimer.current) window.clearTimeout(silentLoopTimer.current);
+    silentGuideRun.current += 1;
     loopReplay.current = null;
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   }, []);
@@ -396,6 +403,7 @@ export default function Home() {
   function chooseCharacter(index: number, character: string) {
     if (!pinyinResolution) return;
     if (isSpeaking) stopSpeaking();
+    if (isSilentGuiding) stopSilentGuide();
     const nextCharacters = [...selectedCharacters];
     nextCharacters[index] = character;
     setPinyinSelection({ key: pinyinResolution.key, characters: nextCharacters });
@@ -424,6 +432,74 @@ export default function Home() {
       window.clearInterval(syncStepTimer.current);
       syncStepTimer.current = null;
     }
+  }
+
+  function clearSilentGuideTimers() {
+    if (silentStepTimer.current) {
+      window.clearTimeout(silentStepTimer.current);
+      silentStepTimer.current = null;
+    }
+    if (silentLoopTimer.current) {
+      window.clearTimeout(silentLoopTimer.current);
+      silentLoopTimer.current = null;
+    }
+  }
+
+  function stopSilentGuide() {
+    silentGuideRun.current += 1;
+    clearSilentGuideTimers();
+    setIsSilentGuiding(false);
+    setActiveSyllableRange(null);
+  }
+
+  function startSilentGuide(alwaysRepeat = false) {
+    if (!syllables.length) return;
+    phraseSequenceRef.current?.stop();
+    if (isSpeaking) stopSpeaking();
+    stopSilentGuide();
+
+    const runId = silentGuideRun.current + 1;
+    silentGuideRun.current = runId;
+    const stepDuration = speedSetting.current === 'slow' ? 560 : 350;
+    setIsSilentGuiding(true);
+    setAudioMessage('Guia silencioso ativo: acompanhe o destaque e pronuncie com sua própria voz.');
+
+    const playPass = () => {
+      if (silentGuideRun.current !== runId) return;
+      let index = 0;
+      setActiveSyllableRange({ start: 0, end: 0 });
+
+      const advance = () => {
+        if (silentGuideRun.current !== runId) return;
+        index += 1;
+        if (index < syllables.length) {
+          setActiveSyllableRange({ start: index, end: index });
+          silentStepTimer.current = window.setTimeout(advance, stepDuration);
+          return;
+        }
+
+        setActiveSyllableRange(null);
+        if (alwaysRepeat || loopEnabled.current) {
+          silentLoopTimer.current = window.setTimeout(playPass, loopGapSetting.current * 1000);
+          return;
+        }
+        setIsSilentGuiding(false);
+        setAudioMessage('Guia silencioso concluído. Você pode reproduzi-lo novamente.');
+      };
+
+      silentStepTimer.current = window.setTimeout(advance, stepDuration);
+    };
+
+    playPass();
+  }
+
+  function toggleSilentGuide() {
+    if (isSilentGuiding) {
+      stopSilentGuide();
+      setAudioMessage('Guia silencioso interrompido.');
+      return;
+    }
+    startSilentGuide(false);
   }
 
   function rangeForBoundary(charIndex: number, charLength: number) {
@@ -467,6 +543,7 @@ export default function Home() {
 
   function changePhrase(value: string) {
     if (isSpeaking) stopSpeaking();
+    if (isSilentGuiding) stopSilentGuide();
     setPhrase(value);
   }
 
@@ -516,6 +593,7 @@ export default function Home() {
     }
 
     phraseSequenceRef.current?.stop();
+    if (isSilentGuiding) stopSilentGuide();
 
     if (!resolvedPhrase.trim() || !('speechSynthesis' in window)) {
       setAudioMessage('O áudio não está disponível neste navegador.');
@@ -723,10 +801,17 @@ export default function Home() {
           </div>
 
           <div className="audio-row">
-            <button className="play-button" type="button" onClick={speak} disabled={!syllables.length}>
-              <span className="play-icon" aria-hidden="true">{isSpeaking ? '◼' : '▶'}</span>
-              {isSpeaking ? 'Parar áudio' : 'Ouvir em mandarim'}
-            </button>
+            <div className="primary-audio-actions">
+              <button className="play-button" type="button" onClick={speak} disabled={!syllables.length}>
+                <span className="play-icon" aria-hidden="true">{isSpeaking ? '◼' : '▶'}</span>
+                {isSpeaking ? 'Parar áudio' : 'Ouvir em mandarim'}
+              </button>
+              <button className={`silent-guide-button ${isSilentGuiding ? 'active' : ''}`} type="button"
+                onClick={toggleSilentGuide} disabled={!syllables.length} aria-pressed={isSilentGuiding}>
+                <span aria-hidden="true">{isSilentGuiding ? '■' : '◉'}</span>
+                {isSilentGuiding ? 'Parar guia' : 'Praticar sem voz'}
+              </button>
+            </div>
             <div className="audio-options">
               <div className="speed-control" aria-label="Velocidade do áudio">
                 <button type="button" className={audioSpeed === 'natural' ? 'active' : ''}
@@ -764,14 +849,20 @@ export default function Home() {
             sessionId={sessionId}
             onBeforeRecord={() => {
               stopSpeaking();
+              stopSilentGuide();
               phraseSequenceRef.current?.stop();
             }}
+            onRecordingStart={() => startSilentGuide(true)}
+            onRecordingStop={stopSilentGuide}
           />
         </div>
       </section>
 
       <PhraseSequence ref={phraseSequenceRef} items={studyPhrases} sessionId={sessionId}
-        onBeforePlay={stopSpeaking} />
+        onBeforePlay={() => {
+          stopSpeaking();
+          stopSilentGuide();
+        }} />
 
       <section className="result-section" aria-live="polite">
         <div className="section-heading">
