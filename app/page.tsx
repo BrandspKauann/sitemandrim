@@ -32,6 +32,12 @@ type PinyinResolution = {
   choices: PinyinChoice[];
 };
 
+type TranslationState = {
+  source: string;
+  text: string;
+  status: 'idle' | 'loading' | 'success' | 'error';
+};
+
 const EXAMPLES = [
   { label: 'Bom dia', phrase: '早上好' },
   { label: 'Obrigado', phrase: '谢谢你' },
@@ -330,6 +336,11 @@ export default function Home() {
   const [activeSyllableRange, setActiveSyllableRange] = useState<{ start: number; end: number } | null>(null);
   const [audioMessage, setAudioMessage] = useState('');
   const [copied, setCopied] = useState(false);
+  const [translation, setTranslation] = useState<TranslationState>({
+    source: '', text: '', status: 'idle',
+  });
+  const [translationRefresh, setTranslationRefresh] = useState(0);
+  const translationCache = useRef(new Map<string, string>());
   const speechRun = useRef(0);
   const loopEnabled = useRef(false);
   const speedSetting = useRef<'natural' | 'slow'>('natural');
@@ -370,6 +381,22 @@ export default function Home() {
   }, [resolvedPhrase, syllables.length]);
   const pinyinLine = syllables.map((item) => item.pinyin).join(' ');
   const portugueseLine = syllables.map((item) => `${item.portuguese} (${item.tone})`).join(' ');
+  const translationWords = useMemo(
+    () => translation.status === 'success' ? translation.text.split(/\s+/).filter(Boolean) : [],
+    [translation],
+  );
+  const activeTranslationRange = useMemo(() => {
+    if (!activeSyllableRange || !syllables.length || !translationWords.length) return null;
+    const start = Math.min(
+      translationWords.length - 1,
+      Math.floor((activeSyllableRange.start / syllables.length) * translationWords.length),
+    );
+    const end = Math.min(
+      translationWords.length - 1,
+      Math.max(start, Math.ceil(((activeSyllableRange.end + 1) / syllables.length) * translationWords.length) - 1),
+    );
+    return { start, end };
+  }, [activeSyllableRange, syllables.length, translationWords.length]);
   const studyPhrases = useMemo<PhraseStudyItem[]>(() => CLASSROOM_PHRASES.map((item, index) => {
     const reading = analyze(item.hanzi);
     return {
@@ -402,6 +429,55 @@ export default function Home() {
       });
     } catch { /* The timer still works without browser persistence. */ }
   }, [sessionId]);
+
+  useEffect(() => {
+    const source = resolvedPhrase.trim();
+    let cancelled = false;
+    const updateTranslation = (next: TranslationState) => {
+      queueMicrotask(() => {
+        if (!cancelled) setTranslation(next);
+      });
+    };
+
+    if (!source || !syllables.length) {
+      updateTranslation({ source: '', text: '', status: 'idle' });
+      return () => { cancelled = true; };
+    }
+
+    const savedPhrase = CLASSROOM_PHRASES.find((item) => item.hanzi === source);
+    const cachedTranslation = savedPhrase?.translation ?? translationCache.current.get(source);
+    if (cachedTranslation) {
+      updateTranslation({ source, text: cachedTranslation, status: 'success' });
+      return () => { cancelled = true; };
+    }
+
+    const controller = new AbortController();
+    updateTranslation({ source, text: '', status: 'loading' });
+    const timer = window.setTimeout(async () => {
+      try {
+        const response = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: source }),
+          signal: controller.signal,
+        });
+        const data = await response.json() as { translation?: string; error?: string };
+        if (!response.ok || !data.translation) throw new Error(data.error ?? 'Translation failed');
+        translationCache.current.set(source, data.translation);
+        if (!cancelled) setTranslation({ source, text: data.translation, status: 'success' });
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        console.error(error);
+        if (!cancelled) setTranslation({ source, text: '', status: 'error' });
+      }
+    }, 450);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [resolvedPhrase, syllables.length, translationRefresh]);
 
   function chooseCharacter(index: number, character: string) {
     if (!pinyinResolution) return;
@@ -570,6 +646,12 @@ export default function Home() {
       && index <= activeSyllableRange.end);
   }
 
+  function translationWordIsActive(index: number) {
+    return Boolean(activeTranslationRange
+      && index >= activeTranslationRange.start
+      && index <= activeTranslationRange.end);
+  }
+
   function changePhrase(value: string) {
     if (isSpeaking) stopSpeaking();
     if (isSilentGuiding) stopSilentGuide();
@@ -694,7 +776,9 @@ export default function Home() {
   async function copyResult() {
     if (!syllables.length) return;
     try {
-      await navigator.clipboard.writeText(`${resolvedPhrase.trim()}\n${pinyinLine}\n${portugueseLine}`);
+      const lines = [resolvedPhrase.trim(), pinyinLine, portugueseLine];
+      if (translation.status === 'success') lines.push(translation.text);
+      await navigator.clipboard.writeText(lines.join('\n'));
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1600);
     } catch { setCopied(false); }
@@ -807,7 +891,7 @@ export default function Home() {
                   ))}
                 </strong>
               </div>
-              <div>
+              <div className="inline-pronunciation">
                 <span>Pronúncia em português</span>
                 <strong className="sync-line">
                   {syllables.map((item, index) => (
@@ -817,6 +901,24 @@ export default function Home() {
                     </span>
                   ))}
                 </strong>
+              </div>
+              <div className="inline-translation">
+                <span>Tradução em português</span>
+                {translation.status === 'success' && (
+                  <strong className="sync-line" lang="pt-BR" aria-label={translation.text}>
+                    {translationWords.map((word, index) => (
+                      <span className={`sync-token ${translationWordIsActive(index) ? 'active-sync-token' : ''}`}
+                        key={`${word}-inline-translation-${index}`}>{word}</span>
+                    ))}
+                  </strong>
+                )}
+                {translation.status === 'loading' && <strong className="translation-loading">Traduzindo…</strong>}
+                {translation.status === 'error' && (
+                  <strong className="translation-error">
+                    Não foi possível traduzir agora.
+                    <button type="button" onClick={() => setTranslationRefresh((value) => value + 1)}>Tentar novamente</button>
+                  </strong>
+                )}
               </div>
             </div>
           )}
@@ -946,12 +1048,34 @@ export default function Home() {
                 {Array.from(new Set(syllables.map((item) => item.tone))).map((tone) => `${tone} = ${TONE_LABELS[tone]}`).join(' · ')}
               </p>
             </div>
+            <div className="result-block translation-block">
+              <div className="label-row">
+                <span className="result-label"><i>4</i> Tradução em português do Brasil</span>
+                <span className="support-badge">Tradução automática</span>
+              </div>
+              {translation.status === 'success' && (
+                <p className="sync-line translation-sync-line" lang="pt-BR" aria-label={translation.text}>
+                  {translationWords.map((word, index) => (
+                    <span className={`sync-token ${translationWordIsActive(index) ? 'active-sync-token' : ''}`}
+                      key={`${word}-result-translation-${index}`}>{word}</span>
+                  ))}
+                </p>
+              )}
+              {translation.status === 'loading' && <p className="translation-loading">Traduzindo a frase…</p>}
+              {translation.status === 'error' && (
+                <div className="translation-failed" role="status">
+                  <p>Não foi possível buscar a tradução neste momento.</p>
+                  <button type="button" onClick={() => setTranslationRefresh((value) => value + 1)}>Tentar novamente</button>
+                </div>
+              )}
+              <small>O destaque acompanha o ritmo do mandarim e avança na ordem natural do português. Nomes e contexto podem alterar a tradução.</small>
+            </div>
           </div>
         ) : (
           <div className="empty-state">
             <span aria-hidden="true">你</span>
             <h3>Comece com ideogramas ou pinyin</h3>
-            <p>A interpretação, o pinyin com tons e a pronúncia aproximada aparecerão aqui.</p>
+            <p>A interpretação, o pinyin com tons, a pronúncia aproximada e a tradução aparecerão aqui.</p>
           </div>
         )}
       </section>
