@@ -35,8 +35,25 @@ type PinyinResolution = {
 type TranslationState = {
   source: string;
   text: string;
+  alignments: TranslationAlignment[];
   status: 'idle' | 'loading' | 'success' | 'error';
 };
+
+type TranslationAlignment = {
+  source: string;
+  sourceStart: number;
+  sourceEnd: number;
+  translations: string[];
+};
+
+function normalizePortugueseWord(value: string) {
+  return value
+    .replace(/\([ao]\)/gi, '')
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLocaleLowerCase('pt-BR')
+    .replace(/[^\p{L}\p{N}]/gu, '');
+}
 
 const EXAMPLES = [
   { label: 'Bom dia', phrase: '早上好' },
@@ -75,6 +92,92 @@ const CLASSROOM_PHRASES = [
     translation: 'Eu sou francesa. Meu professor de chinês também é chinês.',
   },
 ];
+
+const SEMANTIC_EQUIVALENTS: Record<string, string[]> = {
+  我: ['eu', 'meu', 'minha'],
+  你: ['você', 'seu', 'sua', 'te'],
+  您: ['você', 'senhor', 'senhora'],
+  他: ['ele', 'dele'],
+  她: ['ela', 'dela'],
+  我们: ['nós', 'nosso', 'nossa'],
+  你们: ['vocês', 'seus', 'suas'],
+  他们: ['eles', 'delas', 'deles'],
+  大家: ['todos', 'todo mundo'],
+  人: ['pessoa', 'pessoas'],
+  老师: ['professor', 'professora'],
+  学生: ['aluno', 'aluna', 'estudante'],
+  同学: ['colega', 'colegas'],
+  朋友: ['amigo', 'amiga', 'amigos', 'amigas'],
+  中文: ['chinês', 'língua chinesa'],
+  汉语: ['chinês', 'mandarim'],
+  中国: ['China', 'chinês', 'chinesa'],
+  中国人: ['chinês', 'chinesa'],
+  法国: ['França', 'francês', 'francesa'],
+  巴西: ['Brasil', 'brasileiro', 'brasileira'],
+  名字: ['nome'],
+  书: ['livro'],
+  课: ['aula', 'lição'],
+  第一课: ['primeira lição', 'primeira aula'],
+  家: ['casa', 'família'],
+  学校: ['escola'],
+  工作: ['trabalho', 'trabalhar', 'trabalha'],
+  是: ['é', 'sou', 'são', 'ser'],
+  有: ['tem', 'tenho', 'ter', 'há'],
+  叫: ['chamo', 'chama', 'chamar', 'nome'],
+  认识: ['conhecer', 'conheço', 'conhecer você'],
+  学习: ['estudar', 'estudo', 'estudamos', 'aprender'],
+  读: ['ler', 'leia', 'lê'],
+  说: ['falar', 'fale', 'fala', 'dizer', 'diga'],
+  听: ['ouvir', 'escutar', 'ouça'],
+  看: ['ver', 'olhar', 'veja'],
+  写: ['escrever', 'escreva'],
+  坐: ['sentar', 'sente-se', 'sente'],
+  打开: ['abrir', 'abra'],
+  喜欢: ['gostar', 'gosto', 'gosta'],
+  知道: ['saber', 'sei', 'sabe'],
+  明白: ['entender', 'entendo', 'entende'],
+  吃: ['comer', 'coma'],
+  喝: ['beber', 'beba'],
+  去: ['ir', 'vá'],
+  来: ['vir', 'venha'],
+  回: ['voltar', 'retornar'],
+  问: ['perguntar', 'pergunta'],
+  请: ['por favor', 'por gentileza'],
+  谢谢: ['obrigado', 'obrigada', 'agradeço'],
+  再见: ['até logo', 'tchau'],
+  你好: ['olá', 'oi'],
+  您好: ['olá', 'bom dia'],
+  早上好: ['bom dia'],
+  晚上好: ['boa noite'],
+  不客气: ['de nada'],
+  对不起: ['desculpe', 'sinto muito'],
+  没关系: ['não tem problema', 'tudo bem'],
+  今天: ['hoje'],
+  明天: ['amanhã'],
+  昨天: ['ontem'],
+  现在: ['agora'],
+  还: ['ainda', 'também'],
+  也: ['também'],
+  都: ['todos', 'todas'],
+  很: ['muito', 'bem'],
+  再: ['novamente', 'de novo', 'mais uma vez'],
+  一遍: ['uma vez'],
+  好: ['bom', 'boa', 'bem', 'olá'],
+  高兴: ['feliz', 'prazer', 'contente'],
+  忙: ['ocupado', 'ocupada', 'ocupados', 'ocupadas'],
+  慢: ['devagar', 'lento', 'lenta'],
+  慢点: ['mais devagar', 'devagar'],
+  快: ['rápido', 'rápida', 'depressa'],
+  大: ['grande'],
+  小: ['pequeno', 'pequena'],
+  什么: ['o que', 'qual'],
+  为什么: ['por que', 'porque'],
+  怎么: ['como'],
+  哪里: ['onde'],
+  谁: ['quem'],
+  上课: ['começar a aula', 'aula'],
+  下课: ['fim da aula', 'terminar a aula'],
+};
 
 const COMMON_PINYIN_PHRASES: Record<string, string> = {
   nihao: '你好',
@@ -337,10 +440,10 @@ export default function Home() {
   const [audioMessage, setAudioMessage] = useState('');
   const [copied, setCopied] = useState(false);
   const [translation, setTranslation] = useState<TranslationState>({
-    source: '', text: '', status: 'idle',
+    source: '', text: '', alignments: [], status: 'idle',
   });
   const [translationRefresh, setTranslationRefresh] = useState(0);
-  const translationCache = useRef(new Map<string, string>());
+  const translationCache = useRef(new Map<string, Pick<TranslationState, 'text' | 'alignments'>>());
   const speechRun = useRef(0);
   const loopEnabled = useRef(false);
   const speedSetting = useRef<'natural' | 'slow'>('natural');
@@ -385,18 +488,57 @@ export default function Home() {
     () => translation.status === 'success' ? translation.text.split(/\s+/).filter(Boolean) : [],
     [translation],
   );
-  const activeTranslationRange = useMemo(() => {
-    if (!activeSyllableRange || !syllables.length || !translationWords.length) return null;
-    const start = Math.min(
-      translationWords.length - 1,
-      Math.floor((activeSyllableRange.start / syllables.length) * translationWords.length),
-    );
-    const end = Math.min(
-      translationWords.length - 1,
-      Math.max(start, Math.ceil(((activeSyllableRange.end + 1) / syllables.length) * translationWords.length) - 1),
-    );
-    return { start, end };
-  }, [activeSyllableRange, syllables.length, translationWords.length]);
+  const alignmentTargetWords = useMemo(() => {
+    const targetWords = translationWords.map(normalizePortugueseWord);
+    const assignedTargets = new Set<number>();
+
+    return translation.alignments.map((alignment, alignmentIndex) => {
+      const sourceCenter = (alignment.sourceStart + alignment.sourceEnd) / 2;
+      const sourceProgress = resolvedPhrase.length ? sourceCenter / resolvedPhrase.length : 0;
+
+      const semanticCandidates = [
+        ...(SEMANTIC_EQUIVALENTS[alignment.source] ?? []),
+        ...alignment.translations,
+      ];
+      for (const candidate of semanticCandidates) {
+        const candidateWords = candidate.split(/\s+/).map(normalizePortugueseWord).filter(Boolean);
+        if (!candidateWords.length || candidateWords.length > targetWords.length) continue;
+
+        const matches: number[][] = [];
+        for (let start = 0; start <= targetWords.length - candidateWords.length; start += 1) {
+          const windowMatches = candidateWords.every((word, offset) => targetWords[start + offset] === word);
+          if (windowMatches) matches.push(candidateWords.map((_, offset) => start + offset));
+        }
+        if (!matches.length) continue;
+
+        const bestMatch = matches.sort((left, right) => {
+          const leftUsed = left.filter((index) => assignedTargets.has(index)).length;
+          const rightUsed = right.filter((index) => assignedTargets.has(index)).length;
+          if (leftUsed !== rightUsed) return leftUsed - rightUsed;
+          const expected = sourceProgress * Math.max(1, targetWords.length - 1);
+          return Math.abs(left[0] - expected) - Math.abs(right[0] - expected);
+        })[0];
+        bestMatch.forEach((index) => assignedTargets.add(index));
+        return { alignmentIndex, targetIndices: bestMatch };
+      }
+
+      return { alignmentIndex, targetIndices: [] as number[] };
+    });
+  }, [resolvedPhrase.length, translation.alignments, translationWords]);
+  const activeTranslationWords = useMemo(() => {
+    const activeWords = new Set<number>();
+    if (!activeSyllableRange) return activeWords;
+
+    const activePositions = syllablePositions.slice(activeSyllableRange.start, activeSyllableRange.end + 1);
+    alignmentTargetWords.forEach(({ alignmentIndex, targetIndices }) => {
+      const alignment = translation.alignments[alignmentIndex];
+      const overlaps = activePositions.some((position) => (
+        position.start < alignment.sourceEnd && position.end > alignment.sourceStart
+      ));
+      if (overlaps) targetIndices.forEach((index) => activeWords.add(index));
+    });
+    return activeWords;
+  }, [activeSyllableRange, alignmentTargetWords, syllablePositions, translation.alignments]);
   const studyPhrases = useMemo<PhraseStudyItem[]>(() => CLASSROOM_PHRASES.map((item, index) => {
     const reading = analyze(item.hanzi);
     return {
@@ -440,35 +582,40 @@ export default function Home() {
     };
 
     if (!source || !syllables.length) {
-      updateTranslation({ source: '', text: '', status: 'idle' });
+      updateTranslation({ source: '', text: '', alignments: [], status: 'idle' });
       return () => { cancelled = true; };
     }
 
     const savedPhrase = CLASSROOM_PHRASES.find((item) => item.hanzi === source);
-    const cachedTranslation = savedPhrase?.translation ?? translationCache.current.get(source);
+    const cachedTranslation = translationCache.current.get(source);
     if (cachedTranslation) {
-      updateTranslation({ source, text: cachedTranslation, status: 'success' });
+      updateTranslation({ source, ...cachedTranslation, status: 'success' });
       return () => { cancelled = true; };
     }
 
     const controller = new AbortController();
-    updateTranslation({ source, text: '', status: 'loading' });
+    updateTranslation({ source, text: '', alignments: [], status: 'loading' });
     const timer = window.setTimeout(async () => {
       try {
         const response = await fetch('/api/translate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: source }),
+          body: JSON.stringify({ text: source, preferredTranslation: savedPhrase?.translation }),
           signal: controller.signal,
         });
-        const data = await response.json() as { translation?: string; error?: string };
+        const data = await response.json() as {
+          translation?: string;
+          alignments?: TranslationAlignment[];
+          error?: string;
+        };
         if (!response.ok || !data.translation) throw new Error(data.error ?? 'Translation failed');
-        translationCache.current.set(source, data.translation);
-        if (!cancelled) setTranslation({ source, text: data.translation, status: 'success' });
+        const translatedResult = { text: data.translation, alignments: data.alignments ?? [] };
+        translationCache.current.set(source, translatedResult);
+        if (!cancelled) setTranslation({ source, ...translatedResult, status: 'success' });
       } catch (error) {
         if (controller.signal.aborted) return;
         console.error(error);
-        if (!cancelled) setTranslation({ source, text: '', status: 'error' });
+        if (!cancelled) setTranslation({ source, text: '', alignments: [], status: 'error' });
       }
     }, 450);
 
@@ -647,9 +794,7 @@ export default function Home() {
   }
 
   function translationWordIsActive(index: number) {
-    return Boolean(activeTranslationRange
-      && index >= activeTranslationRange.start
-      && index <= activeTranslationRange.end);
+    return activeTranslationWords.has(index);
   }
 
   function changePhrase(value: string) {
@@ -1068,7 +1213,7 @@ export default function Home() {
                   <button type="button" onClick={() => setTranslationRefresh((value) => value + 1)}>Tentar novamente</button>
                 </div>
               )}
-              <small>O destaque acompanha o ritmo do mandarim e avança na ordem natural do português. Nomes e contexto podem alterar a tradução.</small>
+              <small>O destaque pula para a palavra de significado equivalente em português, mesmo quando ela ocupa outra posição na frase. Partículas sem tradução direta podem não destacar nenhuma palavra.</small>
             </div>
           </div>
         ) : (
