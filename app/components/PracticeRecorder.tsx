@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 type PracticeRecorderProps = {
   phrase: string;
@@ -108,6 +108,7 @@ export default function PracticeRecorder({
   onRecordingStart,
   onRecordingStop,
 }: PracticeRecorderProps) {
+  const headingId = useId();
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [preview, setPreview] = useState<Recording | null>(null);
   const [status, setStatus] = useState<RecorderStatus>('idle');
@@ -356,11 +357,11 @@ export default function PracticeRecorder({
   const isBusy = status === 'recording' || status === 'requesting';
 
   return (
-    <section className="practice-recorder" aria-labelledby="practice-recorder-title">
+    <section className="practice-recorder" aria-labelledby={headingId}>
       <div className="recorder-heading">
         <div>
           <span className="recorder-kicker">Compare sua pronúncia</span>
-          <h2 id="practice-recorder-title">Grave sua voz</h2>
+          <h2 id={headingId}>Grave sua voz</h2>
         </div>
         <span className="recording-slots">{recordings.length}/{MAX_RECORDINGS} salvas</span>
       </div>

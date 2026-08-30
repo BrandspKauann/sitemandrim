@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useClientSession } from '../components/ClientSession';
+import HskDialoguePractice from './HskDialoguePractice';
 import styles from './page.module.css';
 
 type Challenge = {
@@ -61,7 +62,7 @@ function shuffledChallenges() {
 }
 
 export default function ExercisesPage() {
-  const { shortId } = useClientSession();
+  const { sessionId, shortId } = useClientSession();
   const [phase, setPhase] = useState<Phase>('intro');
   const [deck, setDeck] = useState<Challenge[]>([]);
   const [roundIndex, setRoundIndex] = useState(0);
@@ -284,6 +285,11 @@ export default function ExercisesPage() {
           ))}
         </div>
       </section>
+
+      <HskDialoguePractice sessionId={sessionId} onBeforePlay={() => {
+        setSpeaking(false);
+        setMessage('');
+      }} />
 
       <footer className={styles.footer}>
         <span className={styles.brandMark} aria-hidden="true">声</span>
