@@ -100,9 +100,13 @@ textarea::placeholder { color: #c5bcb3; font-size: 20px; }
 .input-warning { margin: 10px 0 0; color: var(--red); font-size: 10px; line-height: 1.45; }
 .inline-result { display: grid; gap: 8px; margin-top: 11px; padding: 11px 13px; border-left: 3px solid var(--red); background: #f3ece2; }
 .inline-result > div { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 10px; align-items: baseline; }
-.inline-result span { color: #887c79; font-size: 9px; font-weight: 740; letter-spacing: .05em; text-transform: uppercase; }
+.inline-result > div > span { color: #887c79; font-size: 9px; font-weight: 740; letter-spacing: .05em; text-transform: uppercase; }
 .inline-result strong { overflow-wrap: anywhere; color: #3b3032; font-size: 13px; font-weight: 680; line-height: 1.45; }
 .inline-result > div:last-child strong { color: var(--red-dark); }
+.sync-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px 7px; }
+.sync-token { position: relative; display: inline-flex; align-items: center; border-radius: 3px; transition: color .16s ease, background .16s ease, box-shadow .16s ease, transform .16s ease; transform-origin: center bottom; }
+.inline-result .hanzi-sync-token { font-family: 'Noto Serif SC', 'Songti SC', SimSun, serif; font-size: 18px; }
+.inline-result .active-sync-token { z-index: 1; padding: 1px 4px; background: #fffaf2; color: var(--red-dark); font-weight: 850; box-shadow: 0 0 0 2px rgb(186 63 54 / 18%), 0 4px 10px rgb(84 51 38 / 9%); transform: scale(1.2); }
 .examples { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 13px 0 20px; font-size: 11px; }
 .examples > span { color: #8a807d; margin-right: 2px; }
 .examples button { padding: 6px 10px; border: 1px solid #ddd2c4; background: transparent; border-radius: 100px; color: #6e6263; font-size: 11px; cursor: pointer; transition: .18s ease; }
@@ -258,6 +262,9 @@ textarea::placeholder { color: #c5bcb3; font-size: 20px; }
 .result-label { display: flex; align-items: center; gap: 10px; color: #baafa8; font-size: 10px; font-weight: 740; text-transform: uppercase; letter-spacing: .12em; }
 .result-label i { width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid #76686a; border-radius: 50%; color: #d7cbc4; font-style: normal; font-size: 9px; }
 .hanzi-block p { margin: 17px 0 0; font-family: 'Noto Serif SC', 'Songti SC', SimSun, serif; font-size: clamp(34px, 5vw, 56px); line-height: 1.3; }
+.result-card .sync-line { gap: 10px 16px; }
+.result-card .hanzi-block .sync-line { gap: 2px; }
+.result-card .active-sync-token { z-index: 1; color: #fff9ef; font-weight: 850; background: rgb(186 63 54 / 32%); box-shadow: 0 0 0 3px rgb(234 130 119 / 45%), 0 8px 22px rgb(0 0 0 / 22%); transform: scale(1.18); }
 .syllable-line { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 17px; }
 .pinyin-line { font-size: clamp(22px, 3vw, 32px); font-weight: 630; }
 .tone-text-0 { color: #afa5a3; } .tone-text-1 { color: #ea8277; } .tone-text-2 { color: #76bf9c; } .tone-text-3 { color: #83acd3; } .tone-text-4 { color: #e8c15e; }
@@ -342,4 +349,5 @@ footer p { max-width: 620px; margin: 0; color: #8d8280; font-size: 11px; line-he
   * { transition-duration: .01ms !important; }
   .recording-live-top span i, .permission-pulse { animation: none; }
   .lesson-stage.is-speaking .lesson-stage-copy, .lesson-stage.is-speaking .lesson-sound-bars i { animation: none; }
+  .active-sync-token { transform: none !important; }
 }

@@ -317,6 +317,7 @@ export default function Home() {
   const [loopGapDraft, setLoopGapDraft] = useState(DEFAULT_LOOP_GAP);
   const [savedLoopGap, setSavedLoopGap] = useState(DEFAULT_LOOP_GAP);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [activeSyllableRange, setActiveSyllableRange] = useState<{ start: number; end: number } | null>(null);
   const [audioMessage, setAudioMessage] = useState('');
   const [copied, setCopied] = useState(false);
   const speechRun = useRef(0);
@@ -325,6 +326,9 @@ export default function Home() {
   const loopGapSetting = useRef(DEFAULT_LOOP_GAP);
   const loopTimer = useRef<number | null>(null);
   const loopReplay = useRef<(() => void) | null>(null);
+  const syncStartTimer = useRef<number | null>(null);
+  const syncStepTimer = useRef<number | null>(null);
+  const boundarySeen = useRef(false);
   const phraseSequenceRef = useRef<PhraseSequenceHandle | null>(null);
   const pinyinDetected = isPinyinInput(phrase);
   const pinyinResolution = useMemo(() => resolvePinyin(phrase), [phrase]);
@@ -335,6 +339,25 @@ export default function Home() {
     : defaultCharacters;
   const resolvedPhrase = pinyinResolution ? selectedCharacters.join('') : phrase;
   const syllables = useMemo(() => analyze(resolvedPhrase), [resolvedPhrase]);
+  const syllablePositions = useMemo(() => {
+    const positions: Array<{ start: number; end: number }> = [];
+    for (let offset = 0; offset < resolvedPhrase.length;) {
+      const codePoint = resolvedPhrase.codePointAt(offset);
+      if (codePoint === undefined) break;
+      const character = String.fromCodePoint(codePoint);
+      if (HANZI_PATTERN.test(character)) positions.push({ start: offset, end: offset + character.length });
+      offset += character.length;
+    }
+    return positions.slice(0, syllables.length);
+  }, [resolvedPhrase, syllables.length]);
+  const displayCharacters = useMemo(() => {
+    let syllableIndex = 0;
+    return Array.from(resolvedPhrase.trim()).map((character) => {
+      const index = HANZI_PATTERN.test(character) && syllableIndex < syllables.length ? syllableIndex : null;
+      if (index !== null) syllableIndex += 1;
+      return { character, syllableIndex: index };
+    });
+  }, [resolvedPhrase, syllables.length]);
   const pinyinLine = syllables.map((item) => item.pinyin).join(' ');
   const portugueseLine = syllables.map((item) => `${item.portuguese} (${item.tone})`).join(' ');
   const studyPhrases = useMemo<PhraseStudyItem[]>(() => CLASSROOM_PHRASES.map((item, index) => {
@@ -351,6 +374,8 @@ export default function Home() {
   useEffect(() => () => {
     speechRun.current += 1;
     if (loopTimer.current) window.clearTimeout(loopTimer.current);
+    if (syncStartTimer.current) window.clearTimeout(syncStartTimer.current);
+    if (syncStepTimer.current) window.clearInterval(syncStepTimer.current);
     loopReplay.current = null;
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   }, []);
@@ -370,6 +395,7 @@ export default function Home() {
 
   function chooseCharacter(index: number, character: string) {
     if (!pinyinResolution) return;
+    if (isSpeaking) stopSpeaking();
     const nextCharacters = [...selectedCharacters];
     nextCharacters[index] = character;
     setPinyinSelection({ key: pinyinResolution.key, characters: nextCharacters });
@@ -382,9 +408,61 @@ export default function Home() {
       loopTimer.current = null;
     }
     loopReplay.current = null;
+    clearSyncTimers();
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     setIsSpeaking(false);
+    setActiveSyllableRange(null);
     setAudioMessage('');
+  }
+
+  function clearSyncTimers() {
+    if (syncStartTimer.current) {
+      window.clearTimeout(syncStartTimer.current);
+      syncStartTimer.current = null;
+    }
+    if (syncStepTimer.current) {
+      window.clearInterval(syncStepTimer.current);
+      syncStepTimer.current = null;
+    }
+  }
+
+  function rangeForBoundary(charIndex: number, charLength: number) {
+    if (!syllablePositions.length) return null;
+    const boundaryEnd = charIndex + Math.max(charLength, 1);
+    const matches = syllablePositions
+      .map((position, index) => ({ position, index }))
+      .filter(({ position }) => position.start < boundaryEnd && position.end > charIndex)
+      .map(({ index }) => index);
+
+    if (matches.length) return { start: matches[0], end: matches[matches.length - 1] };
+    const nearest = syllablePositions.findIndex((position) => position.start >= charIndex);
+    const index = nearest >= 0 ? nearest : syllablePositions.length - 1;
+    return { start: index, end: index };
+  }
+
+  function beginFallbackSync(runId: number) {
+    if (!syllables.length) return;
+    let index = 0;
+    setActiveSyllableRange({ start: 0, end: 0 });
+    syncStartTimer.current = window.setTimeout(() => {
+      syncStartTimer.current = null;
+      if (speechRun.current !== runId || boundarySeen.current) return;
+      const stepDuration = speedSetting.current === 'slow' ? 560 : 350;
+      syncStepTimer.current = window.setInterval(() => {
+        if (speechRun.current !== runId || boundarySeen.current) {
+          clearSyncTimers();
+          return;
+        }
+        index = Math.min(index + 1, syllables.length - 1);
+        setActiveSyllableRange({ start: index, end: index });
+      }, stepDuration);
+    }, 320);
+  }
+
+  function syllableIsActive(index: number) {
+    return Boolean(activeSyllableRange
+      && index >= activeSyllableRange.start
+      && index <= activeSyllableRange.end);
   }
 
   function changePhrase(value: string) {
@@ -408,6 +486,8 @@ export default function Home() {
       loopReplay.current = null;
       speechRun.current += 1;
       setIsSpeaking(false);
+      clearSyncTimers();
+      setActiveSyllableRange(null);
     }
   }
 
@@ -460,11 +540,24 @@ export default function Home() {
       if (mandarinVoice) utterance.voice = mandarinVoice;
       utterance.onstart = () => {
         if (speechRun.current !== runId) return;
+        boundarySeen.current = false;
+        clearSyncTimers();
+        beginFallbackSync(runId);
         setIsSpeaking(true);
         setAudioMessage('');
       };
+      utterance.onboundary = (event) => {
+        if (speechRun.current !== runId || event.name === 'sentence') return;
+        const range = rangeForBoundary(event.charIndex, event.charLength ?? 0);
+        if (!range) return;
+        boundarySeen.current = true;
+        clearSyncTimers();
+        setActiveSyllableRange(range);
+      };
       utterance.onend = () => {
         if (speechRun.current !== runId) return;
+        clearSyncTimers();
+        setActiveSyllableRange(null);
         if (loopEnabled.current) {
           loopReplay.current = playPhrase;
           loopTimer.current = window.setTimeout(() => {
@@ -479,6 +572,8 @@ export default function Home() {
       };
       utterance.onerror = () => {
         if (speechRun.current !== runId) return;
+        clearSyncTimers();
+        setActiveSyllableRange(null);
         setIsSpeaking(false);
         setAudioMessage('Não foi possível iniciar a voz em mandarim neste dispositivo.');
       };
@@ -584,8 +679,37 @@ export default function Home() {
 
           {syllables.length > 0 && (
             <div className="inline-result" aria-live="polite">
-              <div><span>Pinyin com tons</span><strong>{pinyinLine}</strong></div>
-              <div><span>Pronúncia em português</span><strong>{portugueseLine}</strong></div>
+              <div className="inline-hanzi-row">
+                <span>Acompanhando</span>
+                <strong className="sync-line" lang="zh-CN">
+                  {displayCharacters.map((item, index) => (
+                    <span key={`${item.character}-${index}`}
+                      className={`sync-token hanzi-sync-token ${item.syllableIndex !== null && syllableIsActive(item.syllableIndex) ? 'active-sync-token' : ''}`}>
+                      {item.character}
+                    </span>
+                  ))}
+                </strong>
+              </div>
+              <div>
+                <span>Pinyin com tons</span>
+                <strong className="sync-line">
+                  {syllables.map((item, index) => (
+                    <span key={`${item.hanzi}-inline-pinyin-${index}`}
+                      className={`sync-token ${syllableIsActive(index) ? 'active-sync-token' : ''}`}>{item.pinyin}</span>
+                  ))}
+                </strong>
+              </div>
+              <div>
+                <span>Pronúncia em português</span>
+                <strong className="sync-line">
+                  {syllables.map((item, index) => (
+                    <span key={`${item.hanzi}-inline-pt-${index}`}
+                      className={`sync-token ${syllableIsActive(index) ? 'active-sync-token' : ''}`}>
+                      {item.portuguese} ({item.tone})
+                    </span>
+                  ))}
+                </strong>
+              </div>
             </div>
           )}
 
@@ -664,13 +788,23 @@ export default function Home() {
           <div className="result-card">
             <div className="result-block hanzi-block">
               <span className="result-label"><i>1</i> Ideogramas</span>
-              <p lang="zh-CN">{resolvedPhrase.trim()}</p>
+              <p className="sync-line" lang="zh-CN">
+                {displayCharacters.map((item, index) => (
+                  <span key={`${item.character}-result-${index}`}
+                    className={`sync-token hanzi-sync-token ${item.syllableIndex !== null && syllableIsActive(item.syllableIndex) ? 'active-sync-token' : ''}`}>
+                    {item.character}
+                  </span>
+                ))}
+              </p>
             </div>
             <div className="result-block">
               <span className="result-label"><i>2</i> Pinyin com tons</span>
               <div className="syllable-line pinyin-line">
                 {syllables.map((item, index) => (
-                  <span key={`${item.hanzi}-${index}`} className={`tone-text-${item.tone || 0}`}>{item.pinyin}</span>
+                  <span key={`${item.hanzi}-${index}`}
+                    className={`sync-token tone-text-${item.tone || 0} ${syllableIsActive(index) ? 'active-sync-token' : ''}`}>
+                    {item.pinyin}
+                  </span>
                 ))}
               </div>
             </div>
@@ -681,7 +815,8 @@ export default function Home() {
               </div>
               <div className="syllable-line portuguese-line">
                 {syllables.map((item, index) => (
-                  <span className="pt-syllable" key={`${item.hanzi}-pt-${index}`}>
+                  <span className={`pt-syllable sync-token ${syllableIsActive(index) ? 'active-sync-token' : ''}`}
+                    key={`${item.hanzi}-pt-${index}`}>
                     {item.portuguese}<b className={`tone-badge tone-bg-${item.tone || 0}`}>{item.tone}</b>
                   </span>
                 ))}
