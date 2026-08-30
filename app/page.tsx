@@ -330,9 +330,6 @@ export default function Home() {
   const syncStartTimer = useRef<number | null>(null);
   const syncStepTimer = useRef<number | null>(null);
   const boundarySeen = useRef(false);
-  const silentGuideRun = useRef(0);
-  const silentStepTimer = useRef<number | null>(null);
-  const silentLoopTimer = useRef<number | null>(null);
   const phraseSequenceRef = useRef<PhraseSequenceHandle | null>(null);
   const pinyinDetected = isPinyinInput(phrase);
   const pinyinResolution = useMemo(() => resolvePinyin(phrase), [phrase]);
@@ -380,9 +377,6 @@ export default function Home() {
     if (loopTimer.current) window.clearTimeout(loopTimer.current);
     if (syncStartTimer.current) window.clearTimeout(syncStartTimer.current);
     if (syncStepTimer.current) window.clearInterval(syncStepTimer.current);
-    if (silentStepTimer.current) window.clearTimeout(silentStepTimer.current);
-    if (silentLoopTimer.current) window.clearTimeout(silentLoopTimer.current);
-    silentGuideRun.current += 1;
     loopReplay.current = null;
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   }, []);
@@ -434,63 +428,89 @@ export default function Home() {
     }
   }
 
-  function clearSilentGuideTimers() {
-    if (silentStepTimer.current) {
-      window.clearTimeout(silentStepTimer.current);
-      silentStepTimer.current = null;
-    }
-    if (silentLoopTimer.current) {
-      window.clearTimeout(silentLoopTimer.current);
-      silentLoopTimer.current = null;
-    }
-  }
-
   function stopSilentGuide() {
-    silentGuideRun.current += 1;
-    clearSilentGuideTimers();
+    speechRun.current += 1;
+    if (loopTimer.current) {
+      window.clearTimeout(loopTimer.current);
+      loopTimer.current = null;
+    }
+    loopReplay.current = null;
+    clearSyncTimers();
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     setIsSilentGuiding(false);
     setActiveSyllableRange(null);
   }
 
   function startSilentGuide(alwaysRepeat = false) {
-    if (!syllables.length) return;
+    if (!resolvedPhrase.trim() || !syllables.length || !('speechSynthesis' in window)) {
+      setAudioMessage('O guia silencioso não está disponível neste navegador.');
+      return;
+    }
     phraseSequenceRef.current?.stop();
     if (isSpeaking) stopSpeaking();
     stopSilentGuide();
 
-    const runId = silentGuideRun.current + 1;
-    silentGuideRun.current = runId;
-    const stepDuration = speedSetting.current === 'slow' ? 560 : 350;
-    setIsSilentGuiding(true);
-    setAudioMessage('Guia silencioso ativo: acompanhe o destaque e pronuncie com sua própria voz.');
+    window.speechSynthesis.cancel();
+    const runId = speechRun.current + 1;
+    speechRun.current = runId;
 
-    const playPass = () => {
-      if (silentGuideRun.current !== runId) return;
-      let index = 0;
-      setActiveSyllableRange({ start: 0, end: 0 });
+    const playMutedPhrase = () => {
+      if (speechRun.current !== runId) return;
 
-      const advance = () => {
-        if (silentGuideRun.current !== runId) return;
-        index += 1;
-        if (index < syllables.length) {
-          setActiveSyllableRange({ start: index, end: index });
-          silentStepTimer.current = window.setTimeout(advance, stepDuration);
-          return;
-        }
+      const utterance = new SpeechSynthesisUtterance(resolvedPhrase);
+      const voices = window.speechSynthesis.getVoices();
+      const mandarinVoice = voices.find((voice) => voice.lang.toLowerCase() === 'zh-cn')
+        ?? voices.find((voice) => voice.lang.toLowerCase().startsWith('zh'));
 
+      utterance.lang = 'zh-CN';
+      utterance.rate = speedSetting.current === 'slow' ? 0.55 : 0.88;
+      utterance.pitch = 1;
+      utterance.volume = 0;
+      if (mandarinVoice) utterance.voice = mandarinVoice;
+      utterance.onstart = () => {
+        if (speechRun.current !== runId) return;
+        boundarySeen.current = false;
+        clearSyncTimers();
+        beginFallbackSync(runId);
+        setIsSilentGuiding(true);
+        setAudioMessage('Guia silencioso ativo: é a mesma voz chinesa e o mesmo ritmo, mas com o volume zerado.');
+      };
+      utterance.onboundary = (event) => {
+        if (speechRun.current !== runId || event.name === 'sentence') return;
+        const range = rangeForBoundary(event.charIndex, event.charLength ?? 0);
+        if (!range) return;
+        boundarySeen.current = true;
+        clearSyncTimers();
+        setActiveSyllableRange(range);
+      };
+      utterance.onend = () => {
+        if (speechRun.current !== runId) return;
+        clearSyncTimers();
         setActiveSyllableRange(null);
         if (alwaysRepeat || loopEnabled.current) {
-          silentLoopTimer.current = window.setTimeout(playPass, loopGapSetting.current * 1000);
+          loopReplay.current = playMutedPhrase;
+          loopTimer.current = window.setTimeout(() => {
+            loopTimer.current = null;
+            const replay = loopReplay.current;
+            loopReplay.current = null;
+            replay?.();
+          }, loopGapSetting.current * 1000);
           return;
         }
         setIsSilentGuiding(false);
         setAudioMessage('Guia silencioso concluído. Você pode reproduzi-lo novamente.');
       };
-
-      silentStepTimer.current = window.setTimeout(advance, stepDuration);
+      utterance.onerror = () => {
+        if (speechRun.current !== runId) return;
+        clearSyncTimers();
+        setActiveSyllableRange(null);
+        setIsSilentGuiding(false);
+        setAudioMessage('Não foi possível iniciar o guia silencioso neste dispositivo.');
+      };
+      window.speechSynthesis.speak(utterance);
     };
 
-    playPass();
+    playMutedPhrase();
   }
 
   function toggleSilentGuide() {
@@ -563,6 +583,7 @@ export default function Home() {
       loopReplay.current = null;
       speechRun.current += 1;
       setIsSpeaking(false);
+      setIsSilentGuiding(false);
       clearSyncTimers();
       setActiveSyllableRange(null);
     }
