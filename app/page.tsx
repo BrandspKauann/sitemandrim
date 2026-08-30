@@ -59,6 +59,15 @@ const CLASSROOM_PHRASES = [
   { hanzi: '大家好', translation: 'Olá a todos.' },
   { hanzi: '同学们好', translation: 'Olá, colegas de classe.' },
   { hanzi: '再见', translation: 'Até logo.' },
+  { hanzi: '你好！我叫李文。', translation: 'Olá! Eu me chamo Li Wen.' },
+  { hanzi: '你好！我叫白家月。', translation: 'Olá! Eu me chamo Bai Jiayue.' },
+  { hanzi: '很高兴认识你。', translation: 'Muito prazer em conhecer você.' },
+  { hanzi: '认识你我也很高兴。', translation: 'Eu também fico muito feliz em conhecer você.' },
+  { hanzi: '我是中国人。', translation: 'Eu sou chinês.' },
+  {
+    hanzi: '我是法国人。我的中文老师也是中国人。',
+    translation: 'Eu sou francesa. Meu professor de chinês também é chinês.',
+  },
 ];
 
 const COMMON_PINYIN_PHRASES: Record<string, string> = {
