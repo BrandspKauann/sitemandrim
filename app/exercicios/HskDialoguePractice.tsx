@@ -21,6 +21,8 @@ type DialogueLine = {
   hanzi: string;
   translation: string;
   syllables: DialogueSyllable[];
+  pinyinTokens: Array<{ text: string; syllableIndex: number }>;
+  pinyinText: string;
   positions: Array<{ start: number; end: number }>;
   characters: Array<{ character: string; syllableIndex: number | null }>;
 };
@@ -33,10 +35,13 @@ type Dialogue = {
   lines: DialogueLine[];
 };
 
-type DialogueLineSource = Omit<DialogueLine, 'syllables' | 'positions' | 'characters'>;
+type DialogueLineSource = Omit<DialogueLine, 'syllables' | 'pinyinTokens' | 'pinyinText' | 'positions' | 'characters'>;
 
 const HANZI_PATTERN = /[\u3400-\u9fff]/u;
 const LINE_GAP_MS = 800;
+const PINYIN_PUNCTUATION: Record<string, string> = {
+  '，': ',', '。': '.', '！': '!', '？': '?', '；': ';', '：': ':', '、': ',',
+};
 
 function prepareLine(line: DialogueLineSource): DialogueLine {
   const syllables = pinyin(line.hanzi, {
@@ -61,7 +66,28 @@ function prepareLine(line: DialogueLineSource): DialogueLine {
     return { character, syllableIndex: index };
   });
 
-  return { ...line, syllables, positions: positions.slice(0, syllables.length), characters };
+  const pinyinTokens = syllables.map((syllable, index) => ({ text: syllable.pinyin, syllableIndex: index }));
+  let lastSyllableIndex = -1;
+  Array.from(line.hanzi).forEach((character) => {
+    if (HANZI_PATTERN.test(character)) {
+      lastSyllableIndex += 1;
+      return;
+    }
+    const punctuation = PINYIN_PUNCTUATION[character];
+    if (punctuation && lastSyllableIndex >= 0 && pinyinTokens[lastSyllableIndex]) {
+      pinyinTokens[lastSyllableIndex].text += punctuation;
+    }
+  });
+  const pinyinText = pinyinTokens.map((token) => token.text).join(' ');
+
+  return {
+    ...line,
+    syllables,
+    pinyinTokens,
+    pinyinText,
+    positions: positions.slice(0, syllables.length),
+    characters,
+  };
 }
 
 const DIALOGUES: Dialogue[] = [
@@ -374,7 +400,6 @@ export default function HskDialoguePractice({ sessionId, onBeforePlay }: HskDial
         <ol className={styles.dialogueLines}>
           {selectedDialogue.lines.map((line, index) => {
             const isActive = activeLineId === line.id && status !== 'idle';
-            const pinyinLine = line.syllables.map((syllable) => syllable.pinyin).join(' ');
             return (
               <li className={isActive ? styles.activeDialogueLine : ''} key={line.id}>
                 <div className={styles.dialogueLineHead}>
@@ -398,10 +423,10 @@ export default function HskDialoguePractice({ sessionId, onBeforePlay }: HskDial
                   ))}
                 </p>
                 <p className={styles.dialoguePinyin}>
-                  {line.syllables.map((syllable, syllableIndex) => (
-                    <span key={`${syllable.hanzi}-${syllableIndex}`}
-                      className={lineIsActive(line.id, syllableIndex) ? styles.activeDialogueToken : ''}>
-                      {syllable.pinyin}
+                  {line.pinyinTokens.map((token) => (
+                    <span key={`${line.id}-pinyin-${token.syllableIndex}`}
+                      className={lineIsActive(line.id, token.syllableIndex) ? styles.activeDialogueToken : ''}>
+                      {token.text}
                     </span>
                   ))}
                 </p>
@@ -410,7 +435,7 @@ export default function HskDialoguePractice({ sessionId, onBeforePlay }: HskDial
                 <div className={styles.dialogueRecorder}>
                   <PracticeRecorder
                     phrase={line.hanzi}
-                    pinyin={pinyinLine}
+                    pinyin={line.pinyinText}
                     sessionId={sessionId}
                     storageScope={`hsk1:${selectedDialogue.id}:${line.id}`}
                     onBeforeRecord={() => {
