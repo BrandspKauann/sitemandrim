@@ -283,6 +283,10 @@ const COMMON_PINYIN_WORDS: Record<string, string> = {
 
 const HANZI_PATTERN = /[\u3400-\u9fff]/u;
 const PINYIN_PATTERN = /[a-zA-ZüÜāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/u;
+const PINYIN_PUNCTUATION: Record<string, string> = {
+  '，': ',', '。': '.', '！': '!', '？': '?', '；': ';', '：': ':', '、': ',',
+  ',': ',', '.': '.', '!': '!', '?': '?', ';': ';', ':': ':',
+};
 const PINYIN_MARKS: Record<string, string> = {
   ā: 'a', á: 'a', ǎ: 'a', à: 'a',
   ē: 'e', é: 'e', ě: 'e', è: 'e',
@@ -473,6 +477,25 @@ function analyze(text: string): Syllable[] {
     }));
 }
 
+function pinyinWithPunctuation(text: string, reading: Syllable[]) {
+  const tokens = reading.map((syllable) => syllable.pinyin);
+  let lastSyllableIndex = -1;
+
+  Array.from(text).forEach((character) => {
+    if (HANZI_PATTERN.test(character)) {
+      lastSyllableIndex += 1;
+      return;
+    }
+
+    const punctuation = PINYIN_PUNCTUATION[character];
+    if (punctuation && lastSyllableIndex >= 0 && tokens[lastSyllableIndex]) {
+      tokens[lastSyllableIndex] += punctuation;
+    }
+  });
+
+  return tokens.join(' ');
+}
+
 export default function Home() {
   const { sessionId, shortId } = useClientSession();
   const [phrase, setPhrase] = useState('今天学习第一课');
@@ -594,7 +617,7 @@ export default function Home() {
       id: index + 1,
       hanzi: item.hanzi,
       translation: item.translation,
-      pinyin: reading.map((syllable) => syllable.pinyin).join(' '),
+      pinyin: pinyinWithPunctuation(item.hanzi, reading),
       portuguese: reading.map((syllable) => `${syllable.portuguese} (${syllable.tone})`).join(' '),
     };
   }), []);
