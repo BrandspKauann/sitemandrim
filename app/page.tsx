@@ -142,6 +142,48 @@ const CLASSROOM_PHRASES = [
   { hanzi: '她今年十二。', translation: 'Ela tem doze anos.' },
 ];
 
+type StudySource = { hanzi: string; translation: string };
+
+const CHINESE_CALENDAR_DIGITS = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'] as const;
+
+function chineseCalendarNumber(value: number) {
+  if (value < 10) return CHINESE_CALENDAR_DIGITS[value];
+  if (value === 10) return '十';
+  const tens = Math.floor(value / 10);
+  const ones = value % 10;
+  return `${tens > 1 ? CHINESE_CALENDAR_DIGITS[tens] : ''}十${ones ? CHINESE_CALENDAR_DIGITS[ones] : ''}`;
+}
+
+const DAYS_OF_MONTH: StudySource[] = Array.from({ length: 30 }, (_, index) => {
+  const day = index + 1;
+  return { hanzi: `${chineseCalendarNumber(day)}号`, translation: `Dia ${day}` };
+});
+
+const DAYS_OF_WEEK: StudySource[] = [
+  { hanzi: '星期一', translation: 'Segunda-feira' },
+  { hanzi: '星期二', translation: 'Terça-feira' },
+  { hanzi: '星期三', translation: 'Quarta-feira' },
+  { hanzi: '星期四', translation: 'Quinta-feira' },
+  { hanzi: '星期五', translation: 'Sexta-feira' },
+  { hanzi: '星期六', translation: 'Sábado' },
+  { hanzi: '星期天', translation: 'Domingo' },
+];
+
+const MONTHS_OF_YEAR: StudySource[] = [
+  { hanzi: '一月', translation: 'Janeiro' },
+  { hanzi: '二月', translation: 'Fevereiro' },
+  { hanzi: '三月', translation: 'Março' },
+  { hanzi: '四月', translation: 'Abril' },
+  { hanzi: '五月', translation: 'Maio' },
+  { hanzi: '六月', translation: 'Junho' },
+  { hanzi: '七月', translation: 'Julho' },
+  { hanzi: '八月', translation: 'Agosto' },
+  { hanzi: '九月', translation: 'Setembro' },
+  { hanzi: '十月', translation: 'Outubro' },
+  { hanzi: '十一月', translation: 'Novembro' },
+  { hanzi: '十二月', translation: 'Dezembro' },
+];
+
 const SEMANTIC_EQUIVALENTS: Record<string, string[]> = {
   我: ['eu', 'meu', 'minha'],
   你: ['você', 'seu', 'sua', 'te'],
@@ -496,6 +538,19 @@ function pinyinWithPunctuation(text: string, reading: Syllable[]) {
   return tokens.join(' ');
 }
 
+function prepareStudyItems(items: StudySource[]): PhraseStudyItem[] {
+  return items.map((item, index) => {
+    const reading = analyze(item.hanzi);
+    return {
+      id: index + 1,
+      hanzi: item.hanzi,
+      translation: item.translation,
+      pinyin: pinyinWithPunctuation(item.hanzi, reading),
+      portuguese: reading.map((syllable) => `${syllable.portuguese} (${syllable.tone})`).join(' '),
+    };
+  });
+}
+
 export default function Home() {
   const { sessionId, shortId } = useClientSession();
   const [phrase, setPhrase] = useState('今天学习第一课');
@@ -526,6 +581,9 @@ export default function Home() {
   const syncStepTimer = useRef<number | null>(null);
   const boundarySeen = useRef(false);
   const phraseSequenceRef = useRef<PhraseSequenceHandle | null>(null);
+  const monthDaySequenceRef = useRef<PhraseSequenceHandle | null>(null);
+  const weekSequenceRef = useRef<PhraseSequenceHandle | null>(null);
+  const monthSequenceRef = useRef<PhraseSequenceHandle | null>(null);
   const pinyinDetected = isPinyinInput(phrase);
   const pinyinResolution = useMemo(() => resolvePinyin(phrase), [phrase]);
   const defaultCharacters = pinyinResolution?.choices.map((choice) => choice.selected) ?? [];
@@ -611,16 +669,17 @@ export default function Home() {
     });
     return activeWords;
   }, [activeSyllableRange, alignmentTargetWords, syllablePositions, translation.alignments]);
-  const studyPhrases = useMemo<PhraseStudyItem[]>(() => CLASSROOM_PHRASES.map((item, index) => {
-    const reading = analyze(item.hanzi);
-    return {
-      id: index + 1,
-      hanzi: item.hanzi,
-      translation: item.translation,
-      pinyin: pinyinWithPunctuation(item.hanzi, reading),
-      portuguese: reading.map((syllable) => `${syllable.portuguese} (${syllable.tone})`).join(' '),
-    };
-  }), []);
+  const studyPhrases = useMemo(() => prepareStudyItems(CLASSROOM_PHRASES), []);
+  const monthDays = useMemo(() => prepareStudyItems(DAYS_OF_MONTH), []);
+  const weekDays = useMemo(() => prepareStudyItems(DAYS_OF_WEEK), []);
+  const yearMonths = useMemo(() => prepareStudyItems(MONTHS_OF_YEAR), []);
+
+  function stopStudySequences(except: PhraseSequenceHandle | null = null) {
+    [phraseSequenceRef.current, monthDaySequenceRef.current, weekSequenceRef.current, monthSequenceRef.current]
+      .forEach((player) => {
+        if (player && player !== except) player.stop();
+      });
+  }
 
   useEffect(() => () => {
     speechRun.current += 1;
@@ -750,7 +809,7 @@ export default function Home() {
       setAudioMessage('O guia silencioso não está disponível neste navegador.');
       return;
     }
-    phraseSequenceRef.current?.stop();
+    stopStudySequences();
     if (isSpeaking) stopSpeaking();
     stopSilentGuide();
 
@@ -921,7 +980,7 @@ export default function Home() {
       return;
     }
 
-    phraseSequenceRef.current?.stop();
+    stopStudySequences();
     if (isSilentGuiding) stopSilentGuide();
 
     if (!resolvedPhrase.trim() || !('speechSynthesis' in window)) {
@@ -1199,7 +1258,7 @@ export default function Home() {
             onBeforeRecord={() => {
               stopSpeaking();
               stopSilentGuide();
-              phraseSequenceRef.current?.stop();
+              stopStudySequences();
             }}
             onRecordingStart={() => startSilentGuide(true)}
             onRecordingStop={stopSilentGuide}
@@ -1211,7 +1270,65 @@ export default function Home() {
         onBeforePlay={() => {
           stopSpeaking();
           stopSilentGuide();
+          stopStudySequences(phraseSequenceRef.current);
         }} />
+
+      <PhraseSequence
+        ref={monthDaySequenceRef}
+        items={monthDays}
+        sessionId={sessionId}
+        sectionId="dias-do-mes"
+        kicker="Calendário em mandarim"
+        title="Dias do mês, do 1 ao 30."
+        description="Ouça os dias em ordem usando a forma falada com 号 (hào), comum para dizer datas em mandarim."
+        countLabel="30 dias"
+        playAllLabel="Reproduzir os dias 1–30"
+        itemNoun="dia"
+        gapLabel="Pausa entre os dias"
+        onBeforePlay={() => {
+          stopSpeaking();
+          stopSilentGuide();
+          stopStudySequences(monthDaySequenceRef.current);
+        }}
+      />
+
+      <PhraseSequence
+        ref={weekSequenceRef}
+        items={weekDays}
+        sessionId={sessionId}
+        sectionId="dias-da-semana"
+        kicker="Semana em mandarim"
+        title="Dias da semana."
+        description="Reproduza de segunda-feira a domingo e acompanhe cada nome em hanzi, pinyin e português."
+        countLabel="7 dias"
+        playAllLabel="Reproduzir a semana completa"
+        itemNoun="dia da semana"
+        gapLabel="Pausa entre os dias da semana"
+        onBeforePlay={() => {
+          stopSpeaking();
+          stopSilentGuide();
+          stopStudySequences(weekSequenceRef.current);
+        }}
+      />
+
+      <PhraseSequence
+        ref={monthSequenceRef}
+        items={yearMonths}
+        sessionId={sessionId}
+        sectionId="meses-do-ano"
+        kicker="Ano em mandarim"
+        title="Meses do ano."
+        description="Ouça de janeiro a dezembro em sequência ou escolha um mês para praticar separadamente."
+        countLabel="12 meses"
+        playAllLabel="Reproduzir janeiro–dezembro"
+        itemNoun="mês"
+        gapLabel="Pausa entre os meses"
+        onBeforePlay={() => {
+          stopSpeaking();
+          stopSilentGuide();
+          stopStudySequences(monthSequenceRef.current);
+        }}
+      />
 
       <section className="result-section" aria-live="polite">
         <div className="section-heading">

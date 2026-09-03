@@ -18,6 +18,14 @@ type PhraseSequenceProps = {
   items: PhraseStudyItem[];
   sessionId: string;
   onBeforePlay?: () => void;
+  sectionId?: string;
+  kicker?: string;
+  title?: string;
+  description?: string;
+  countLabel?: string;
+  playAllLabel?: string;
+  itemNoun?: string;
+  gapLabel?: string;
 };
 
 const DEFAULT_GAP = 2;
@@ -25,7 +33,19 @@ const MIN_GAP = 1;
 const MAX_GAP = 30;
 
 const PhraseSequence = forwardRef<PhraseSequenceHandle, PhraseSequenceProps>(function PhraseSequence(
-  { items, sessionId, onBeforePlay }, ref,
+  {
+    items,
+    sessionId,
+    onBeforePlay,
+    sectionId = 'frases-da-aula',
+    kicker = 'Sequência de estudo',
+    title = 'Frases da aula, uma por uma.',
+    description = 'Escute em ordem, acompanhe o pinyin, use a leitura em português como apoio e confira a tradução.',
+    countLabel,
+    playAllLabel,
+    itemNoun = 'frase',
+    gapLabel = 'Pausa entre as frases',
+  }, ref,
 ) {
   const [status, setStatus] = useState<'idle' | 'playing' | 'paused'>('idle');
   const [currentItem, setCurrentItem] = useState<PhraseStudyItem | null>(null);
@@ -46,6 +66,11 @@ const PhraseSequence = forwardRef<PhraseSequenceHandle, PhraseSequenceProps>(fun
   const gapRef = useRef(DEFAULT_GAP);
   const timer = useRef<number | null>(null);
   const nextAction = useRef<(() => void) | null>(null);
+  const titleId = `${sectionId}-title`;
+  const gapInputId = `${sectionId}-gap`;
+  const gapStorageKey = sectionId === 'frases-da-aula'
+    ? `tons-de-mandarim:phrase-sequence-gap:${sessionId}`
+    : `tons-de-mandarim:phrase-sequence-gap:${sectionId}:${sessionId}`;
 
   function clearTimer() {
     if (timer.current !== null) {
@@ -83,7 +108,7 @@ const PhraseSequence = forwardRef<PhraseSequenceHandle, PhraseSequenceProps>(fun
   useEffect(() => {
     if (!sessionId) return;
     try {
-      const stored = Number(window.sessionStorage.getItem(`tons-de-mandarim:phrase-sequence-gap:${sessionId}`));
+      const stored = Number(window.sessionStorage.getItem(gapStorageKey));
       if (!Number.isInteger(stored) || stored < MIN_GAP || stored > MAX_GAP) return;
       gapRef.current = stored;
       queueMicrotask(() => {
@@ -91,7 +116,7 @@ const PhraseSequence = forwardRef<PhraseSequenceHandle, PhraseSequenceProps>(fun
         setSavedGap(stored);
       });
     } catch { /* The player still works without browser persistence. */ }
-  }, [sessionId]);
+  }, [gapStorageKey, sessionId]);
 
   function scheduleNext(activeRun: number) {
     nextAction.current = () => playNext(activeRun);
@@ -203,7 +228,7 @@ const PhraseSequence = forwardRef<PhraseSequenceHandle, PhraseSequenceProps>(fun
     setGapDraft(seconds);
     setSavedGap(seconds);
     try {
-      window.sessionStorage.setItem(`tons-de-mandarim:phrase-sequence-gap:${sessionId}`, String(seconds));
+      window.sessionStorage.setItem(gapStorageKey, String(seconds));
     } catch { /* Keeping the value in memory is enough for this visit. */ }
 
     if (timer.current && nextAction.current) {
@@ -221,15 +246,15 @@ const PhraseSequence = forwardRef<PhraseSequenceHandle, PhraseSequenceProps>(fun
   const speaking = status === 'playing';
 
   return (
-    <section className="lesson-section" id="frases-da-aula" aria-labelledby="lesson-title">
+    <section className="lesson-section" id={sectionId} aria-labelledby={titleId}>
       <div className="lesson-shell">
         <div className="lesson-heading">
           <div>
-            <span className="section-kicker">Sequência de estudo</span>
-            <h2 id="lesson-title">Frases da aula, uma por uma.</h2>
-            <p>Escute em ordem, acompanhe o pinyin, use a leitura em português como apoio e confira a tradução.</p>
+            <span className="section-kicker">{kicker}</span>
+            <h2 id={titleId}>{title}</h2>
+            <p>{description}</p>
           </div>
-          <span className="lesson-count">{items.length} frases</span>
+          <span className="lesson-count">{countLabel ?? `${items.length} frases`}</span>
         </div>
 
         <div className="lesson-player">
@@ -257,7 +282,7 @@ const PhraseSequence = forwardRef<PhraseSequenceHandle, PhraseSequenceProps>(fun
 
           <div className="lesson-controls">
             <button className="lesson-play-all" type="button" onClick={() => startQueue(items)}>
-              ▶ Reproduzir as {items.length} frases
+              ▶ {playAllLabel ?? `Reproduzir as ${items.length} frases`}
             </button>
             <button type="button" onClick={togglePause} disabled={status === 'idle'}>
               {status === 'paused' ? 'Continuar' : 'Pausar'}
@@ -266,7 +291,7 @@ const PhraseSequence = forwardRef<PhraseSequenceHandle, PhraseSequenceProps>(fun
           </div>
 
           <div className="lesson-options">
-            <div className="lesson-speed" aria-label="Velocidade das frases">
+            <div className="lesson-speed" aria-label={`Velocidade: ${title}`}>
               <button type="button" className={speed === 'slow' ? 'active' : ''}
                 onClick={() => changeSpeed('slow')} aria-pressed={speed === 'slow'}>Devagar</button>
               <button type="button" className={speed === 'natural' ? 'active' : ''}
@@ -277,8 +302,8 @@ const PhraseSequence = forwardRef<PhraseSequenceHandle, PhraseSequenceProps>(fun
           </div>
 
           <div className="lesson-gap-control">
-            <div><label htmlFor="lesson-gap">Pausa entre as frases</label><output htmlFor="lesson-gap">{gapDraft}s</output></div>
-            <input id="lesson-gap" type="range" min={MIN_GAP} max={MAX_GAP} step="1"
+            <div><label htmlFor={gapInputId}>{gapLabel}</label><output htmlFor={gapInputId}>{gapDraft}s</output></div>
+            <input id={gapInputId} type="range" min={MIN_GAP} max={MAX_GAP} step="1"
               value={gapDraft} onChange={(event) => setGapDraft(Number(event.target.value))} />
             <div className="lesson-gap-footer">
               <span>Em uso: {savedGap}s</span>
@@ -298,7 +323,7 @@ const PhraseSequence = forwardRef<PhraseSequenceHandle, PhraseSequenceProps>(fun
                 <div className="lesson-card-head">
                   <span>{String(item.id).padStart(2, '0')}</span>
                   <button type="button" onClick={() => startQueue([item])}
-                    aria-label={`Ouvir frase ${item.id}: ${item.hanzi}`}>{isCurrent ? '■ Falando' : '▶ Ouvir'}</button>
+                    aria-label={`Ouvir ${itemNoun} ${item.id}: ${item.hanzi}`}>{isCurrent ? '■ Falando' : '▶ Ouvir'}</button>
                 </div>
                 <strong className="lesson-hanzi" lang="zh-CN">{item.hanzi}</strong>
                 <dl>
