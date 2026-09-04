@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { pinyin } from 'pinyin-pro';
 import { useEffect, useMemo, useState } from 'react';
 import { useClientSession } from '../components/ClientSession';
 import HskDialoguePractice from './HskDialoguePractice';
@@ -12,6 +13,7 @@ type Challenge = {
   pinyin: string;
   tone: 1 | 2 | 3 | 4;
   meaning: string;
+  context?: string;
 };
 
 type Phase = 'intro' | 'question' | 'answered' | 'finished';
@@ -19,7 +21,7 @@ type Speed = 'natural' | 'slow';
 
 const ROUND_SIZE = 10;
 
-const CHALLENGES: Challenge[] = [
+const EXTRA_CHALLENGES: Challenge[] = [
   { id: 'ma1', hanzi: '妈', pinyin: 'mā', tone: 1, meaning: 'mãe' },
   { id: 'ma2', hanzi: '麻', pinyin: 'má', tone: 2, meaning: 'cânhamo' },
   { id: 'ma3', hanzi: '马', pinyin: 'mǎ', tone: 3, meaning: 'cavalo' },
@@ -45,6 +47,51 @@ const CHALLENGES: Challenge[] = [
   { id: 'tang3', hanzi: '躺', pinyin: 'tǎng', tone: 3, meaning: 'deitar-se' },
   { id: 'tang4', hanzi: '烫', pinyin: 'tàng', tone: 4, meaning: 'muito quente' },
 ];
+
+// Lista oficial clássica do HSK 1 (150 palavras). As variantes com 儿 são
+// expandidas para que todos os caracteres usados pela lista entrem no treino.
+const HSK1_WORDS = `
+爱 八 爸爸 杯子 北京 本 不 不客气 菜 茶 吃 出租车 打电话 大 的 点 电脑 电视 电影 东西 都 读
+对不起 多 多少 儿子 二 饭馆 飞机 分钟 高兴 个 工作 狗 汉语 好 喝 和 很 后面 回 会 火车站 几
+家 叫 她 今天 九 开 看 看见 块 来 老师 冷 里 了 零 六 妈妈 吗 买 猫 没 没关系 米饭 名字 明天
+哪 哪儿 那 那儿 呢 能 你 年 女儿 朋友 漂亮 苹果 七 前面 钱 请 去 热 人 认识 日 三 商店 上 上午
+少 十 什么 时候 是 书 谁 水 水果 睡觉 说话 四 岁 他 太 天气 听 同学 喂 我 我们 五 喜欢 下 下午
+下雨 先生 现在 想 小 小姐 些 写 谢谢 星期 学生 学习 学校 一 衣服 医生 医院 椅子 有 月 再见 在
+怎么 怎么样 这 这儿 中国 中午 住 桌子 字 昨天 坐 做
+`.trim().split(/\s+/);
+
+function buildHsk1Challenges(): Challenge[] {
+  const seen = new Set<string>();
+  const challenges: Challenge[] = [];
+
+  HSK1_WORDS.forEach((word) => {
+    Array.from(word).forEach((character) => {
+      if (seen.has(character)) return;
+      seen.add(character);
+
+      const reading = pinyin(character, {
+        type: 'all', toneType: 'symbol', nonZh: 'removed', toneSandhi: false,
+      }).find((item) => item.isZh);
+      if (!reading || ![1, 2, 3, 4].includes(reading.num)) return;
+
+      challenges.push({
+        id: `hsk1-${character}-${reading.pinyin}`,
+        hanzi: character,
+        pinyin: reading.pinyin,
+        tone: reading.num as Challenge['tone'],
+        meaning: 'caractere do HSK 1',
+        context: word,
+      });
+    });
+  });
+
+  return challenges;
+}
+
+const HSK1_CHALLENGES = buildHsk1Challenges();
+const CHALLENGES = [...HSK1_CHALLENGES, ...EXTRA_CHALLENGES].filter((challenge, index, items) => (
+  items.findIndex((item) => item.hanzi === challenge.hanzi && item.pinyin === challenge.pinyin) === index
+));
 
 const TONES = [
   { number: 1 as const, mark: '—', name: 'alto e estável', example: 'mā' },
@@ -174,9 +221,9 @@ export default function ExercisesPage() {
         <div className={styles.heroCopy}>
           <span className={styles.eyebrow}>Treino de ouvido</span>
           <h1>Escute o caractere.<br /><em>Descubra o tom.</em></h1>
-          <p>Você terá dez desafios. Ouça a pronúncia em mandarim e escolha o contorno tonal que reconheceu.</p>
+          <p>A cada rodada, dez caracteres são sorteados entre todo o repertório tonal do HSK 1 e os pares extras do treino.</p>
           <div className={styles.heroStats}>
-            <span><strong>24</strong> caracteres</span>
+            <span><strong>{HSK1_CHALLENGES.length}</strong> caracteres HSK 1</span>
             <span><strong>4</strong> tons</span>
             <span><strong>10</strong> rodadas</span>
           </div>
@@ -200,8 +247,13 @@ export default function ExercisesPage() {
             <div className={styles.progressTrack} aria-hidden="true"><i style={{ width: `${progress}%` }} /></div>
           </div>
           <div className={styles.speedControl} aria-label="Velocidade do áudio">
-            <button type="button" className={speed === 'slow' ? styles.selectedSpeed : ''} onClick={() => setSpeed('slow')} aria-pressed={speed === 'slow'}>Devagar</button>
-            <button type="button" className={speed === 'natural' ? styles.selectedSpeed : ''} onClick={() => setSpeed('natural')} aria-pressed={speed === 'natural'}>Natural</button>
+            <span>Velocidade do áudio</span>
+            <div className={styles.speedButtons}>
+              <button type="button" className={speed === 'natural' ? styles.selectedSpeed : ''}
+                onClick={() => setSpeed('natural')} aria-pressed={speed === 'natural'}>Natural</button>
+              <button type="button" className={speed === 'slow' ? styles.selectedSpeed : ''}
+                onClick={() => setSpeed('slow')} aria-pressed={speed === 'slow'}>Devagar <small>0,6×</small></button>
+            </div>
           </div>
         </div>
 
@@ -229,7 +281,11 @@ export default function ExercisesPage() {
                 <div className={`${styles.answerReveal} ${correct ? styles.correctReveal : styles.wrongReveal}`}>
                   <span>{correct ? '✓ Você acertou' : 'A resposta correta é'}</span>
                   <strong>{challenge.pinyin}</strong>
-                  <small>{challenge.tone}º tom · {toneGuide?.name} · “{challenge.meaning}”</small>
+                  <small>
+                    {challenge.tone}º tom · {toneGuide?.name} · {challenge.context
+                      ? <>aparece em “<b lang="zh-CN">{challenge.context}</b>”</>
+                      : <>“{challenge.meaning}”</>}
+                  </small>
                 </div>
               )}
             </div>
