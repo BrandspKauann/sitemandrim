@@ -344,6 +344,7 @@ footer p { max-width: 620px; margin: 0; color: #8d8280; font-size: 11px; line-he
 @media (max-width: 560px) {
   .topbar, .hero, .method-section, footer { width: min(100% - 30px, 1180px); }
   .topbar { height: 70px; }
+  .brand > span:last-child { display: none; }
   .how-link { display: none; }
   .session-badge { width: 28px; min-height: 28px; justify-content: center; padding: 0; }
   .session-badge > span { display: none; }

@@ -1090,6 +1090,7 @@ export default function Home() {
           </span>
           <Link className="syllables-link" href="/letras-e-silabas">Letras e sílabas</Link>
           <Link className="syllables-link" href="/exercicios">Exercícios</Link>
+          <Link className="syllables-link" href="/tons">Tons</Link>
           <a className="how-link" href="#como-funciona">Como funciona</a>
         </nav>
       </header>
