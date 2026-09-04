@@ -192,12 +192,14 @@ export default function TonesClient() {
   const { shortId } = useClientSession();
   const [firstTone, setFirstTone] = useState<FirstTone>(1);
   const [speed, setSpeed] = useState<'natural' | 'slow'>('slow');
+  const [loopEnabled, setLoopEnabled] = useState(false);
   const [status, setStatus] = useState<'idle' | 'playing'>('idle');
   const [currentWord, setCurrentWord] = useState<ToneWord | null>(null);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [message, setMessage] = useState('');
   const runId = useRef(0);
   const timer = useRef<number | null>(null);
+  const loopEnabledRef = useRef(false);
 
   const visibleGroups = useMemo(
     () => SECOND_TONES.map((second) => GROUPS.find((group) => group.first === firstTone && group.second === second)!),
@@ -261,6 +263,20 @@ export default function TonesClient() {
       utterance.onend = () => {
         if (runId.current !== activeRun) return;
         index += 1;
+        if (index >= words.length && loopEnabledRef.current) {
+          timer.current = window.setTimeout(() => {
+            if (runId.current !== activeRun) return;
+            if (!loopEnabledRef.current) {
+              setStatus('idle');
+              setCurrentWord(null);
+              setProgress({ current: 0, total: 0 });
+              return;
+            }
+            index = 0;
+            playNext();
+          }, 1000);
+          return;
+        }
         timer.current = window.setTimeout(playNext, words.length > 1 ? 700 : 0);
       };
       utterance.onerror = () => {
@@ -277,6 +293,12 @@ export default function TonesClient() {
   function chooseFirstTone(tone: FirstTone) {
     stop();
     setFirstTone(tone);
+  }
+
+  function toggleLoop() {
+    const nextValue = !loopEnabledRef.current;
+    loopEnabledRef.current = nextValue;
+    setLoopEnabled(nextValue);
   }
 
   return (
@@ -317,9 +339,14 @@ export default function TonesClient() {
               <button type="button" className={speed === 'natural' ? styles.selected : ''}
                 onClick={() => setSpeed('natural')} aria-pressed={speed === 'natural'}>Natural</button>
             </div>
+            <button className={`${styles.loopButton} ${loopEnabled ? styles.loopActive : ''}`} type="button"
+              onClick={toggleLoop} aria-pressed={loopEnabled}>
+              ↻ Loop
+            </button>
             <button className={styles.stopButton} type="button" onClick={stop} disabled={status === 'idle'}>Parar</button>
             {progress.total > 1 && <b>{progress.current}/{progress.total}</b>}
           </div>
+          {loopEnabled && <p className={styles.loopHint}>Loop ligado: repetição com 1 segundo de pausa.</p>}
           {message && <p className={styles.message} role="status">{message}</p>}
         </aside>
       </section>

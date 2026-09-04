@@ -47,11 +47,13 @@
 .nowPlaying p { margin: 7px 0 0; color: #b9aaa6; font-size: 14px; line-height: 1.5; }
 .playerFooter { margin-top: 16px; display: flex; align-items: center; gap: 8px; }
 .speedControl { display: grid; grid-template-columns: 1fr 1fr; flex: 1; padding: 3px; background: rgb(255 255 255 / 7%); border-radius: 4px; }
-.speedControl button, .stopButton { min-height: 36px; padding: 0 11px; border: 0; background: transparent; color: #b7aaa7; border-radius: 3px; font-size: 12px; font-weight: 720; cursor: pointer; }
+.speedControl button, .stopButton, .loopButton { min-height: 36px; padding: 0 11px; border: 0; background: transparent; color: #b7aaa7; border-radius: 3px; font-size: 12px; font-weight: 720; cursor: pointer; white-space: nowrap; }
 .speedControl .selected { background: #fff8ed; color: var(--ink); }
-.stopButton { border: 1px solid rgb(255 255 255 / 17%); }
+.stopButton, .loopButton { border: 1px solid rgb(255 255 255 / 17%); }
+.loopButton.loopActive { border-color: #e98278; background: #bd4037; color: #fff8ed; }
 .stopButton:disabled { opacity: .35; cursor: default; }
 .playerFooter > b { min-width: 35px; color: #e98278; font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+.loopHint { margin-top: 11px !important; color: #e5b1aa !important; font-size: 12px !important; }
 .message { color: #ef8478 !important; font-size: 13px !important; }
 
 .studyArea { padding: 62px max(24px, calc((100% - 1180px) / 2)) 96px; border-top: 1px solid #ddd1c3; background: rgb(238 229 217 / 86%); }
@@ -139,6 +141,8 @@
   .nav a { font-size: 10px; }
   .intro h1 { font-size: 43px; }
   .nowPlaying { padding: 21px 17px; }
+  .playerFooter { flex-wrap: wrap; }
+  .speedControl { min-width: 190px; }
   .studyArea, .threeSection { padding-left: 15px; padding-right: 15px; }
   .selectorHeading { align-items: flex-start; flex-direction: column; }
   .firstToneTabs { padding: 6px; }
