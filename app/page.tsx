@@ -10,6 +10,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useClientSession } from './components/ClientSession';
 import PhraseSequence, { type PhraseSequenceHandle, type PhraseStudyItem } from './components/PhraseSequence';
 import PracticeRecorder from './components/PracticeRecorder';
+import RecordedNumberSequence from './components/RecordedNumberSequence';
 
 cnchar.use(cncharInput, cncharWords, cncharPoly);
 
@@ -182,6 +183,19 @@ const MONTHS_OF_YEAR: StudySource[] = [
   { hanzi: '十月', translation: 'Outubro' },
   { hanzi: '十一月', translation: 'Novembro' },
   { hanzi: '十二月', translation: 'Dezembro' },
+];
+
+const CHINESE_NUMBERS: StudySource[] = [
+  { hanzi: '一', translation: 'Um' },
+  { hanzi: '二', translation: 'Dois' },
+  { hanzi: '三', translation: 'Três' },
+  { hanzi: '四', translation: 'Quatro' },
+  { hanzi: '五', translation: 'Cinco' },
+  { hanzi: '六', translation: 'Seis' },
+  { hanzi: '七', translation: 'Sete' },
+  { hanzi: '八', translation: 'Oito' },
+  { hanzi: '九', translation: 'Nove' },
+  { hanzi: '十', translation: 'Dez' },
 ];
 
 const SEMANTIC_EQUIVALENTS: Record<string, string[]> = {
@@ -581,6 +595,7 @@ export default function Home() {
   const syncStepTimer = useRef<number | null>(null);
   const boundarySeen = useRef(false);
   const phraseSequenceRef = useRef<PhraseSequenceHandle | null>(null);
+  const numberSequenceRef = useRef<PhraseSequenceHandle | null>(null);
   const monthDaySequenceRef = useRef<PhraseSequenceHandle | null>(null);
   const weekSequenceRef = useRef<PhraseSequenceHandle | null>(null);
   const monthSequenceRef = useRef<PhraseSequenceHandle | null>(null);
@@ -670,12 +685,13 @@ export default function Home() {
     return activeWords;
   }, [activeSyllableRange, alignmentTargetWords, syllablePositions, translation.alignments]);
   const studyPhrases = useMemo(() => prepareStudyItems(CLASSROOM_PHRASES), []);
+  const chineseNumbers = useMemo(() => prepareStudyItems(CHINESE_NUMBERS), []);
   const monthDays = useMemo(() => prepareStudyItems(DAYS_OF_MONTH), []);
   const weekDays = useMemo(() => prepareStudyItems(DAYS_OF_WEEK), []);
   const yearMonths = useMemo(() => prepareStudyItems(MONTHS_OF_YEAR), []);
 
   function stopStudySequences(except: PhraseSequenceHandle | null = null) {
-    [phraseSequenceRef.current, monthDaySequenceRef.current, weekSequenceRef.current, monthSequenceRef.current]
+    [phraseSequenceRef.current, numberSequenceRef.current, monthDaySequenceRef.current, weekSequenceRef.current, monthSequenceRef.current]
       .forEach((player) => {
         if (player && player !== except) player.stop();
       });
@@ -1272,6 +1288,16 @@ export default function Home() {
           stopSilentGuide();
           stopStudySequences(phraseSequenceRef.current);
         }} />
+
+      <RecordedNumberSequence
+        ref={numberSequenceRef}
+        items={chineseNumbers}
+        onBeforePlay={() => {
+          stopSpeaking();
+          stopSilentGuide();
+          stopStudySequences(numberSequenceRef.current);
+        }}
+      />
 
       <PhraseSequence
         ref={monthDaySequenceRef}

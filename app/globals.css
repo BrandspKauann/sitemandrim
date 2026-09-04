@@ -258,6 +258,22 @@ textarea::placeholder { color: #c5bcb3; font-size: 20px; }
 .lesson-list dd { margin: 0; color: #44383a; font-size: 11px; font-weight: 620; line-height: 1.45; }
 .lesson-list dl > div:nth-child(2) dd { color: var(--red-dark); }
 
+.numbers-section { background: #f7f0e6; }
+.numbers-player { position: relative; }
+.numbers-native-audio { width: 100%; height: 38px; margin-top: 16px; color-scheme: dark; }
+.numbers-source { margin: 11px 0 0; color: #918487; font-size: 9px; line-height: 1.5; }
+.numbers-source a { color: #e88d83; text-underline-offset: 3px; }
+.numbers-audio-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 28px 0 0; padding: 0; list-style: none; }
+.numbers-audio-grid li { min-width: 0; padding: 17px 15px; display: grid; grid-template-columns: auto 1fr; grid-template-areas: 'number hanzi' 'reading reading' 'translation translation'; align-items: center; gap: 7px 12px; border: 1px solid #d9cdbf; border-radius: 4px; background: #fffaf3; transition: transform .2s, border-color .2s, box-shadow .2s, background .2s; }
+.numbers-audio-grid li > span { grid-area: number; color: #a49691; font: italic 11px Georgia, serif; }
+.numbers-audio-grid li > strong { grid-area: hanzi; justify-self: end; color: var(--ink); font-family: 'Noto Serif SC', 'Songti SC', SimSun, serif; font-size: 34px; font-weight: 550; line-height: 1; transition: color .2s, transform .2s; }
+.numbers-audio-grid li > div { grid-area: reading; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding-top: 9px; border-top: 1px solid #e9dfd4; }
+.numbers-audio-grid li b { color: var(--red-dark); font-size: 15px; }
+.numbers-audio-grid li small { color: #776b6d; font-size: 9px; font-weight: 650; text-align: right; }
+.numbers-audio-grid li em { grid-area: translation; color: #948883; font-family: Georgia, serif; font-size: 11px; }
+.numbers-audio-grid li.active { border-color: var(--red); background: #fff4ed; box-shadow: 0 12px 28px rgb(100 59 48 / 14%); transform: translateY(-3px); }
+.numbers-audio-grid li.active > strong { color: var(--red); transform: scale(1.12); transform-origin: right center; }
+
 @keyframes lesson-phrase-in { from { opacity: .25; transform: translateY(10px); filter: blur(2px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
 @keyframes lesson-sound { from { transform: scaleY(.55); } to { transform: scaleY(2.7); } }
 
@@ -355,6 +371,7 @@ footer p { max-width: 620px; margin: 0; color: #8d8280; font-size: 11px; line-he
   .lesson-controls .lesson-play-all { grid-column: 1 / -1; }
   .lesson-list { grid-template-columns: 1fr; }
   .lesson-list dl > div { grid-template-columns: 1fr; gap: 3px; }
+  .numbers-audio-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .result-section { padding-top: 64px; padding-bottom: 72px; }
   .section-heading { align-items: start; flex-direction: column; }
   .result-block { padding: 24px 19px; }
