@@ -195,6 +195,7 @@ export default function TonesClient() {
   const [loopEnabled, setLoopEnabled] = useState(false);
   const [status, setStatus] = useState<'idle' | 'playing'>('idle');
   const [currentWord, setCurrentWord] = useState<ToneWord | null>(null);
+  const [activeSequenceId, setActiveSequenceId] = useState<string | null>(null);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [message, setMessage] = useState('');
   const runId = useRef(0);
@@ -221,10 +222,11 @@ export default function TonesClient() {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     setStatus('idle');
     setCurrentWord(null);
+    setActiveSequenceId(null);
     setProgress({ current: 0, total: 0 });
   }
 
-  function playWords(words: ToneWord[]) {
+  function playWords(words: ToneWord[], sequenceId: string | null = null) {
     if (!words.length || !('speechSynthesis' in window)) {
       setMessage('A voz em mandarim não está disponível neste navegador.');
       return;
@@ -233,6 +235,7 @@ export default function TonesClient() {
     stop();
     const activeRun = runId.current + 1;
     runId.current = activeRun;
+    setActiveSequenceId(sequenceId);
     let index = 0;
 
     const playNext = () => {
@@ -240,6 +243,7 @@ export default function TonesClient() {
       if (index >= words.length) {
         setStatus('idle');
         setCurrentWord(null);
+        setActiveSequenceId(null);
         setProgress({ current: 0, total: 0 });
         return;
       }
@@ -269,6 +273,7 @@ export default function TonesClient() {
             if (!loopEnabledRef.current) {
               setStatus('idle');
               setCurrentWord(null);
+              setActiveSequenceId(null);
               setProgress({ current: 0, total: 0 });
               return;
             }
@@ -299,6 +304,22 @@ export default function TonesClient() {
     const nextValue = !loopEnabledRef.current;
     loopEnabledRef.current = nextValue;
     setLoopEnabled(nextValue);
+  }
+
+  function playOnce(words: ToneWord[], sequenceId: string) {
+    loopEnabledRef.current = false;
+    setLoopEnabled(false);
+    playWords(words, sequenceId);
+  }
+
+  function playInLoop(words: ToneWord[], sequenceId: string) {
+    if (status === 'playing' && loopEnabledRef.current && activeSequenceId === sequenceId) {
+      stop();
+      return;
+    }
+    loopEnabledRef.current = true;
+    setLoopEnabled(true);
+    playWords(words, sequenceId);
   }
 
   return (
@@ -371,40 +392,51 @@ export default function TonesClient() {
         </div>
 
         <div className={styles.groups}>
-          {visibleGroups.map((group) => (
-            <section className={styles.group} key={`${group.first}-${group.second}`}>
-              <div className={styles.groupHeading}>
-                <div>
-                  <span>Padrão {tonePattern([group.first, group.second])}</span>
-                  <h3>{TONE_NAMES[group.first]} + {TONE_NAMES[group.second].toLocaleLowerCase('pt-BR')}</h3>
-                </div>
-                <button type="button" onClick={() => playWords(group.words)}>
-                  ▶ Ouvir as {group.words.length}
-                </button>
-              </div>
-              <div className={styles.wordGrid}>
-                {group.words.map((word) => {
-                  const active = currentWord?.hanzi === word.hanzi && status === 'playing';
-                  return (
-                    <button className={`${styles.wordCard} ${active ? styles.activeWord : ''}`} type="button"
-                      key={word.hanzi} onClick={() => playWords([word])} aria-label={`Ouvir ${word.hanzi}, ${word.pinyin}`}>
-                      <span className={styles.wordTop}>
-                        <b>{word.hsk1 ? 'HSK 1' : 'Básico'}</b>
-                        <i aria-hidden="true">{active ? '■' : '▶'}</i>
-                      </span>
-                      <strong lang="zh-CN">{word.hanzi}</strong>
-                      <span className={styles.pinyin}>
-                        {word.pinyin.split(' ').map((syllable, index) => (
-                          <em className={styles[`textTone${word.tones[index]}`]} key={`${syllable}-${index}`}>{syllable}</em>
-                        ))}
-                      </span>
-                      <small>{word.meaning}</small>
+          {visibleGroups.map((group) => {
+            const sequenceId = `group-${group.first}-${group.second}`;
+            const groupPlaying = status === 'playing' && activeSequenceId === sequenceId;
+            const groupLooping = groupPlaying && loopEnabled;
+            return (
+              <section className={styles.group} key={`${group.first}-${group.second}`}>
+                <div className={styles.groupHeading}>
+                  <div>
+                    <span>Padrão {tonePattern([group.first, group.second])}</span>
+                    <h3>{TONE_NAMES[group.first]} + {TONE_NAMES[group.second].toLocaleLowerCase('pt-BR')}</h3>
+                  </div>
+                  <div className={styles.groupActions}>
+                    <button type="button" onClick={() => groupPlaying && !groupLooping ? stop() : playOnce(group.words, sequenceId)}>
+                      {groupPlaying && !groupLooping ? '■ Parar' : `▶ Ouvir as ${group.words.length}`}
                     </button>
-                  );
-                })}
-              </div>
-            </section>
-          ))}
+                    <button type="button" className={groupLooping ? styles.activeGroupLoop : ''}
+                      onClick={() => playInLoop(group.words, sequenceId)} aria-pressed={groupLooping}>
+                      {groupLooping ? '■ Parar loop' : '↻ Ouvir em loop'}
+                    </button>
+                  </div>
+                </div>
+                <div className={styles.wordGrid}>
+                  {group.words.map((word) => {
+                    const active = currentWord?.hanzi === word.hanzi && status === 'playing';
+                    return (
+                      <button className={`${styles.wordCard} ${active ? styles.activeWord : ''}`} type="button"
+                        key={word.hanzi} onClick={() => playWords([word])} aria-label={`Ouvir ${word.hanzi}, ${word.pinyin}`}>
+                        <span className={styles.wordTop}>
+                          <b>{word.hsk1 ? 'HSK 1' : 'Básico'}</b>
+                          <i aria-hidden="true">{active ? '■' : '▶'}</i>
+                        </span>
+                        <strong lang="zh-CN">{word.hanzi}</strong>
+                        <span className={styles.pinyin}>
+                          {word.pinyin.split(' ').map((syllable, index) => (
+                            <em className={styles[`textTone${word.tones[index]}`]} key={`${syllable}-${index}`}>{syllable}</em>
+                          ))}
+                        </span>
+                        <small>{word.meaning}</small>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
         </div>
       </section>
 
@@ -417,7 +449,19 @@ export default function TonesClient() {
         <div className={styles.threeHeading}>
           <span>Três caracteres</span>
           <h2>Sequências maiores para praticar.</h2>
-          <p>Use o padrão completo para acompanhar o movimento de três sílabas.</p>
+          <div>
+            <p>Use o padrão completo para acompanhar o movimento de três sílabas.</p>
+            <div className={styles.threeActions}>
+              <button type="button" onClick={() => activeSequenceId === 'three-characters' && !loopEnabled ? stop() : playOnce(THREE_CHARACTER_WORDS, 'three-characters')}>
+                {activeSequenceId === 'three-characters' && status === 'playing' && !loopEnabled ? '■ Parar' : '▶ Ouvir as 10'}
+              </button>
+              <button type="button" className={activeSequenceId === 'three-characters' && status === 'playing' && loopEnabled ? styles.activeThreeLoop : ''}
+                onClick={() => playInLoop(THREE_CHARACTER_WORDS, 'three-characters')}
+                aria-pressed={activeSequenceId === 'three-characters' && status === 'playing' && loopEnabled}>
+                {activeSequenceId === 'three-characters' && status === 'playing' && loopEnabled ? '■ Parar loop' : '↻ Ouvir em loop'}
+              </button>
+            </div>
+          </div>
         </div>
         <div className={styles.threeGrid}>
           {THREE_CHARACTER_WORDS.map((word) => {

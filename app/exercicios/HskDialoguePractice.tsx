@@ -17,7 +17,8 @@ type DialogueLine = {
   id: string;
   speaker: string;
   speakerHanzi: string;
-  speakerKey: 'yixue' | 'yifei';
+  speakerKey: 'yixue' | 'yifei' | 'tongle';
+  useDefaultVoice?: boolean;
   hanzi: string;
   translation: string;
   syllables: DialogueSyllable[];
@@ -30,6 +31,7 @@ type DialogueLine = {
 type Dialogue = {
   id: string;
   tab: string;
+  lessonLabel: string;
   title: string;
   subtitle: string;
   lines: DialogueLine[];
@@ -94,6 +96,7 @@ const DIALOGUES: Dialogue[] = [
   {
     id: 'dialogue-3',
     tab: 'Diálogo 3',
+    lessonLabel: '课文 3',
     title: 'Texto 3 (continuação)',
     subtitle: 'Uma conversa entre Wang Yixue e Wang Yifei.',
     lines: ([
@@ -120,6 +123,32 @@ const DIALOGUES: Dialogue[] = [
       {
         id: 'dialogue-3-line-6', speaker: 'Wang Yifei', speakerHanzi: '王一飞', speakerKey: 'yifei',
         hanzi: '我也想你们。', translation: 'Eu também sinto falta de vocês.',
+      },
+    ] satisfies DialogueLineSource[]).map(prepareLine),
+  },
+  {
+    id: 'dialogue-4',
+    tab: 'Diálogo 4',
+    lessonLabel: '课文 4',
+    title: 'Texto 4',
+    subtitle: 'Uma conversa entre Wang Yixue e Yang Tongle.',
+    lines: ([
+      {
+        id: 'dialogue-4-line-1', speaker: 'Wang Yixue', speakerHanzi: '王一雪', speakerKey: 'yixue', useDefaultVoice: true,
+        hanzi: '你会做饭吗？', translation: 'Você sabe cozinhar?',
+      },
+      {
+        id: 'dialogue-4-line-2', speaker: 'Yang Tongle', speakerHanzi: '杨同乐', speakerKey: 'tongle', useDefaultVoice: true,
+        hanzi: '我会做。', translation: 'Sei cozinhar.',
+      },
+      {
+        id: 'dialogue-4-line-3', speaker: 'Wang Yixue', speakerHanzi: '王一雪', speakerKey: 'yixue', useDefaultVoice: true,
+        hanzi: '你会做什么？', translation: 'O que você sabe cozinhar?',
+      },
+      {
+        id: 'dialogue-4-line-4', speaker: 'Yang Tongle', speakerHanzi: '杨同乐', speakerKey: 'tongle', useDefaultVoice: true,
+        hanzi: '我会做面条儿、饺子，也会做一些菜。星期天我也做饭。',
+        translation: 'Sei fazer macarrão, jiaozi (bolinhos chineses) e também alguns pratos. Aos domingos, também cozinho.',
       },
     ] satisfies DialogueLineSource[]).map(prepareLine),
   },
@@ -241,11 +270,11 @@ export default function HskDialoguePractice({ sessionId, onBeforePlay }: HskDial
 
     const utterance = new SpeechSynthesisUtterance(line.hanzi);
     const voices = window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith('zh'));
-    const voiceIndex = line.speakerKey === 'yifei' ? 1 : 0;
+    const voiceIndex = line.useDefaultVoice ? 0 : line.speakerKey === 'yifei' ? 1 : 0;
     const mandarinVoice = voices[voiceIndex % Math.max(voices.length, 1)];
     utterance.lang = mandarinVoice?.lang ?? 'zh-CN';
     utterance.rate = speedRef.current === 'slow' ? 0.55 : 0.88;
-    utterance.pitch = line.speakerKey === 'yifei' ? 1.04 : 0.96;
+    utterance.pitch = line.useDefaultVoice ? 1 : line.speakerKey === 'yifei' ? 1.04 : 0.96;
     utterance.volume = silentRef.current ? 0 : 1;
     if (mandarinVoice) utterance.voice = mandarinVoice;
 
@@ -341,7 +370,7 @@ export default function HskDialoguePractice({ sessionId, onBeforePlay }: HskDial
           <h2 id="hsk-book-title">Exercícios do livro HSK 1</h2>
           <p>Escolha um diálogo, escute cada fala e grave sua própria dublagem para comparar.</p>
         </div>
-        <span className={styles.dialogueCount}>{DIALOGUES.length} diálogo</span>
+        <span className={styles.dialogueCount}>{DIALOGUES.length} diálogos</span>
       </div>
 
       <div className={styles.dialogueTabs} role="tablist" aria-label="Diálogos do livro HSK 1">
@@ -358,7 +387,7 @@ export default function HskDialoguePractice({ sessionId, onBeforePlay }: HskDial
       <div className={styles.dialoguePanel} role="tabpanel">
         <div className={styles.dialoguePanelHead}>
           <div>
-            <span>课文 3</span>
+            <span>{selectedDialogue.lessonLabel}</span>
             <h3>{selectedDialogue.title}</h3>
             <p>{selectedDialogue.subtitle}</p>
           </div>

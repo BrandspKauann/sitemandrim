@@ -77,8 +77,9 @@
 .groupHeading { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 17px; border-bottom: 1px solid #e2d7cb; }
 .groupHeading span { font-size: 11px; }
 .groupHeading h3 { margin: 6px 0 0; font-family: Georgia, 'Times New Roman', serif; font-size: 25px; font-weight: 500; }
+.groupActions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
 .groupHeading button { min-height: 39px; padding: 0 14px; border: 1px solid var(--red); background: transparent; color: var(--red-dark); border-radius: 3px; font-size: 12px; font-weight: 750; cursor: pointer; }
-.groupHeading button:hover { background: var(--red); color: #fff; }
+.groupHeading button:hover, .groupHeading .activeGroupLoop { background: var(--red); color: #fff; }
 
 .wordGrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 9px; margin-top: 16px; }
 .wordCard { min-width: 0; min-height: 176px; padding: 14px; display: flex; flex-direction: column; align-items: flex-start; border: 1px solid #e0d6ca; background: #fffdf8; color: var(--ink); border-radius: 3px; text-align: left; cursor: pointer; transition: border-color .2s, box-shadow .2s, transform .2s; }
@@ -103,6 +104,9 @@
 .threeHeading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, .6fr); gap: 0 40px; align-items: end; margin-bottom: 28px; }
 .threeHeading > span { grid-column: 1 / -1; color: #e47d73; }
 .threeHeading p { margin: 0; color: #a99b98; font-size: 14px; line-height: 1.55; }
+.threeActions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }
+.threeActions button { min-height: 37px; padding: 0 12px; border: 1px solid rgb(255 255 255 / 22%); background: transparent; color: #d8cac6; border-radius: 3px; font-size: 11px; font-weight: 740; cursor: pointer; }
+.threeActions button:hover, .threeActions .activeThreeLoop { border-color: #e78378; background: #bd4037; color: #fff8ef; }
 .threeGrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
 .threeCard { position: relative; min-height: 180px; padding: 17px; display: flex; flex-direction: column; align-items: flex-start; border: 1px solid rgb(255 255 255 / 13%); background: rgb(255 255 255 / 4%); color: #fff8ef; border-radius: 3px; text-align: left; cursor: pointer; transition: background .2s, border-color .2s, transform .2s; }
 .threeCard:hover { background: rgb(255 255 255 / 7%); border-color: rgb(255 255 255 / 28%); }
@@ -132,7 +136,8 @@
   .firstToneTabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .wordGrid, .threeGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .selectorHeading, .groupHeading { align-items: flex-start; flex-direction: column; }
-  .groupHeading button { width: 100%; }
+  .groupActions { width: 100%; }
+  .groupHeading button { flex: 1; }
 }
 
 @media (max-width: 560px) {
