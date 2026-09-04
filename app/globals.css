@@ -26,6 +26,10 @@ body {
 button, textarea { font: inherit; }
 button { color: inherit; }
 
+.page-loading { min-height: 100vh; display: grid; place-content: center; justify-items: center; gap: 14px; background: var(--paper); color: #766b6d; }
+.page-loading .brand-mark { width: 48px; height: 48px; font-size: 24px; }
+.page-loading p { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: .04em; }
+
 .topbar {
   width: min(1180px, calc(100% - 48px));
   height: 88px;
