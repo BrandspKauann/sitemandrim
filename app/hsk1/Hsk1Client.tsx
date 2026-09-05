@@ -315,15 +315,24 @@ export default function Hsk1Client() {
           <ol className={styles.wordList}>
             {selectedGroup.items.map((item, index) => {
               const active = status === 'playing' && activeItem?.id === item.id;
+              const loopingThisItem = active && loopEnabled && progress.total === 1;
               return (
                 <li className={active ? styles.activeWord : ''} key={item.id}>
                   <span className={styles.number}>{String(index + 1).padStart(2, '0')}</span>
                   <strong lang="zh-CN">{item.hanzi}</strong>
-                  <div><b>{item.pinyin}</b><p>{item.meaning}</p></div>
-                  <button type="button" onClick={() => active ? stop() : startQueue([item], false)}
-                    aria-label={`Ouvir ${item.hanzi}, ${item.pinyin}, e o significado ${item.meaning}`}>
-                    {active ? '■ Parar' : '▶ Ouvir os dois'}
-                  </button>
+                  <div className={styles.wordDetails}><b>{item.pinyin}</b><p>{item.meaning}</p></div>
+                  <div className={styles.wordActions}>
+                    <button type="button" onClick={() => active ? stop() : startQueue([item], false)}
+                      aria-label={`Ouvir ${item.hanzi}, ${item.pinyin}, e o significado ${item.meaning}`}>
+                      {active ? '■ Parar' : '▶ Ouvir uma vez'}
+                    </button>
+                    <button type="button" className={loopingThisItem ? styles.wordLoopActive : ''}
+                      onClick={() => loopingThisItem ? stop() : startQueue([item], true)}
+                      aria-pressed={loopingThisItem}
+                      aria-label={`${loopingThisItem ? 'Parar' : 'Repetir em loop'} ${item.hanzi}, ${item.pinyin}, e ${item.meaning}`}>
+                      {loopingThisItem ? '■ Parar loop' : '↻ Loop'}
+                    </button>
+                  </div>
                 </li>
               );
             })}

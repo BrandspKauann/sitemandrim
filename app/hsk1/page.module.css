@@ -64,10 +64,12 @@
 .wordList li { min-width: 0; min-height: 112px; padding: 16px; display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; gap: 14px; align-items: center; border: 1px solid #e0d5c9; background: #fffaf5; border-radius: 3px; transition: border-color .18s, transform .18s, box-shadow .18s; }
 .number { color: #a39590; font-size: 11px; font-variant-numeric: tabular-nums; }
 .wordList li > strong { min-width: 76px; font-family: 'Noto Serif SC', 'Songti SC', SimSun, serif; font-size: 31px; font-weight: 540; }
-.wordList li > div b { color: var(--red-dark); font-size: 15px; }
-.wordList li > div p { margin: 5px 0 0; color: #756967; font-size: 12px; line-height: 1.35; }
-.wordList li > button { min-height: 34px; padding: 0 10px; border: 1px solid #d6c8ba; background: transparent; color: #6f6260; border-radius: 3px; font-size: 10px; font-weight: 740; cursor: pointer; }
-.wordList li > button:hover { border-color: var(--red); color: var(--red); }
+.wordDetails b { color: var(--red-dark); font-size: 15px; }
+.wordDetails p { margin: 5px 0 0; color: #756967; font-size: 12px; line-height: 1.35; }
+.wordActions { min-width: 116px; display: grid; gap: 6px; }
+.wordActions button { min-height: 32px; padding: 0 9px; border: 1px solid #d6c8ba; background: transparent; color: #6f6260; border-radius: 3px; font-size: 10px; font-weight: 740; cursor: pointer; }
+.wordActions button:hover { border-color: var(--red); color: var(--red); }
+.wordActions .wordLoopActive { border-color: var(--red); background: rgb(186 63 54 / 10%); color: var(--red-dark); }
 .wordList .activeWord { border-color: var(--red); box-shadow: inset 4px 0 0 var(--red), 0 10px 24px rgb(108 56 48 / 10%); transform: translateY(-2px); }
 .wordList .activeWord > strong { color: var(--red); transform: scale(1.1); transform-origin: left center; }
 
@@ -103,10 +105,10 @@
   .groupPlayerControls button { padding: 0 9px; }
   .groupPlayerControls button:last-child { grid-column: 1 / -1; }
   .wordList { padding: 15px; }
-  .wordList li { grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; }
+  .wordList li { grid-template-columns: auto minmax(0, 1fr); gap: 10px; }
   .wordList li > strong { grid-column: 2; grid-row: 1; min-width: 0; }
-  .wordList li > div { grid-column: 2 / -1; }
-  .wordList li > button { grid-column: 3; grid-row: 1; }
+  .wordDetails { grid-column: 2; grid-row: 2; }
+  .wordActions { grid-column: 2; grid-row: 3; grid-template-columns: 1fr 1fr; min-width: 0; }
   .footer { grid-template-columns: auto 1fr; }
   .footer a { grid-column: 1 / -1; }
 }
