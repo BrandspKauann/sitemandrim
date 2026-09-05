@@ -17,7 +17,7 @@ type DialogueLine = {
   id: string;
   speaker: string;
   speakerHanzi: string;
-  speakerKey: 'yixue' | 'yifei' | 'tongle';
+  speakerKey: 'yixue' | 'yifei' | 'tongle' | 'tianzhong' | 'jiayue';
   useDefaultVoice?: boolean;
   hanzi: string;
   translation: string;
@@ -182,6 +182,31 @@ const DIALOGUES: Dialogue[] = [
       {
         id: 'dialogue-5-line-6', speaker: 'Yang Tongle', speakerHanzi: '杨同乐', speakerKey: 'tongle', useDefaultVoice: true,
         hanzi: '我也很喜欢它。', translation: 'Eu também gosto muito dele.',
+      },
+    ] satisfies DialogueLineSource[]).map(prepareLine),
+  },
+  {
+    id: 'dialogue-6',
+    tab: 'Diálogo 6',
+    lessonLabel: '课文 6',
+    title: 'Texto 6',
+    subtitle: 'Uma conversa entre Chen Tianzhong e Bai Jiayue.',
+    lines: ([
+      {
+        id: 'dialogue-6-line-1', speaker: 'Chen Tianzhong', speakerHanzi: '陈天中', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '家月，明天你去哪儿？', translation: 'Jiayue, aonde você vai amanhã?',
+      },
+      {
+        id: 'dialogue-6-line-2', speaker: 'Bai Jiayue', speakerHanzi: '白家月', speakerKey: 'jiayue', useDefaultVoice: true,
+        hanzi: '我想去超市买东西。', translation: 'Quero ir ao supermercado comprar algumas coisas.',
+      },
+      {
+        id: 'dialogue-6-line-3', speaker: 'Chen Tianzhong', speakerHanzi: '陈天中', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '你去超市买什么？', translation: 'O que você vai comprar no supermercado?',
+      },
+      {
+        id: 'dialogue-6-line-4', speaker: 'Bai Jiayue', speakerHanzi: '白家月', speakerKey: 'jiayue', useDefaultVoice: true,
+        hanzi: '我想买些牛奶。', translation: 'Quero comprar um pouco de leite.',
       },
     ] satisfies DialogueLineSource[]).map(prepareLine),
   },
