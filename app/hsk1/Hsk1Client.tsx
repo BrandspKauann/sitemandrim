@@ -21,6 +21,7 @@ type VocabularyGroup = {
 };
 
 type Speed = 'natural' | 'slow';
+type PlaybackLanguage = 'mandarin' | 'portuguese';
 
 const GROUPS: VocabularyGroup[] = [
   {
@@ -68,6 +69,7 @@ export default function Hsk1Client() {
   const [speed, setSpeed] = useState<Speed>('slow');
   const [status, setStatus] = useState<'idle' | 'playing'>('idle');
   const [activeItem, setActiveItem] = useState<VocabularyItem | null>(null);
+  const [activeLanguage, setActiveLanguage] = useState<PlaybackLanguage | null>(null);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [loopEnabled, setLoopEnabled] = useState(false);
   const [pauseDraft, setPauseDraft] = useState(storedPauseSeconds);
@@ -92,6 +94,7 @@ export default function Hsk1Client() {
   function finishPlayback() {
     setStatus('idle');
     setActiveItem(null);
+    setActiveLanguage(null);
     setProgress({ current: 0, total: 0 });
   }
 
@@ -130,20 +133,19 @@ export default function Hsk1Client() {
       const item = items[index];
       setActiveItem(item);
       setProgress({ current: index + 1, total: items.length });
-      const utterance = new SpeechSynthesisUtterance(item.hanzi);
       const voices = window.speechSynthesis.getVoices();
-      const voice = voices.find((candidate) => candidate.lang.toLowerCase() === 'zh-cn')
+      const mandarinVoice = voices.find((candidate) => candidate.lang.toLowerCase() === 'zh-cn')
         ?? voices.find((candidate) => candidate.lang.toLowerCase().startsWith('zh'));
-      utterance.lang = voice?.lang ?? 'zh-CN';
-      utterance.rate = speedRef.current === 'slow' ? 0.52 : 0.86;
-      utterance.pitch = 1;
-      if (voice) utterance.voice = voice;
-      utterance.onstart = () => {
+      const portugueseVoice = voices.find((candidate) => candidate.lang.toLowerCase() === 'pt-br')
+        ?? voices.find((candidate) => candidate.lang.toLowerCase().startsWith('pt'));
+
+      const handleError = () => {
         if (runId.current !== activeRun) return;
-        setStatus('playing');
-        setMessage('');
+        stop();
+        setMessage('Não consegui reproduzir esta palavra. Tente novamente.');
       };
-      utterance.onend = () => {
+
+      const scheduleNext = () => {
         if (runId.current !== activeRun) return;
         index += 1;
         if (index >= items.length && !shouldLoop) {
@@ -152,12 +154,37 @@ export default function Hsk1Client() {
         }
         timer.current = window.setTimeout(playNext, pauseSecondsRef.current * 1000);
       };
-      utterance.onerror = () => {
+
+      const playPortuguese = () => {
         if (runId.current !== activeRun) return;
-        stop();
-        setMessage('Não consegui reproduzir esta palavra. Tente novamente.');
+        const translation = new SpeechSynthesisUtterance(item.meaning);
+        translation.lang = portugueseVoice?.lang ?? 'pt-BR';
+        translation.rate = speedRef.current === 'slow' ? 0.72 : 0.96;
+        translation.pitch = 1;
+        if (portugueseVoice) translation.voice = portugueseVoice;
+        translation.onstart = () => {
+          if (runId.current !== activeRun) return;
+          setActiveLanguage('portuguese');
+        };
+        translation.onend = scheduleNext;
+        translation.onerror = handleError;
+        window.speechSynthesis.speak(translation);
       };
-      window.speechSynthesis.speak(utterance);
+
+      const mandarin = new SpeechSynthesisUtterance(item.hanzi);
+      mandarin.lang = mandarinVoice?.lang ?? 'zh-CN';
+      mandarin.rate = speedRef.current === 'slow' ? 0.52 : 0.86;
+      mandarin.pitch = 1;
+      if (mandarinVoice) mandarin.voice = mandarinVoice;
+      mandarin.onstart = () => {
+        if (runId.current !== activeRun) return;
+        setStatus('playing');
+        setActiveLanguage('mandarin');
+        setMessage('');
+      };
+      mandarin.onend = playPortuguese;
+      mandarin.onerror = handleError;
+      window.speechSynthesis.speak(mandarin);
     };
 
     playNext();
@@ -208,7 +235,9 @@ export default function Hsk1Client() {
         </div>
         <aside className={styles.player} aria-live="polite">
           <div className={styles.playerStatus}>
-            <span>{status === 'playing' ? loopEnabled ? 'Reproduzindo em loop' : 'Reproduzindo lista' : 'Player HSK 1'}</span>
+            <span>{status === 'playing'
+              ? `${activeLanguage === 'portuguese' ? 'Significado em português' : 'Pronúncia em mandarim'}${loopEnabled ? ' · loop' : ''}`
+              : 'Player chinês + português'}</span>
             {progress.total > 0 && <b>{progress.current}/{progress.total}</b>}
           </div>
           <div className={styles.stage}>
@@ -218,7 +247,7 @@ export default function Hsk1Client() {
           </div>
           <div className={styles.mainControls}>
             <button className={styles.playButton} type="button" onClick={() => startQueue(selectedGroup.items, false)}>
-              ▶ Ouvir grupo
+              ▶ Chinês + português
             </button>
             <button className={`${styles.loopButton} ${loopEnabled && status === 'playing' ? styles.activeLoop : ''}`}
               type="button" onClick={() => loopEnabled && status === 'playing' ? stop() : startQueue(selectedGroup.items, true)}>
@@ -264,7 +293,7 @@ export default function Hsk1Client() {
             <div className={styles.groupPlayerCopy}>
               <span>Reprodução deste grupo</span>
               <strong>{selectedGroup.name}</strong>
-              <small>{selectedGroup.items.length} {selectedGroup.items.length === 1 ? 'palavra' : 'palavras'} em sequência</small>
+              <small>{selectedGroup.items.length} {selectedGroup.items.length === 1 ? 'palavra' : 'palavras'} · mandarim + português</small>
             </div>
             <div className={styles.groupPlayerControls}>
               <button className={styles.groupPlayButton} type="button" onClick={() => startQueue(selectedGroup.items, false)}>
@@ -292,8 +321,8 @@ export default function Hsk1Client() {
                   <strong lang="zh-CN">{item.hanzi}</strong>
                   <div><b>{item.pinyin}</b><p>{item.meaning}</p></div>
                   <button type="button" onClick={() => active ? stop() : startQueue([item], false)}
-                    aria-label={`Ouvir ${item.hanzi}, ${item.pinyin}`}>
-                    {active ? '■ Parar' : '▶ Ouvir'}
+                    aria-label={`Ouvir ${item.hanzi}, ${item.pinyin}, e o significado ${item.meaning}`}>
+                    {active ? '■ Parar' : '▶ Ouvir os dois'}
                   </button>
                 </li>
               );
