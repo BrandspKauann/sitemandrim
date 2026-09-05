@@ -27,7 +27,7 @@ const GROUPS: VocabularyGroup[] = [
     id: 'comidas',
     name: 'Comidas',
     label: '食物 · shíwù',
-    description: 'Alimentos e refeições para reconhecer, escutar e repetir.',
+    description: 'Alimentos, bebidas, ações e refeições para reconhecer, escutar e repetir.',
     items: [
       { id: 'baozi', hanzi: '包子', pinyin: 'bāozi', meaning: 'pãozinho chinês recheado, cozido no vapor' },
       { id: 'cai', hanzi: '菜', pinyin: 'cài', meaning: 'prato de comida / verdura' },
@@ -39,25 +39,9 @@ const GROUPS: VocabularyGroup[] = [
       { id: 'mifan', hanzi: '米饭', pinyin: 'mǐfàn', meaning: 'arroz cozido' },
       { id: 'pingguo', hanzi: '苹果', pinyin: 'píngguǒ', meaning: 'maçã' },
       { id: 'shuiguo', hanzi: '水果', pinyin: 'shuǐguǒ', meaning: 'fruta' },
-    ],
-  },
-  {
-    id: 'bebidas',
-    name: 'Bebidas',
-    label: '饮料 · yǐnliào',
-    description: 'Bebidas básicas para pedir, oferecer e reconhecer.',
-    items: [
       { id: 'shui', hanzi: '水', pinyin: 'shuǐ', meaning: 'água' },
       { id: 'cha', hanzi: '茶', pinyin: 'chá', meaning: 'chá' },
       { id: 'niunai', hanzi: '牛奶', pinyin: 'niúnǎi', meaning: 'leite' },
-    ],
-  },
-  {
-    id: 'comer-e-refeicoes',
-    name: 'Palavras relacionadas a comer',
-    label: '吃饭 · chīfàn',
-    description: 'Ações, refeições do dia e lugares ligados à alimentação.',
-    items: [
       { id: 'chi', hanzi: '吃', pinyin: 'chī', meaning: 'comer' },
       { id: 'he', hanzi: '喝', pinyin: 'hē', meaning: 'beber' },
       { id: 'haochi', hanzi: '好吃', pinyin: 'hǎochī', meaning: 'gostoso / delicioso' },
