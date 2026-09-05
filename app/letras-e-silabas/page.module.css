@@ -186,8 +186,10 @@
   .topbar, .hero, .contentSection, .notice, .vowelAudioSection, .specialNote, .footer { width: min(100% - 30px, 1180px); }
   .topbar { height: 72px; }
   .brand > span:last-child { display: none; }
-  .nav { gap: 2px; }
-  .nav a { padding: 8px; font-size: 11px; }
+  .brand { display: none; }
+  .nav { width: 100%; justify-content: space-between; gap: 1px; }
+  .nav :global(.session-badge) { display: none; }
+  .nav a { padding: 8px 5px; font-size: 10px; }
   .hero { padding: 54px 0 47px; gap: 38px; }
   .heroCopy h1 { font-size: 44px; }
   .player { padding: 22px 17px; box-shadow: 8px 8px 0 rgb(117 85 67 / 8%); }

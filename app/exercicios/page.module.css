@@ -180,8 +180,10 @@
   .topbar, .hero, .exerciseArea, .toneLegend, .bookExercises, .footer { width: min(100% - 30px, 1180px); }
   .topbar { height: auto; min-height: 72px; padding: 10px 0; }
   .brand > span:last-child { display: none; }
-  .nav { gap: 2px; }
-  .nav a { padding: 8px 6px; font-size: 10px; }
+  .brand { display: none; }
+  .nav { width: 100%; justify-content: space-between; gap: 1px; }
+  .nav :global(.session-badge) { display: none; }
+  .nav a { padding: 8px 5px; font-size: 10px; }
   .hero { padding: 48px 0 40px; gap: 34px; }
   .heroCopy h1 { font-size: 44px; }
   .exerciseArea { min-height: 0; margin-bottom: 64px; box-shadow: 8px 8px 0 rgb(117 85 67 / 7%); }

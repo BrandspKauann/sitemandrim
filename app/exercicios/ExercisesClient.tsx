@@ -215,6 +215,7 @@ export default function ExercisesPage() {
           <Link href="/letras-e-silabas">Letras e sílabas</Link>
           <Link className={styles.activeNav} href="/exercicios">Exercícios</Link>
           <Link href="/tons">Tons</Link>
+          <Link href="/hsk1">HSK1</Link>
         </nav>
       </header>
 

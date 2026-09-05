@@ -345,10 +345,11 @@ footer p { max-width: 620px; margin: 0; color: #8d8280; font-size: 11px; line-he
   .topbar, .hero, .method-section, footer { width: min(100% - 30px, 1180px); }
   .topbar { height: 70px; }
   .brand > span:last-child { display: none; }
+  .topbar > .brand { display: none; }
   .how-link { display: none; }
-  .session-badge { width: 28px; min-height: 28px; justify-content: center; padding: 0; }
-  .session-badge > span { display: none; }
-  .syllables-link { padding: 8px 10px; font-size: 10px; }
+  .session-badge { display: none; }
+  .topbar nav { width: 100%; justify-content: space-between; gap: 1px; }
+  .syllables-link { padding: 8px 5px; font-size: 10px; }
   .hero { padding: 48px 0 66px; gap: 45px; }
   h1 { font-size: 44px; }
   .workspace-card { padding: 22px 17px; box-shadow: 8px 8px 0 rgb(117 85 67 / 7%); }
