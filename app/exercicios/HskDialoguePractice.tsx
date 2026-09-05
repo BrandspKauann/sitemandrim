@@ -152,6 +152,39 @@ const DIALOGUES: Dialogue[] = [
       },
     ] satisfies DialogueLineSource[]).map(prepareLine),
   },
+  {
+    id: 'dialogue-5',
+    tab: 'Diálogo 5',
+    lessonLabel: '课文 5',
+    title: 'Texto 5',
+    subtitle: 'Uma conversa entre Wang Yixue e Yang Tongle.',
+    lines: ([
+      {
+        id: 'dialogue-5-line-1', speaker: 'Wang Yixue', speakerHanzi: '王一雪', speakerKey: 'yixue', useDefaultVoice: true,
+        hanzi: '同乐，下班吗？', translation: 'Tongle, já terminou o expediente?',
+      },
+      {
+        id: 'dialogue-5-line-2', speaker: 'Yang Tongle', speakerHanzi: '杨同乐', speakerKey: 'tongle', useDefaultVoice: true,
+        hanzi: '下班。', translation: 'Sim, terminei o expediente.',
+      },
+      {
+        id: 'dialogue-5-line-3', speaker: 'Wang Yixue', speakerHanzi: '王一雪', speakerKey: 'yixue', useDefaultVoice: true,
+        hanzi: '这是你的新电脑吗？', translation: 'Este é o seu computador novo?',
+      },
+      {
+        id: 'dialogue-5-line-4', speaker: 'Yang Tongle', speakerHanzi: '杨同乐', speakerKey: 'tongle', useDefaultVoice: true,
+        hanzi: '是的，是我的新电脑。', translation: 'Sim, é o meu computador novo.',
+      },
+      {
+        id: 'dialogue-5-line-5', speaker: 'Wang Yixue', speakerHanzi: '王一雪', speakerKey: 'yixue', useDefaultVoice: true,
+        hanzi: '真好看！', translation: 'É muito bonito!',
+      },
+      {
+        id: 'dialogue-5-line-6', speaker: 'Yang Tongle', speakerHanzi: '杨同乐', speakerKey: 'tongle', useDefaultVoice: true,
+        hanzi: '我也很喜欢它。', translation: 'Eu também gosto muito dele.',
+      },
+    ] satisfies DialogueLineSource[]).map(prepareLine),
+  },
 ];
 
 type HskDialoguePracticeProps = {
