@@ -49,6 +49,16 @@
 .pauseControl input { width: 100%; margin: 13px 0 10px; accent-color: var(--red); }
 .pauseControl button { min-height: 32px; padding: 0 11px; border: 1px solid var(--red); background: transparent; color: var(--red-dark); border-radius: 3px; font-size: 11px; font-weight: 740; cursor: pointer; }
 .pauseControl small { margin-left: 10px; color: #968985; font-size: 11px; }
+.groupPlayer { margin: 22px 27px 0; padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border: 1px solid #dfd2c5; border-left: 4px solid var(--red); background: #f8f1e9; }
+.groupPlayerCopy { display: grid; gap: 3px; }
+.groupPlayerCopy span { color: var(--red); font-size: 11px; font-weight: 780; letter-spacing: .09em; text-transform: uppercase; }
+.groupPlayerCopy strong { color: var(--ink); font-family: Georgia, 'Times New Roman', serif; font-size: 20px; font-weight: 550; }
+.groupPlayerCopy small { color: #8e817d; font-size: 11px; }
+.groupPlayerControls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+.groupPlayerControls button { min-height: 38px; padding: 0 13px; border: 1px solid #d2c2b3; background: #fffaf4; color: #685b58; border-radius: 3px; font-size: 11px; font-weight: 750; cursor: pointer; }
+.groupPlayerControls .groupPlayButton { border-color: var(--red); background: var(--red); color: #fff; }
+.groupPlayerControls .groupLoopActive { border-color: var(--red); background: rgb(186 63 54 / 10%); color: var(--red-dark); }
+.groupPlayerControls button:disabled { opacity: .38; cursor: default; }
 .message { margin: 13px 27px 0; color: var(--red-dark); font-size: 12px; }
 .wordList { margin: 0; padding: 24px 27px 29px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; list-style: none; }
 .wordList li { min-width: 0; min-height: 112px; padding: 16px; display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; gap: 14px; align-items: center; border: 1px solid #e0d5c9; background: #fffaf5; border-radius: 3px; transition: border-color .18s, transform .18s, box-shadow .18s; }
@@ -88,6 +98,10 @@
   .workspace { padding: 54px 15px 70px; }
   .groupTabs button { flex: 1; }
   .groupHeading { padding: 20px 16px; }
+  .groupPlayer { margin: 16px 16px 0; align-items: stretch; flex-direction: column; gap: 14px; }
+  .groupPlayerControls { display: grid; grid-template-columns: 1fr 1fr; }
+  .groupPlayerControls button { padding: 0 9px; }
+  .groupPlayerControls button:last-child { grid-column: 1 / -1; }
   .wordList { padding: 15px; }
   .wordList li { grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; }
   .wordList li > strong { grid-column: 2; grid-row: 1; min-width: 0; }

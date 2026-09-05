@@ -41,6 +41,33 @@ const GROUPS: VocabularyGroup[] = [
       { id: 'shuiguo', hanzi: '水果', pinyin: 'shuǐguǒ', meaning: 'fruta' },
     ],
   },
+  {
+    id: 'bebidas',
+    name: 'Bebidas',
+    label: '饮料 · yǐnliào',
+    description: 'Bebidas básicas para pedir, oferecer e reconhecer.',
+    items: [
+      { id: 'shui', hanzi: '水', pinyin: 'shuǐ', meaning: 'água' },
+      { id: 'cha', hanzi: '茶', pinyin: 'chá', meaning: 'chá' },
+      { id: 'niunai', hanzi: '牛奶', pinyin: 'niúnǎi', meaning: 'leite' },
+    ],
+  },
+  {
+    id: 'comer-e-refeicoes',
+    name: 'Palavras relacionadas a comer',
+    label: '吃饭 · chīfàn',
+    description: 'Ações, refeições do dia e lugares ligados à alimentação.',
+    items: [
+      { id: 'chi', hanzi: '吃', pinyin: 'chī', meaning: 'comer' },
+      { id: 'he', hanzi: '喝', pinyin: 'hē', meaning: 'beber' },
+      { id: 'haochi', hanzi: '好吃', pinyin: 'hǎochī', meaning: 'gostoso / delicioso' },
+      { id: 'zuofan', hanzi: '做饭', pinyin: 'zuòfàn', meaning: 'cozinhar / preparar comida' },
+      { id: 'fandian', hanzi: '饭店', pinyin: 'fàndiàn', meaning: 'restaurante' },
+      { id: 'zaofan', hanzi: '早饭', pinyin: 'zǎofàn', meaning: 'café da manhã' },
+      { id: 'wufan', hanzi: '午饭', pinyin: 'wǔfàn', meaning: 'almoço' },
+      { id: 'wanfan', hanzi: '晚饭', pinyin: 'wǎnfàn', meaning: 'jantar' },
+    ],
+  },
 ];
 
 const PAUSE_STORAGE_KEY = 'hsk1:pause-seconds';
@@ -201,9 +228,9 @@ export default function Hsk1Client() {
             {progress.total > 0 && <b>{progress.current}/{progress.total}</b>}
           </div>
           <div className={styles.stage}>
-            <strong lang="zh-CN">{activeItem?.hanzi ?? '食物'}</strong>
-            <span>{activeItem?.pinyin ?? 'shíwù'}</span>
-            <p>{activeItem?.meaning ?? 'Comidas'}</p>
+            <strong lang="zh-CN">{activeItem?.hanzi ?? selectedGroup.label.split('·')[0].trim()}</strong>
+            <span>{activeItem?.pinyin ?? selectedGroup.label.split('·')[1].trim()}</span>
+            <p>{activeItem?.meaning ?? selectedGroup.name}</p>
           </div>
           <div className={styles.mainControls}>
             <button className={styles.playButton} type="button" onClick={() => startQueue(selectedGroup.items, false)}>
@@ -246,6 +273,27 @@ export default function Hsk1Client() {
                 onChange={(event) => setPauseDraft(Number(event.target.value))} aria-label="Segundos entre as palavras" />
               <button type="button" onClick={savePause}>Salvar intervalo</button>
               <small>Em uso: {pauseSeconds}s</small>
+            </div>
+          </div>
+
+          <div className={styles.groupPlayer} aria-label={`Controles de reprodução do grupo ${selectedGroup.name}`}>
+            <div className={styles.groupPlayerCopy}>
+              <span>Reprodução deste grupo</span>
+              <strong>{selectedGroup.name}</strong>
+              <small>{selectedGroup.items.length} {selectedGroup.items.length === 1 ? 'palavra' : 'palavras'} em sequência</small>
+            </div>
+            <div className={styles.groupPlayerControls}>
+              <button className={styles.groupPlayButton} type="button" onClick={() => startQueue(selectedGroup.items, false)}>
+                ▶ Ouvir grupo inteiro
+              </button>
+              <button
+                className={loopEnabled && status === 'playing' ? styles.groupLoopActive : ''}
+                type="button"
+                onClick={() => loopEnabled && status === 'playing' ? stop() : startQueue(selectedGroup.items, true)}
+              >
+                {loopEnabled && status === 'playing' ? '■ Parar loop' : '↻ Reproduzir em loop'}
+              </button>
+              <button type="button" onClick={stop} disabled={status === 'idle'}>■ Parar</button>
             </div>
           </div>
 
