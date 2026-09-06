@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
+import type { ChangeEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useClientSession } from '../components/ClientSession';
 import styles from './page.module.css';
@@ -135,6 +137,17 @@ const GROUPS: VocabularyGroup[] = [
 ];
 
 const PAUSE_STORAGE_KEY = 'hsk1:pause-seconds';
+const MAX_IMAGE_BYTES = 100 * 1024 * 1024;
+
+function imageMapKey(sessionId: string, groupId: string, itemId: string) {
+  return `${sessionId}:${groupId}:${itemId}`;
+}
+
+function imageEndpoint(sessionId: string, groupId: string, itemId?: string) {
+  const params = new URLSearchParams({ session: sessionId, group: groupId });
+  if (itemId) params.set('item', itemId);
+  return `/api/hsk1-image?${params.toString()}`;
+}
 
 function storedPauseSeconds() {
   if (typeof window === 'undefined') return 1;
@@ -143,7 +156,7 @@ function storedPauseSeconds() {
 }
 
 export default function Hsk1Client() {
-  const { shortId } = useClientSession();
+  const { sessionId, shortId } = useClientSession();
   const [selectedGroupId, setSelectedGroupId] = useState(GROUPS[0].id);
   const [speed, setSpeed] = useState<Speed>('slow');
   const [status, setStatus] = useState<'idle' | 'playing'>('idle');
@@ -154,6 +167,8 @@ export default function Hsk1Client() {
   const [pauseDraft, setPauseDraft] = useState(storedPauseSeconds);
   const [pauseSeconds, setPauseSeconds] = useState(storedPauseSeconds);
   const [message, setMessage] = useState('');
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
+  const [uploadingImage, setUploadingImage] = useState('');
   const runId = useRef(0);
   const timer = useRef<number | null>(null);
   const speedRef = useRef<Speed>('slow');
@@ -163,6 +178,36 @@ export default function Hsk1Client() {
     () => GROUPS.find((group) => group.id === selectedGroupId) ?? GROUPS[0],
     [selectedGroupId],
   );
+
+  useEffect(() => {
+    if (!sessionId) return;
+    const controller = new AbortController();
+
+    async function loadImages() {
+      try {
+        const response = await fetch(imageEndpoint(sessionId, selectedGroup.id), {
+          cache: 'no-store',
+          signal: controller.signal,
+        });
+        if (!response.ok) return;
+        const data = await response.json() as { items?: string[] };
+        const loadedAt = Date.now();
+        const nextEntries = Object.fromEntries((data.items ?? []).map((itemId) => [
+          imageMapKey(sessionId, selectedGroup.id, itemId),
+          `${imageEndpoint(sessionId, selectedGroup.id, itemId)}&v=${loadedAt}`,
+        ]));
+        setImageUrls((current) => ({
+          ...Object.fromEntries(Object.entries(current).filter(([key]) => !key.startsWith(`${sessionId}:${selectedGroup.id}:`))),
+          ...nextEntries,
+        }));
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === 'AbortError')) return;
+      }
+    }
+
+    void loadImages();
+    return () => controller.abort();
+  }, [sessionId, selectedGroup.id]);
 
   useEffect(() => () => {
     runId.current += 1;
@@ -287,6 +332,68 @@ export default function Hsk1Client() {
     setSpeed(nextSpeed);
   }
 
+  async function uploadImage(event: ChangeEvent<HTMLInputElement>, item: VocabularyItem) {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    if (!file || !sessionId) return;
+
+    if (!file.type.startsWith('image/')) {
+      setMessage('Escolha um arquivo de imagem.');
+      input.value = '';
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      setMessage('A imagem deve ter no máximo 100 MB.');
+      input.value = '';
+      return;
+    }
+
+    const key = imageMapKey(sessionId, selectedGroup.id, item.id);
+    setUploadingImage(key);
+    setMessage('');
+    try {
+      const response = await fetch(imageEndpoint(sessionId, selectedGroup.id, item.id), {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+      const result = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) throw new Error(result.error ?? 'Não consegui salvar a imagem.');
+      setImageUrls((current) => ({
+        ...current,
+        [key]: `${imageEndpoint(sessionId, selectedGroup.id, item.id)}&v=${Date.now()}`,
+      }));
+      setMessage(`Imagem associada a ${item.hanzi}.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Não consegui salvar a imagem.');
+    } finally {
+      setUploadingImage('');
+      input.value = '';
+    }
+  }
+
+  async function removeImage(item: VocabularyItem) {
+    if (!sessionId || !window.confirm(`Remover a imagem de ${item.hanzi}?`)) return;
+    const key = imageMapKey(sessionId, selectedGroup.id, item.id);
+    setUploadingImage(key);
+    setMessage('');
+    try {
+      const response = await fetch(imageEndpoint(sessionId, selectedGroup.id, item.id), { method: 'DELETE' });
+      const result = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) throw new Error(result.error ?? 'Não consegui remover a imagem.');
+      setImageUrls((current) => {
+        const next = { ...current };
+        delete next[key];
+        return next;
+      });
+      setMessage(`Imagem de ${item.hanzi} removida.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Não consegui remover a imagem.');
+    } finally {
+      setUploadingImage('');
+    }
+  }
+
   return (
     <main className={styles.page}>
       <header className={styles.topbar}>
@@ -395,11 +502,39 @@ export default function Hsk1Client() {
             {selectedGroup.items.map((item, index) => {
               const active = status === 'playing' && activeItem?.id === item.id;
               const loopingThisItem = active && loopEnabled && progress.total === 1;
+              const itemImageKey = imageMapKey(sessionId, selectedGroup.id, item.id);
+              const imageUrl = imageUrls[itemImageKey];
+              const imageBusy = uploadingImage === itemImageKey;
               return (
                 <li className={active ? styles.activeWord : ''} key={item.id}>
                   <span className={styles.number}>{String(index + 1).padStart(2, '0')}</span>
                   <strong lang="zh-CN">{item.hanzi}</strong>
                   <div className={styles.wordDetails}><b>{item.pinyin}</b><p>{item.meaning}</p></div>
+                  <div className={styles.wordImage}>
+                    {imageUrl ? (
+                      <div className={styles.savedImage}>
+                        {/* User-selected images are displayed from this session's private storage. */}
+                        <Image src={imageUrl} alt={`${item.meaning}: imagem associada a ${item.hanzi}`}
+                          width={320} height={220} unoptimized />
+                        <div>
+                          <label className={imageBusy ? styles.imageDisabled : ''}>
+                            <input type="file" accept="image/*" disabled={imageBusy}
+                              onChange={(event) => void uploadImage(event, item)} />
+                            {imageBusy ? 'Salvando…' : 'Trocar'}
+                          </label>
+                          <button type="button" disabled={imageBusy} onClick={() => void removeImage(item)}>Remover</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <label className={`${styles.imageUpload} ${imageBusy || !sessionId ? styles.imageDisabled : ''}`}>
+                        <input type="file" accept="image/*" disabled={imageBusy || !sessionId}
+                          onChange={(event) => void uploadImage(event, item)} />
+                        <span aria-hidden="true">＋</span>
+                        <b>{imageBusy ? 'Salvando…' : 'Adicionar imagem'}</b>
+                        <small>até 100 MB</small>
+                      </label>
+                    )}
+                  </div>
                   <div className={styles.wordActions}>
                     <button type="button" onClick={() => active ? stop() : startQueue([item], false)}
                       aria-label={`Ouvir ${item.hanzi}, ${item.pinyin}, e o significado ${item.meaning}`}>

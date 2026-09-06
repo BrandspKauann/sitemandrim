@@ -61,11 +61,25 @@
 .groupPlayerControls button:disabled { opacity: .38; cursor: default; }
 .message { margin: 13px 27px 0; color: var(--red-dark); font-size: 12px; }
 .wordList { margin: 0; padding: 24px 27px 29px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; list-style: none; }
-.wordList li { min-width: 0; min-height: 112px; padding: 16px; display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; gap: 14px; align-items: center; border: 1px solid #e0d5c9; background: #fffaf5; border-radius: 3px; transition: border-color .18s, transform .18s, box-shadow .18s; }
+.wordList li { min-width: 0; min-height: 148px; padding: 16px; display: grid; grid-template-columns: auto auto minmax(70px, .7fr) minmax(130px, 1.15fr) auto; gap: 12px; align-items: center; border: 1px solid #e0d5c9; background: #fffaf5; border-radius: 3px; transition: border-color .18s, transform .18s, box-shadow .18s; }
 .number { color: #a39590; font-size: 11px; font-variant-numeric: tabular-nums; }
 .wordList li > strong { min-width: 76px; font-family: 'Noto Serif SC', 'Songti SC', SimSun, serif; font-size: 31px; font-weight: 540; }
 .wordDetails b { color: var(--red-dark); font-size: 15px; }
 .wordDetails p { margin: 5px 0 0; color: #756967; font-size: 12px; line-height: 1.35; }
+.wordImage { width: 100%; min-width: 130px; max-width: 190px; }
+.wordImage input { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+.imageUpload { min-height: 108px; padding: 11px; display: grid; place-content: center; justify-items: center; gap: 3px; border: 1px dashed #cfbdae; background: #f8efe6; color: #766966; border-radius: 3px; text-align: center; cursor: pointer; transition: border-color .18s, background .18s; }
+.imageUpload:hover { border-color: var(--red); background: #fff8f1; }
+.imageUpload span { color: var(--red); font-size: 25px; font-weight: 350; line-height: 1; }
+.imageUpload b { font-size: 11px; }
+.imageUpload small { color: #9a8b87; font-size: 10px; }
+.imageDisabled { opacity: .55; cursor: wait; }
+.savedImage { padding: 4px; border: 1px solid #d9cabc; background: #fff; border-radius: 3px; }
+.savedImage img { width: 100%; height: 78px; display: block; border-radius: 2px; object-fit: cover; }
+.savedImage > div { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 4px; }
+.savedImage label, .savedImage button { min-height: 25px; display: grid; place-items: center; padding: 0 5px; border: 1px solid #ddcec0; background: #fffaf5; color: #766966; border-radius: 2px; font: inherit; font-size: 10px; font-weight: 720; cursor: pointer; }
+.savedImage button:hover, .savedImage label:hover { border-color: var(--red); color: var(--red); }
+.savedImage button:disabled { opacity: .45; cursor: wait; }
 .wordActions { min-width: 116px; display: grid; gap: 6px; }
 .wordActions button { min-height: 32px; padding: 0 9px; border: 1px solid #d6c8ba; background: transparent; color: #6f6260; border-radius: 3px; font-size: 10px; font-weight: 740; cursor: pointer; }
 .wordActions button:hover { border-color: var(--red); color: var(--red); }
@@ -108,7 +122,10 @@
   .wordList li { grid-template-columns: auto minmax(0, 1fr); gap: 10px; }
   .wordList li > strong { grid-column: 2; grid-row: 1; min-width: 0; }
   .wordDetails { grid-column: 2; grid-row: 2; }
-  .wordActions { grid-column: 2; grid-row: 3; grid-template-columns: 1fr 1fr; min-width: 0; }
+  .wordImage { grid-column: 2; grid-row: 3; max-width: none; }
+  .imageUpload { min-height: 145px; }
+  .savedImage img { height: min(52vw, 230px); }
+  .wordActions { grid-column: 2; grid-row: 4; grid-template-columns: 1fr 1fr; min-width: 0; }
   .footer { grid-template-columns: auto 1fr; }
   .footer a { grid-column: 1 / -1; }
 }
