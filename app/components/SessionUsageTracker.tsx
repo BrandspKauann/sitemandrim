@@ -129,14 +129,13 @@ export default function SessionUsageTracker() {
   const { sessionId, shortId } = useClientSession();
   const pathname = usePathname();
   const [reportOpen, setReportOpen] = useState(false);
-  const [liveOpenMs, setLiveOpenMs] = useState(0);
+  const [liveActiveMs, setLiveActiveMs] = useState(0);
   const [currentDay, setCurrentDay] = useState('');
   const [records, setRecords] = useState<UsageRecord[]>([]);
   const recordRef = useRef<UsageRecord | null>(null);
   const ownerRef = useRef('');
   const openAnchorRef = useRef(0);
   const visibleAnchorRef = useRef<number | null>(null);
-  const pageAnchorRef = useRef(0);
   const pageRef = useRef(pathname);
   const checkpointRef = useRef<(ended?: boolean, remote?: boolean) => UsageRecord | null>(() => null);
 
@@ -163,7 +162,6 @@ export default function SessionUsageTracker() {
     recordRef.current = record;
     openAnchorRef.current = now;
     visibleAnchorRef.current = document.visibilityState === 'visible' ? now : null;
-    pageAnchorRef.current = now;
     pageRef.current = window.location.pathname;
     writeRecord(record);
 
@@ -192,20 +190,18 @@ export default function SessionUsageTracker() {
       active.openMs += Math.max(0, timestamp - openAnchorRef.current);
       openAnchorRef.current = timestamp;
 
-      const pageStart = pageAnchorRef.current;
-      active.pages[pageRef.current] = (active.pages[pageRef.current] ?? 0) + Math.max(0, timestamp - pageStart);
-      pageAnchorRef.current = timestamp;
-
       if (visibleAnchorRef.current !== null) {
+        const activeDuration = Math.max(0, timestamp - visibleAnchorRef.current);
         addAcrossDays(active.dailyVisibleMs, visibleAnchorRef.current, timestamp);
-        active.visibleMs += Math.max(0, timestamp - visibleAnchorRef.current);
+        active.visibleMs += activeDuration;
+        active.pages[pageRef.current] = (active.pages[pageRef.current] ?? 0) + activeDuration;
         visibleAnchorRef.current = timestamp;
       }
 
       active.lastSeenAt = timestamp;
       active.endedAt = ended ? timestamp : null;
       writeRecord(active);
-      setLiveOpenMs(active.openMs);
+      setLiveActiveMs(active.visibleMs);
       if (remote) sendRemote(active, ended);
       return active;
     };
@@ -216,7 +212,10 @@ export default function SessionUsageTracker() {
       const active = recordRef.current;
       if (active?.sessionId === sessionId) {
         const timestamp = Date.now();
-        setLiveOpenMs(active.openMs + Math.max(0, timestamp - openAnchorRef.current));
+        const currentActiveDuration = visibleAnchorRef.current === null
+          ? 0
+          : Math.max(0, timestamp - visibleAnchorRef.current);
+        setLiveActiveMs(active.visibleMs + currentActiveDuration);
         const today = dayKey(timestamp);
         setCurrentDay((current) => current === today ? current : today);
       }
@@ -250,7 +249,6 @@ export default function SessionUsageTracker() {
     if (!recordRef.current || pageRef.current === pathname) return;
     checkpointRef.current(false, true);
     pageRef.current = pathname;
-    pageAnchorRef.current = Date.now();
   }, [pathname]);
 
   useEffect(() => {
@@ -288,9 +286,8 @@ export default function SessionUsageTracker() {
   }, [reportOpen]);
 
   const report = useMemo(() => {
-    const totalMs = records.reduce((sum, record) => sum + record.openMs, 0);
-    const todayMs = records.reduce((sum, record) => sum + (record.dailyMs[currentDay] ?? 0), 0);
-    const visibleTodayMs = records.reduce((sum, record) => sum + (record.dailyVisibleMs[currentDay] ?? 0), 0);
+    const totalMs = records.reduce((sum, record) => sum + record.visibleMs, 0);
+    const todayMs = records.reduce((sum, record) => sum + (record.dailyVisibleMs[currentDay] ?? 0), 0);
     const pages: NumericMap = {};
     records.forEach((record) => Object.entries(record.pages).forEach(([page, duration]) => {
       pages[page] = (pages[page] ?? 0) + duration;
@@ -298,7 +295,6 @@ export default function SessionUsageTracker() {
     return {
       totalMs,
       todayMs,
-      visibleTodayMs,
       pages: Object.entries(pages).sort(([, a], [, b]) => b - a),
     };
   }, [currentDay, records]);
@@ -314,8 +310,8 @@ export default function SessionUsageTracker() {
     <>
       <button className={styles.timerButton} type="button" onClick={openReport}
         aria-haspopup="dialog" aria-expanded={reportOpen}>
-        <span>Tempo desta sessão</span>
-        <strong>{formatDuration(liveOpenMs, true)}</strong>
+        <span>Tempo de estudo</span>
+        <strong>{formatDuration(liveActiveMs, true)}</strong>
       </button>
 
       {reportOpen && (
@@ -324,18 +320,18 @@ export default function SessionUsageTracker() {
         }}>
           <section className={styles.report} role="dialog" aria-modal="true" aria-labelledby="usage-report-title">
             <header className={styles.reportHeader}>
-              <div><span>Contagem em milissegundos</span><h2 id="usage-report-title">Relatório de uso</h2></div>
+              <div><span>Meu tempo de estudo</span><h2 id="usage-report-title">Relatório de uso</h2></div>
               <button className={styles.closeButton} type="button" onClick={() => setReportOpen(false)} aria-label="Fechar relatório">×</button>
             </header>
 
             <div className={styles.summaryGrid}>
-              <div className={styles.summaryCard}><span>Sessão atual</span><strong>{formatDuration(liveOpenMs)}</strong></div>
-              <div className={styles.summaryCard}><span>Hoje · aba aberta</span><strong>{formatDuration(report.todayMs)}</strong></div>
-              <div className={styles.summaryCard}><span>Hoje · aba visível</span><strong>{formatDuration(report.visibleTodayMs)}</strong></div>
+              <div className={styles.summaryCard}><span>Sessão atual</span><strong>{formatDuration(liveActiveMs)}</strong></div>
+              <div className={styles.summaryCard}><span>Estudo de hoje</span><strong>{formatDuration(report.todayMs)}</strong></div>
               <div className={styles.summaryCard}><span>Tempo total</span><strong>{formatDuration(report.totalMs)}</strong></div>
+              <div className={styles.summaryCard}><span>Sessões registradas</span><strong>{records.length}</strong></div>
             </div>
 
-            <p className={styles.definition}><b>Aba aberta</b> conta todo o tempo em que o site permanece carregado, mesmo em segundo plano. <b>Aba visível</b> conta somente quando a página está aparecendo na tela.</p>
+            <p className={styles.definition}>O contador só avança enquanto esta aba do site está selecionada e visível. Ao trocar de aba, ele pausa automaticamente e continua do mesmo ponto quando você volta.</p>
 
             <div className={styles.reportSections}>
               <div>
@@ -360,7 +356,7 @@ export default function SessionUsageTracker() {
                           <span>{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'medium' }).format(record.startedAt)}</span>
                           <small>{record.endedAt ? 'encerrada' : 'em andamento'}</small>
                         </div>
-                        <strong>{formatDuration(record.openMs)}</strong>
+                        <strong>{formatDuration(record.visibleMs)}</strong>
                       </li>
                     ))}
                   </ol>
