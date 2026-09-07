@@ -1,19 +1,11 @@
+import { env } from 'cloudflare:workers';
+
 const MAX_IMAGE_BYTES = 100 * 1024 * 1024;
 const SESSION_PATTERN = /^[a-zA-Z0-9-]{8,80}$/;
 const ID_PATTERN = /^[a-z0-9-]{1,80}$/;
 
-type CloudflareModule = {
-  env?: Record<string, unknown>;
-};
-
-async function imageBucket() {
-  try {
-    const moduleName = 'cloudflare:workers';
-    const cloudflare = await import(/* webpackIgnore: true */ moduleName) as CloudflareModule;
-    return cloudflare.env?.HSK1_IMAGES as R2Bucket | undefined;
-  } catch {
-    return undefined;
-  }
+function imageBucket() {
+  return (env as Record<string, unknown>).HSK1_IMAGES as R2Bucket | undefined;
 }
 
 function requestParts(request: Request, itemRequired: boolean) {
@@ -38,7 +30,7 @@ function storageUnavailable() {
 }
 
 export async function GET(request: Request) {
-  const bucket = await imageBucket();
+  const bucket = imageBucket();
   if (!bucket) return storageUnavailable();
 
   const url = new URL(request.url);
@@ -64,7 +56,7 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const bucket = await imageBucket();
+  const bucket = imageBucket();
   if (!bucket) return storageUnavailable();
 
   const parts = requestParts(request, true);
@@ -89,7 +81,7 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const bucket = await imageBucket();
+  const bucket = imageBucket();
   if (!bucket) return storageUnavailable();
 
   const parts = requestParts(request, true);
