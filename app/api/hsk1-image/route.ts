@@ -63,7 +63,7 @@ export async function PUT(request: Request) {
   if (!parts) return Response.json({ error: 'Pedido inválido.' }, { status: 400 });
 
   const contentType = request.headers.get('content-type') ?? '';
-  const contentLength = Number(request.headers.get('content-length'));
+  const contentLength = Number(request.headers.get('content-length') ?? request.headers.get('x-image-size'));
   if (!contentType.startsWith('image/')) {
     return Response.json({ error: 'Escolha um arquivo de imagem.' }, { status: 415 });
   }

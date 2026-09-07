@@ -5,6 +5,7 @@ import Image from 'next/image';
 import type { ChangeEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useClientSession } from '../components/ClientSession';
+import { deleteLocalImage, listLocalImages, saveLocalImage } from './imageStore';
 import styles from './page.module.css';
 
 type VocabularyItem = {
@@ -134,6 +135,28 @@ const GROUPS: VocabularyGroup[] = [
       { id: 'zuofan-verbo', hanzi: '做饭', pinyin: 'zuòfàn', meaning: 'cozinhar' },
     ],
   },
+  {
+    id: 'nacionalidades',
+    name: 'Nacionalidades',
+    label: '国籍 · guójí',
+    description: 'Países e nacionalidades para perguntar e dizer de onde uma pessoa é.',
+    items: [
+      { id: 'zhongguo', hanzi: '中国', pinyin: 'zhōngguó', meaning: 'China' },
+      { id: 'zhongguoren', hanzi: '中国人', pinyin: 'zhōngguó rén', meaning: 'chinês' },
+      { id: 'baxi', hanzi: '巴西', pinyin: 'bāxī', meaning: 'Brasil' },
+      { id: 'baxiren', hanzi: '巴西人', pinyin: 'bāxī rén', meaning: 'brasileiro' },
+      { id: 'meiguo', hanzi: '美国', pinyin: 'měiguó', meaning: 'Estados Unidos' },
+      { id: 'meiguoren', hanzi: '美国人', pinyin: 'měiguó rén', meaning: 'americano' },
+      { id: 'yingguo', hanzi: '英国', pinyin: 'yīngguó', meaning: 'Reino Unido' },
+      { id: 'yingguoren', hanzi: '英国人', pinyin: 'yīngguó rén', meaning: 'britânico' },
+      { id: 'faguo', hanzi: '法国', pinyin: 'fǎguó', meaning: 'França' },
+      { id: 'faguoren', hanzi: '法国人', pinyin: 'fǎguó rén', meaning: 'francês' },
+      { id: 'riben', hanzi: '日本', pinyin: 'rìběn', meaning: 'Japão' },
+      { id: 'ribenren', hanzi: '日本人', pinyin: 'rìběn rén', meaning: 'japonês' },
+      { id: 'hanguo', hanzi: '韩国', pinyin: 'hánguó', meaning: 'Coreia do Sul' },
+      { id: 'hanguoren', hanzi: '韩国人', pinyin: 'hánguó rén', meaning: 'sul-coreano' },
+    ],
+  },
 ];
 
 const PAUSE_STORAGE_KEY = 'hsk1:pause-seconds';
@@ -173,6 +196,7 @@ export default function Hsk1Client() {
   const timer = useRef<number | null>(null);
   const speedRef = useRef<Speed>('slow');
   const pauseSecondsRef = useRef(pauseSeconds);
+  const objectUrlsRef = useRef(new Set<string>());
 
   const selectedGroup = useMemo(
     () => GROUPS.find((group) => group.id === selectedGroupId) ?? GROUPS[0],
@@ -184,9 +208,24 @@ export default function Hsk1Client() {
     const controller = new AbortController();
 
     async function loadImages() {
+      const prefix = `${sessionId}:${selectedGroup.id}:`;
+      try {
+        const localImages = await listLocalImages(prefix);
+        if (controller.signal.aborted) return;
+        const localEntries = Object.fromEntries(localImages.map((record) => {
+          const url = URL.createObjectURL(record.blob);
+          objectUrlsRef.current.add(url);
+          return [record.key, url];
+        }));
+        setImageUrls((current) => ({ ...current, ...localEntries }));
+      } catch {
+        // The cloud remains the primary store when this browser blocks IndexedDB.
+      }
+
       try {
         const response = await fetch(imageEndpoint(sessionId, selectedGroup.id), {
           cache: 'no-store',
+          credentials: 'same-origin',
           signal: controller.signal,
         });
         if (!response.ok) return;
@@ -196,12 +235,9 @@ export default function Hsk1Client() {
           imageMapKey(sessionId, selectedGroup.id, itemId),
           `${imageEndpoint(sessionId, selectedGroup.id, itemId)}&v=${loadedAt}`,
         ]));
-        setImageUrls((current) => ({
-          ...Object.fromEntries(Object.entries(current).filter(([key]) => !key.startsWith(`${sessionId}:${selectedGroup.id}:`))),
-          ...nextEntries,
-        }));
+        setImageUrls((current) => ({ ...current, ...nextEntries }));
       } catch (error) {
-        if (!(error instanceof DOMException && error.name === 'AbortError')) return;
+        if (error instanceof DOMException && error.name === 'AbortError') return;
       }
     }
 
@@ -213,6 +249,8 @@ export default function Hsk1Client() {
     runId.current += 1;
     if (timer.current !== null) window.clearTimeout(timer.current);
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    objectUrlsRef.current.clear();
   }, []);
 
   function finishPlayback() {
@@ -354,18 +392,36 @@ export default function Hsk1Client() {
     try {
       const response = await fetch(imageEndpoint(sessionId, selectedGroup.id, item.id), {
         method: 'PUT',
-        headers: { 'Content-Type': file.type },
+        cache: 'no-store',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': file.type, 'X-Image-Size': String(file.size) },
         body: file,
       });
       const result = await response.json().catch(() => ({})) as { error?: string };
       if (!response.ok) throw new Error(result.error ?? 'Não consegui salvar a imagem.');
+      await deleteLocalImage(key).catch(() => undefined);
       setImageUrls((current) => ({
         ...current,
         [key]: `${imageEndpoint(sessionId, selectedGroup.id, item.id)}&v=${Date.now()}`,
       }));
       setMessage(`Imagem associada a ${item.hanzi}.`);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Não consegui salvar a imagem.');
+      try {
+        await saveLocalImage(key, file);
+        const localUrl = URL.createObjectURL(file);
+        objectUrlsRef.current.add(localUrl);
+        setImageUrls((current) => {
+          const previousUrl = current[key];
+          if (previousUrl?.startsWith('blob:')) {
+            URL.revokeObjectURL(previousUrl);
+            objectUrlsRef.current.delete(previousUrl);
+          }
+          return { ...current, [key]: localUrl };
+        });
+        setMessage(`Imagem associada a ${item.hanzi} e salva neste navegador.`);
+      } catch {
+        setMessage(error instanceof Error ? error.message : 'Não consegui salvar a imagem.');
+      }
     } finally {
       setUploadingImage('');
       input.value = '';
@@ -375,18 +431,30 @@ export default function Hsk1Client() {
   async function removeImage(item: VocabularyItem) {
     if (!sessionId || !window.confirm(`Remover a imagem de ${item.hanzi}?`)) return;
     const key = imageMapKey(sessionId, selectedGroup.id, item.id);
+    const isLocalImage = imageUrls[key]?.startsWith('blob:') ?? false;
     setUploadingImage(key);
     setMessage('');
     try {
-      const response = await fetch(imageEndpoint(sessionId, selectedGroup.id, item.id), { method: 'DELETE' });
+      const response = await fetch(imageEndpoint(sessionId, selectedGroup.id, item.id), {
+        method: 'DELETE',
+        cache: 'no-store',
+        credentials: 'same-origin',
+      });
       const result = await response.json().catch(() => ({})) as { error?: string };
-      if (!response.ok) throw new Error(result.error ?? 'Não consegui remover a imagem.');
+      const localRemoved = await deleteLocalImage(key).then(() => true).catch(() => false);
+      if (!response.ok && !(isLocalImage && localRemoved)) {
+        throw new Error(result.error ?? 'Não consegui remover a imagem.');
+      }
       setImageUrls((current) => {
         const next = { ...current };
+        if (next[key]?.startsWith('blob:')) {
+          URL.revokeObjectURL(next[key]);
+          objectUrlsRef.current.delete(next[key]);
+        }
         delete next[key];
         return next;
       });
-      setMessage(`Imagem de ${item.hanzi} removida.`);
+      setMessage(`Imagem de ${item.hanzi} removida${response.ok ? '' : ' deste navegador'}.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Não consegui remover a imagem.');
     } finally {
