@@ -6,6 +6,7 @@ import type { ChangeEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useClientSession } from '../components/ClientSession';
 import { deleteLocalImage, listLocalImages, saveLocalImage } from './imageStore';
+import RealMandarinDialogues, { type RealMandarinDialoguesHandle } from './RealMandarinDialogues';
 import styles from './page.module.css';
 
 type VocabularyItem = {
@@ -204,6 +205,7 @@ export default function Hsk1Client() {
   const speedRef = useRef<Speed>('slow');
   const pauseSecondsRef = useRef(pauseSeconds);
   const objectUrlsRef = useRef(new Set<string>());
+  const realDialogueRef = useRef<RealMandarinDialoguesHandle>(null);
 
   const selectedGroup = useMemo(
     () => GROUPS.find((group) => group.id === selectedGroupId) ?? GROUPS[0],
@@ -283,6 +285,7 @@ export default function Hsk1Client() {
       return;
     }
 
+    realDialogueRef.current?.stop();
     stop();
     setLoopEnabled(shouldLoop);
     const activeRun = runId.current + 1;
@@ -367,6 +370,7 @@ export default function Hsk1Client() {
   }
 
   function changeGroup(groupId: string) {
+    realDialogueRef.current?.stop();
     stop();
     setLoopEnabled(false);
     setSelectedGroupId(groupId);
@@ -628,6 +632,8 @@ export default function Hsk1Client() {
           </ol>
         </div>
       </section>
+
+      <RealMandarinDialogues ref={realDialogueRef} onBeforePlay={stop} />
 
       <footer className={styles.footer}>
         <span className={styles.brandMark} aria-hidden="true">词</span>
