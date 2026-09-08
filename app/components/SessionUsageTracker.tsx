@@ -22,6 +22,8 @@ type UsageRecord = {
 
 const OWNER_KEY = 'tons-de-mandarim:usage-owner';
 const RECORD_PREFIX = 'tons-de-mandarim:usage-session:';
+const RESET_KEY = 'tons-de-mandarim:usage-reset-version';
+const RESET_VERSION = '2026-09-08-active-view-v1';
 const REPORT_ENDPOINT = '/api/usage';
 const PAGE_LABELS: Record<string, string> = {
   '/': 'Frases',
@@ -31,6 +33,27 @@ const PAGE_LABELS: Record<string, string> = {
   '/hsk1': 'HSK1',
 };
 let memoryOwnerId = '';
+
+function resetUsageHistoryOnce() {
+  try {
+    if (window.localStorage.getItem(RESET_KEY) === RESET_VERSION) return;
+    const usageKeys: string[] = [];
+    for (let index = 0; index < window.localStorage.length; index += 1) {
+      const key = window.localStorage.key(index);
+      if (key?.startsWith(RECORD_PREFIX)) usageKeys.push(key);
+    }
+    usageKeys.forEach((key) => window.localStorage.removeItem(key));
+    window.localStorage.removeItem(OWNER_KEY);
+    window.localStorage.setItem(RESET_KEY, RESET_VERSION);
+    memoryOwnerId = '';
+  } catch {
+    memoryOwnerId = '';
+  }
+}
+
+function pageIsActive() {
+  return document.visibilityState === 'visible' && document.hasFocus();
+}
 
 function newId() {
   if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
@@ -141,6 +164,7 @@ export default function SessionUsageTracker() {
 
   useEffect(() => {
     if (!sessionId) return;
+    resetUsageHistoryOnce();
     const now = Date.now();
     const currentOwnerId = ownerId();
     ownerRef.current = currentOwnerId;
@@ -161,7 +185,7 @@ export default function SessionUsageTracker() {
     record.endedAt = null;
     recordRef.current = record;
     openAnchorRef.current = now;
-    visibleAnchorRef.current = document.visibilityState === 'visible' ? now : null;
+    visibleAnchorRef.current = pageIsActive() ? now : null;
     pageRef.current = window.location.pathname;
     writeRecord(record);
 
@@ -225,19 +249,23 @@ export default function SessionUsageTracker() {
       checkpoint(false, checkpointCount % 5 === 0);
     }, 1000);
 
-    const onVisibilityChange = () => {
+    const onActivityChange = () => {
       checkpoint(false, true);
-      visibleAnchorRef.current = document.visibilityState === 'visible' ? Date.now() : null;
+      visibleAnchorRef.current = pageIsActive() ? Date.now() : null;
     };
     const onPageHide = () => { checkpoint(true, true); };
-    document.addEventListener('visibilitychange', onVisibilityChange);
+    document.addEventListener('visibilitychange', onActivityChange);
+    window.addEventListener('focus', onActivityChange);
+    window.addEventListener('blur', onActivityChange);
     window.addEventListener('pagehide', onPageHide);
     window.addEventListener('beforeunload', onPageHide);
 
     return () => {
       window.clearInterval(displayTimer);
       window.clearInterval(storageTimer);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
+      document.removeEventListener('visibilitychange', onActivityChange);
+      window.removeEventListener('focus', onActivityChange);
+      window.removeEventListener('blur', onActivityChange);
       window.removeEventListener('pagehide', onPageHide);
       window.removeEventListener('beforeunload', onPageHide);
       checkpoint(true, true);
