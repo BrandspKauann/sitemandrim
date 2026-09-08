@@ -4,7 +4,7 @@
 
 我的母语是巴西葡萄牙语，所以我把汉字、拼音、声调、葡萄牙语发音提示和意思放在同一个地方。这样练习时不用一直切换词典、翻译器和录音软件，也能更直接地比较自己的发音。
 
-在线使用：[tons-de-mandarim.kauannloko.chatgpt.site](https://tons-de-mandarim.kauannloko.chatgpt.site/)
+在线使用：[sitemandrim.vercel.app](https://sitemandrim.vercel.app/)
 
 ## 现在可以做什么
 
