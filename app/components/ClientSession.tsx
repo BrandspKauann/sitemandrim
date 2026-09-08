@@ -9,8 +9,10 @@ type ClientSessionValue = {
 
 const SESSION_KEY = 'tons-de-mandarim:private-session';
 const SESSION_CHANNEL = 'tons-de-mandarim:session-check';
+const COLLISION_PROBE_DELAY_MS = 800;
 const ClientSessionContext = createContext<ClientSessionValue>({ sessionId: '', shortId: '' });
 let fallbackSessionId = '';
+let documentTabId = '';
 
 function newSessionId() {
   if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
@@ -34,6 +36,11 @@ function storeSessionId(sessionId: string) {
   try { window.sessionStorage.setItem(SESSION_KEY, sessionId); } catch { /* Memory fallback keeps this visit isolated. */ }
 }
 
+function currentDocumentTabId() {
+  if (!documentTabId) documentTabId = newSessionId();
+  return documentTabId;
+}
+
 function subscribeToSession(onStoreChange: () => void) {
   let active = true;
   if (!sessionSnapshot()) {
@@ -43,8 +50,10 @@ function subscribeToSession(onStoreChange: () => void) {
     });
   }
 
-  const tabId = newSessionId();
+  const tabId = currentDocumentTabId();
+  let collisionHandled = false;
   let channel: BroadcastChannel | null = null;
+  let probeTimer: number | null = null;
   try {
     channel = new BroadcastChannel(SESSION_CHANNEL);
     channel.onmessage = (event: MessageEvent<{ type?: string; sessionId?: string; tabId?: string; targetTabId?: string }>) => {
@@ -53,20 +62,22 @@ function subscribeToSession(onStoreChange: () => void) {
       if (data.type === 'probe' && data.sessionId === currentSession && data.tabId !== tabId) {
         channel?.postMessage({ type: 'occupied', sessionId: currentSession, targetTabId: data.tabId });
       }
-      if (data.type === 'occupied' && data.targetTabId === tabId && data.sessionId === currentSession) {
+      if (!collisionHandled && data.type === 'occupied' && data.targetTabId === tabId && data.sessionId === currentSession) {
+        collisionHandled = true;
         storeSessionId(newSessionId());
         onStoreChange();
       }
     };
-    queueMicrotask(() => {
+    probeTimer = window.setTimeout(() => {
       if (active) channel?.postMessage({ type: 'probe', sessionId: sessionSnapshot(), tabId });
-    });
+    }, COLLISION_PROBE_DELAY_MS);
   } catch {
     channel = null;
   }
 
   return () => {
     active = false;
+    if (probeTimer !== null) window.clearTimeout(probeTimer);
     channel?.close();
   };
 }
