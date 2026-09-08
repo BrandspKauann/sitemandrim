@@ -5,7 +5,7 @@ import { pinyin } from 'pinyin-pro';
 import { REAL_DIALOGUE_AUDIO, REAL_DIALOGUE_LINES, type RealDialogueLine } from './realDialogueData';
 import styles from './RealMandarinDialogues.module.css';
 
-type Phase = 'idle' | 'mandarin' | 'portuguese' | 'pause';
+type Phase = 'idle' | 'mandarin' | 'pause';
 type PlayMode = 'all-once' | 'all-loop' | 'single-once' | 'single-loop';
 
 export type RealMandarinDialoguesHandle = {
@@ -164,7 +164,6 @@ const RealMandarinDialogues = forwardRef<RealMandarinDialoguesHandle, Props>(fun
     runId.current += 1;
     clearScheduledWork();
     audioRef.current?.pause();
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     setPhase('idle');
     setMode(null);
     setActiveLine(null);
@@ -204,32 +203,6 @@ const RealMandarinDialogues = forwardRef<RealMandarinDialoguesHandle, Props>(fun
     }, gapRef.current * 1000);
   }
 
-  function speakPortuguese(activeRun: number, queue: typeof lines, currentIndex: number, shouldLoop: boolean) {
-    if (runId.current !== activeRun) return;
-    if (!('speechSynthesis' in window)) {
-      setMessage('A voz em português não está disponível neste navegador.');
-      scheduleNext(activeRun, queue, currentIndex, shouldLoop);
-      return;
-    }
-
-    setPhase('portuguese');
-    const utterance = new SpeechSynthesisUtterance(queue[currentIndex].translation);
-    const voices = window.speechSynthesis.getVoices();
-    const voice = voices.find((candidate) => candidate.lang.toLowerCase() === 'pt-br')
-      ?? voices.find((candidate) => candidate.lang.toLowerCase().startsWith('pt'));
-    utterance.lang = voice?.lang ?? 'pt-BR';
-    utterance.rate = 1.18;
-    utterance.pitch = 1;
-    if (voice) utterance.voice = voice;
-    utterance.onend = () => scheduleNext(activeRun, queue, currentIndex, shouldLoop);
-    utterance.onerror = () => {
-      if (runId.current !== activeRun) return;
-      setMessage('Não consegui narrar a tradução. Tente novamente.');
-      stop();
-    };
-    window.speechSynthesis.speak(utterance);
-  }
-
   async function playLine(activeRun: number, queue: typeof lines, currentIndex: number, shouldLoop: boolean) {
     const audio = audioRef.current;
     if (!audio || runId.current !== activeRun) return;
@@ -256,7 +229,7 @@ const RealMandarinDialogues = forwardRef<RealMandarinDialoguesHandle, Props>(fun
       if (audio.currentTime >= line.end || audio.ended) {
         audio.pause();
         animationFrame.current = null;
-        speakPortuguese(activeRun, queue, currentIndex, shouldLoop);
+        scheduleNext(activeRun, queue, currentIndex, shouldLoop);
         return;
       }
       animationFrame.current = window.requestAnimationFrame(watchEnd);
@@ -292,7 +265,7 @@ const RealMandarinDialogues = forwardRef<RealMandarinDialoguesHandle, Props>(fun
         <div>
           <span className={styles.eyebrow}>Escuta com voz real</span>
           <h2 id="real-dialogue-title">Diálogos em mandarim real</h2>
-          <p>Uma semana na vida da senhorita Wang, dividida em 47 frases. Primeiro você ouve o áudio original; logo depois, o significado em português.</p>
+          <p>Uma semana na vida da senhorita Wang, dividida em 47 frases. A reprodução usa somente o áudio original em mandarim; o significado em português continua disponível para leitura.</p>
         </div>
         <div className={styles.summary}>
           <strong>一周的生活</strong>
@@ -304,12 +277,11 @@ const RealMandarinDialogues = forwardRef<RealMandarinDialoguesHandle, Props>(fun
       <div className={styles.player} aria-live="polite">
         <div className={styles.playerTop}>
           <div>
-            <span>{phase === 'mandarin' ? 'Áudio original em mandarim' : phase === 'portuguese' ? 'Significado em português' : phase === 'pause' ? 'Intervalo entre frases' : 'Pronto para começar'}</span>
+            <span>{phase === 'mandarin' ? 'Áudio original em mandarim' : phase === 'pause' ? 'Intervalo entre frases' : 'Pronto para começar'}</span>
             <strong>{progress.total ? `${progress.current}/${progress.total}` : '47 frases'}</strong>
           </div>
-          <div className={styles.phaseDots} aria-label="Ordem de reprodução">
-            <i className={phase === 'mandarin' ? styles.currentPhase : ''}>1</i><span>Mandarim</span>
-            <i className={phase === 'portuguese' ? styles.currentPhase : ''}>2</i><span>Português rápido</span>
+          <div className={styles.phaseDots} aria-label="Idioma do áudio">
+            <i className={phase === 'mandarin' ? styles.currentPhase : ''}>中</i><span>Somente mandarim</span>
           </div>
         </div>
         <div className={styles.stage}>
@@ -318,7 +290,7 @@ const RealMandarinDialogues = forwardRef<RealMandarinDialoguesHandle, Props>(fun
           <p>{activeLine?.translation ?? 'Acompanhe uma frase de cada vez.'}</p>
         </div>
         <div className={styles.controls}>
-          <button className={styles.primary} type="button" onClick={() => start(lines, 'all-once')}>▶ Reproduzir as 47</button>
+          <button className={styles.primary} type="button" onClick={() => start(lines, 'all-once')}>▶ Ouvir as 47 em mandarim</button>
           <button className={mode === 'all-loop' && playing ? styles.looping : ''} type="button"
             onClick={() => mode === 'all-loop' && playing ? stop() : start(lines, 'all-loop')}>
             {mode === 'all-loop' && playing ? '■ Parar loop' : '↻ Reproduzir tudo em loop'}
@@ -326,7 +298,7 @@ const RealMandarinDialogues = forwardRef<RealMandarinDialoguesHandle, Props>(fun
           <button type="button" onClick={stop} disabled={!playing}>■ Parar</button>
         </div>
         <div className={styles.gapControl}>
-          <div><span>Intervalo depois da tradução</span><strong>{gapDraft}s</strong></div>
+          <div><span>Intervalo entre as frases</span><strong>{gapDraft}s</strong></div>
           <input type="range" min="1" max="10" step="1" value={gapDraft}
             onChange={(event) => setGapDraft(Number(event.target.value))} aria-label="Intervalo entre as frases" />
           <button type="button" onClick={saveGap}>Salvar intervalo</button>
