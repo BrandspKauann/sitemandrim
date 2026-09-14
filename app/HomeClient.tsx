@@ -1092,6 +1092,7 @@ export default function Home() {
           <Link className="syllables-link" href="/exercicios">Exercícios</Link>
           <Link className="syllables-link" href="/tons">Tons</Link>
           <Link className="syllables-link" href="/hsk1">HSK1</Link>
+          <Link className="syllables-link" href="/revisao">Revisão</Link>
           <a className="how-link" href="#como-funciona">Como funciona</a>
         </nav>
       </header>

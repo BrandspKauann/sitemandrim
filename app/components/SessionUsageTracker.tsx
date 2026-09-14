@@ -31,6 +31,7 @@ const PAGE_LABELS: Record<string, string> = {
   '/exercicios': 'Exercícios',
   '/tons': 'Tons',
   '/hsk1': 'HSK1',
+  '/revisao': 'Revisão',
 };
 let memoryOwnerId = '';
 

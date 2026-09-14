@@ -339,6 +339,7 @@ export default function TonesClient() {
           <Link href="/exercicios">Exercícios</Link>
           <Link className={styles.activeNav} href="/tons">Tons</Link>
           <Link href="/hsk1">HSK1</Link>
+          <Link href="/revisao">Revisão</Link>
         </nav>
       </header>
 
