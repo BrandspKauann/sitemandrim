@@ -56,7 +56,7 @@ export default function RevisionLogin({ configured }: { configured: boolean }) {
         <form className={styles.loginCard} onSubmit={submit}>
           <span className={styles.cardLabel}>Conteúdo protegido</span>
           <h2>Digite a senha</h2>
-          <p>A sessão ficará liberada neste navegador por 30 dias.</p>
+          <p>O acesso vale apenas nesta sessão do navegador, por até 12 horas. Outros visitantes precisam digitar a própria senha.</p>
           <label htmlFor="revision-password">Senha da revisão</label>
           <div className={styles.passwordField}>
             <input id="revision-password" type={showPassword ? 'text' : 'password'} value={password}

@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import {
   REVISION_COOKIE,
-  REVISION_COOKIE_MAX_AGE,
+  createRevisionSession,
   revisionPassword,
-  revisionToken,
   safeEqual,
 } from '../../../revisao/revisionAuth';
 
@@ -22,22 +21,17 @@ export async function POST(request: Request) {
   if (!password) {
     return NextResponse.json({ error: 'Digite a senha.' }, { status: 400 });
   }
-  const [receivedToken, expectedToken] = await Promise.all([
-    revisionToken(password),
-    revisionToken(configuredPassword),
-  ]);
-
-  if (!safeEqual(receivedToken, expectedToken)) {
+  if (!safeEqual(password, configuredPassword)) {
     return NextResponse.json({ error: 'Senha incorreta.' }, { status: 401 });
   }
 
   const response = NextResponse.json({ ok: true });
-  response.cookies.set(REVISION_COOKIE, expectedToken, {
+  response.headers.set('Cache-Control', 'private, no-store');
+  response.cookies.set(REVISION_COOKIE, await createRevisionSession(), {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,
     sameSite: 'strict',
     path: '/',
-    maxAge: REVISION_COOKIE_MAX_AGE,
   });
   return response;
 }
