@@ -18,10 +18,47 @@ import {
   WRITING_EXERCISES,
   type LessonPhrase,
 } from './aula1Data';
+import {
+  AULA2_HANZI_CORRECTIONS,
+  AULA2_HOMEWORK,
+  AULA2_KEY_PHRASES,
+  AULA2_LESSON_TOPICS,
+  AULA2_LISTENING_EXERCISES,
+  AULA2_NUMBER_ROWS,
+  AULA2_PINYIN_NOTES,
+  AULA2_VOCABULARY_GROUPS,
+  AULA2_WRITING_EXERCISES,
+} from './aula2Data';
 import styles from './page.module.css';
 
 type StudyMode = 'resumo' | 'escrever' | 'falar' | 'ouvir';
 type ExerciseStatus = 'idle' | 'correct' | 'incorrect' | 'revealed';
+type LessonId = 'aula1' | 'aula2';
+
+const LESSONS = {
+  aula1: {
+    number: '01', tabTitle: 'Aula 1', tabSubtitle: 'Quantidade e família', title: 'Família, números e perguntas',
+    objective: 'Falar sobre o que alguém tem e sobre quantidades.',
+    description: 'Você revisou 有/没有, números, classificadores, membros da família, 吗/呢 e perguntas com 几 ou 多少. A professora também corrigiu caracteres e pontos de pinyin.',
+    topics: LESSON_TOPICS, pinyinNotes: PINYIN_NOTES, numberRows: NUMBER_ROWS, vocabularyGroups: VOCABULARY_GROUPS,
+    hanziCorrections: HANZI_CORRECTIONS, keyPhrases: KEY_PHRASES, homework: HOMEWORK,
+    writingExercises: WRITING_EXERCISES, listeningExercises: LISTENING_EXERCISES,
+    numbersTitle: 'Unidades, dezenas e valores maiores',
+    numbersDescription: 'Para quantidades, leia o número completo. Em números de quarto, telefone ou códigos, os algarismos podem ser lidos um por um.',
+    numberRule: <><b>1528 como valor:</b> 一千五百二十八. <b>Como número de quarto:</b> 一、五、二、八.</>,
+  },
+  aula2: {
+    number: '02', tabTitle: 'Aula 2', tabSubtitle: 'Filhos e idade', title: 'Filhos, idade e escrita dos caracteres',
+    objective: 'Perguntar e responder sobre filhos, idade e ano escolar.',
+    description: 'A aula trabalhou 儿子/女儿/孩子, 几岁/多大, 今年 + idade, tratamento respeitoso com 您 e os princípios básicos da ordem dos traços.',
+    topics: AULA2_LESSON_TOPICS, pinyinNotes: AULA2_PINYIN_NOTES, numberRows: AULA2_NUMBER_ROWS, vocabularyGroups: AULA2_VOCABULARY_GROUPS,
+    hanziCorrections: AULA2_HANZI_CORRECTIONS, keyPhrases: AULA2_KEY_PHRASES, homework: AULA2_HOMEWORK,
+    writingExercises: AULA2_WRITING_EXERCISES, listeningExercises: AULA2_LISTENING_EXERCISES,
+    numbersTitle: 'Idades trabalhadas na aula',
+    numbersDescription: 'Leia o número e acrescente 岁. Dê atenção especial à diferença entre 十二 (12) e 二十 (20).',
+    numberRule: <><b>Modelo:</b> 我妈妈今年五十八岁。 O número vem antes de 岁; 今年 pode aparecer antes da idade.</>,
+  },
+} as const;
 
 const MODES: Array<{ id: StudyMode; marker: string; name: string; description: string }> = [
   { id: 'resumo', marker: '课', name: 'Resumo', description: 'Toda a matéria organizada' },
@@ -90,6 +127,7 @@ export default function RevisionHome() {
   const { sessionId } = useClientSession();
   const [leaving, setLeaving] = useState(false);
   const [mode, setMode] = useState<StudyMode>('resumo');
+  const [lessonId, setLessonId] = useState<LessonId>('aula1');
   const [writingIndex, setWritingIndex] = useState(0);
   const [writingValue, setWritingValue] = useState('');
   const [writingStatus, setWritingStatus] = useState<ExerciseStatus>('idle');
@@ -98,13 +136,14 @@ export default function RevisionHome() {
   const [listeningChoice, setListeningChoice] = useState<string | null>(null);
   const [listeningScore, setListeningScore] = useState(0);
 
+  const lesson = LESSONS[lessonId];
   const speakingPhrase = useMemo(
-    () => KEY_PHRASES.find((phrase) => phrase.id === speakingId) ?? KEY_PHRASES[0],
-    [speakingId],
+    () => lesson.keyPhrases.find((phrase) => phrase.id === speakingId) ?? lesson.keyPhrases[0],
+    [lesson, speakingId],
   );
-  const listeningExercise = LISTENING_EXERCISES[listeningIndex];
-  const listeningPhrase = KEY_PHRASES.find((phrase) => phrase.id === listeningExercise.phraseId) ?? KEY_PHRASES[0];
-  const writingExercise = WRITING_EXERCISES[writingIndex];
+  const listeningExercise = lesson.listeningExercises[listeningIndex];
+  const listeningPhrase = lesson.keyPhrases.find((phrase) => phrase.id === listeningExercise.phraseId) ?? lesson.keyPhrases[0];
+  const writingExercise = lesson.writingExercises[writingIndex];
 
   useEffect(() => () => {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
@@ -125,13 +164,27 @@ export default function RevisionHome() {
     setMode(nextMode);
   }
 
+  function changeLesson(nextLesson: LessonId) {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    const next = LESSONS[nextLesson];
+    setLessonId(nextLesson);
+    setMode('resumo');
+    setWritingIndex(0);
+    setWritingValue('');
+    setWritingStatus('idle');
+    setSpeakingId(next.keyPhrases[0].id);
+    setListeningIndex(0);
+    setListeningChoice(null);
+    setListeningScore(0);
+  }
+
   function checkWriting() {
     if (!writingValue.trim()) return;
     setWritingStatus(normalizedAnswer(writingValue) === normalizedAnswer(writingExercise.answer) ? 'correct' : 'incorrect');
   }
 
   function nextWriting() {
-    setWritingIndex((current) => (current + 1) % WRITING_EXERCISES.length);
+    setWritingIndex((current) => (current + 1) % lesson.writingExercises.length);
     setWritingValue('');
     setWritingStatus('idle');
   }
@@ -144,7 +197,7 @@ export default function RevisionHome() {
 
   function nextListening() {
     setListeningChoice(null);
-    setListeningIndex((current) => (current + 1) % LISTENING_EXERCISES.length);
+    setListeningIndex((current) => (current + 1) % lesson.listeningExercises.length);
   }
 
   return (
@@ -163,35 +216,38 @@ export default function RevisionHome() {
         </div>
 
         <div className={styles.lessonTabs} role="tablist" aria-label="Aulas disponíveis">
-          <button className={styles.activeLesson} type="button" role="tab" aria-selected="true">
-            <span>Aula 1</span>
-            <small>Quantidade e família</small>
-          </button>
+          {(Object.keys(LESSONS) as LessonId[]).map((id) => (
+            <button key={id} className={lessonId === id ? styles.activeLesson : ''} type="button" role="tab"
+              aria-selected={lessonId === id} onClick={() => changeLesson(id)}>
+              <span>{LESSONS[id].tabTitle}</span>
+              <small>{LESSONS[id].tabSubtitle}</small>
+            </button>
+          ))}
         </div>
 
-        <section className={styles.lessonPanel} aria-labelledby="lesson-one-title">
+        <section className={styles.lessonPanel} aria-labelledby="lesson-title">
           <div className={styles.lessonTitle}>
             <div>
-              <span>Aula 01 · resumo completo</span>
-              <h2 id="lesson-one-title">Família, números e perguntas</h2>
+              <span>Aula {lesson.number} · resumo completo</span>
+              <h2 id="lesson-title">{lesson.title}</h2>
             </div>
-            <b>{KEY_PHRASES.length} frases para praticar</b>
+            <b>{lesson.keyPhrases.length} frases para praticar</b>
           </div>
 
           <div className={styles.lessonOverview}>
             <div>
               <span>Objetivo da aula</span>
-              <h3>Falar sobre o que alguém tem e sobre quantidades.</h3>
-              <p>Você revisou 有/没有, números, classificadores, membros da família, 吗/呢 e perguntas com 几 ou 多少. A professora também corrigiu caracteres e pontos de pinyin.</p>
+              <h3>{lesson.objective}</h3>
+              <p>{lesson.description}</p>
             </div>
             <dl>
               <div><dt>Gramática</dt><dd>6 blocos</dd></div>
-              <div><dt>Vocabulário</dt><dd>{VOCABULARY_GROUPS.reduce((total, group) => total + group.words.length, 0)} itens</dd></div>
+              <div><dt>Vocabulário</dt><dd>{lesson.vocabularyGroups.reduce((total, group) => total + group.words.length, 0)} itens</dd></div>
               <div><dt>Prática</dt><dd>escrita, fala e escuta</dd></div>
             </dl>
           </div>
 
-          <div className={styles.studyModes} role="tablist" aria-label="Modos de estudo da Aula 1">
+          <div className={styles.studyModes} role="tablist" aria-label={`Modos de estudo da ${lesson.tabTitle}`}>
             {MODES.map((item) => (
               <button key={item.id} type="button" role="tab" aria-selected={mode === item.id}
                 className={mode === item.id ? styles.activeMode : ''} onClick={() => changeMode(item.id)}>
@@ -209,7 +265,7 @@ export default function RevisionHome() {
                   <h3 id="grammar-title">As estruturas que você precisa dominar</h3>
                 </div>
                 <div className={styles.topicGrid}>
-                  {LESSON_TOPICS.map((topic) => (
+                  {lesson.topics.map((topic) => (
                     <article key={topic.title} className={styles.topicCard}>
                       <div className={styles.topicCardHead}><span lang="zh-CN">{topic.marker}</span><h4>{topic.title}</h4></div>
                       <p>{topic.summary}</p>
@@ -234,7 +290,7 @@ export default function RevisionHome() {
                   <h3 id="pinyin-title">Correções feitas durante a aula</h3>
                 </div>
                 <div className={styles.noteGrid}>
-                  {PINYIN_NOTES.map((note, index) => (
+                  {lesson.pinyinNotes.map((note, index) => (
                     <article key={note.title}>
                       <span>{String(index + 1).padStart(2, '0')}</span>
                       <div><h4>{note.title}</h4><p>{note.detail}</p></div>
@@ -246,11 +302,11 @@ export default function RevisionHome() {
               <section className={styles.contentSection} aria-labelledby="numbers-title">
                 <div className={styles.sectionHeading}>
                   <span>03 · Números</span>
-                  <h3 id="numbers-title">Unidades, dezenas e valores maiores</h3>
-                  <p>Para quantidades, leia o número completo. Em números de quarto, telefone ou códigos, os algarismos podem ser lidos um por um.</p>
+                  <h3 id="numbers-title">{lesson.numbersTitle}</h3>
+                  <p>{lesson.numbersDescription}</p>
                 </div>
                 <div className={styles.numberTable}>
-                  {NUMBER_ROWS.map((row) => (
+                  {lesson.numberRows.map((row) => (
                     <div key={row.hanzi}>
                       <span lang="zh-CN">{row.hanzi}</span>
                       <b>{getPinyin(row.hanzi)}</b>
@@ -260,7 +316,7 @@ export default function RevisionHome() {
                 </div>
                 <div className={styles.numberRule}>
                   <strong>Exemplo da professora</strong>
-                  <p><b>1528 como valor:</b> 一千五百二十八. <b>Como número de quarto:</b> 一、五、二、八.</p>
+                  <p>{lesson.numberRule}</p>
                 </div>
               </section>
 
@@ -270,8 +326,8 @@ export default function RevisionHome() {
                   <h3 id="vocabulary-title">Palavras trabalhadas na aula</h3>
                 </div>
                 <div className={styles.vocabularyGroups}>
-                  {VOCABULARY_GROUPS.map((group) => (
-                    <details key={group.title} open={group === VOCABULARY_GROUPS[0]}>
+                  {lesson.vocabularyGroups.map((group, groupIndex) => (
+                    <details key={group.title} open={groupIndex === 0}>
                       <summary><span>{group.title}</span><small>{group.words.length} itens</small></summary>
                       <p>{group.description}</p>
                       <div className={styles.wordGrid}>
@@ -295,7 +351,7 @@ export default function RevisionHome() {
                   <h3 id="hanzi-title">O que corrigir no caderno</h3>
                 </div>
                 <div className={styles.hanziCorrections}>
-                  {HANZI_CORRECTIONS.map((item) => (
+                  {lesson.hanziCorrections.map((item) => (
                     <article key={item.hanzi}>
                       <span lang="zh-CN">{item.hanzi}</span>
                       <div><h4>{item.title}</h4><p>{item.detail}</p></div>
@@ -310,7 +366,7 @@ export default function RevisionHome() {
                   <h3 id="phrases-title">Leia, escute e repita</h3>
                 </div>
                 <ol className={styles.phraseList}>
-                  {KEY_PHRASES.map((phrase, index) => (
+                  {lesson.keyPhrases.map((phrase, index) => (
                     <li key={phrase.id}>
                       <span>{String(index + 1).padStart(2, '0')}</span>
                       <div>
@@ -333,7 +389,7 @@ export default function RevisionHome() {
                   <span>课后练习 · depois da aula</span>
                   <h3 id="homework-title">Plano de revisão</h3>
                 </div>
-                <ol>{HOMEWORK.map((item) => <li key={item}>{item}</li>)}</ol>
+                <ol>{lesson.homework.map((item) => <li key={item}>{item}</li>)}</ol>
               </section>
             </div>
           )}
@@ -345,9 +401,9 @@ export default function RevisionHome() {
                 <h3 id="writing-title">Monte a frase em caracteres</h3>
                 <p>Leia a frase em português, escreva em mandarim e confira. Pontuação e espaços não alteram o resultado.</p>
               </div>
-              <div className={styles.exerciseProgress}><i style={{ width: `${((writingIndex + 1) / WRITING_EXERCISES.length) * 100}%` }} /></div>
+              <div className={styles.exerciseProgress}><i style={{ width: `${((writingIndex + 1) / lesson.writingExercises.length) * 100}%` }} /></div>
               <div className={styles.writingCard}>
-                <div className={styles.exerciseCounter}>Frase {writingIndex + 1} de {WRITING_EXERCISES.length}</div>
+                <div className={styles.exerciseCounter}>Frase {writingIndex + 1} de {lesson.writingExercises.length}</div>
                 <p>{writingExercise.prompt}</p>
                 <label htmlFor="writing-answer">Escreva em chinês</label>
                 <textarea id="writing-answer" value={writingValue} onChange={(event) => {
@@ -388,7 +444,7 @@ export default function RevisionHome() {
                   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
                   setSpeakingId(event.target.value);
                 }}>
-                  {KEY_PHRASES.map((phrase, index) => <option key={phrase.id} value={phrase.id}>{index + 1}. {phrase.hanzi}</option>)}
+                  {lesson.keyPhrases.map((phrase, index) => <option key={phrase.id} value={phrase.id}>{index + 1}. {phrase.hanzi}</option>)}
                 </select>
               </div>
               <div className={styles.speakingStage}>
@@ -402,9 +458,9 @@ export default function RevisionHome() {
                 </div>
               </div>
               <div className={styles.speakingRecorder}>
-                <PracticeRecorder key={speakingPhrase.id} phrase={speakingPhrase.hanzi}
+                <PracticeRecorder key={`${lessonId}-${speakingPhrase.id}`} phrase={speakingPhrase.hanzi}
                   pinyin={getPinyin(speakingPhrase.hanzi)} sessionId={sessionId}
-                  storageScope={`revisao-aula1-${speakingPhrase.id}`}
+                  storageScope={`revisao-${lessonId}-${speakingPhrase.id}`}
                   onBeforeRecord={() => window.speechSynthesis?.cancel()} />
               </div>
             </section>
@@ -418,7 +474,7 @@ export default function RevisionHome() {
                 <p>Reproduza a frase e escolha o significado. O hanzi e o pinyin só aparecem depois da resposta.</p>
               </div>
               <div className={styles.listeningScore}>
-                <span>Questão {listeningIndex + 1} de {LISTENING_EXERCISES.length}</span>
+                <span>Questão {listeningIndex + 1} de {lesson.listeningExercises.length}</span>
                 <strong>{listeningScore} acertos</strong>
               </div>
               <div className={styles.listeningCard}>
