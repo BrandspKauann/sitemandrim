@@ -112,18 +112,18 @@ export const AULA2_PINYIN_NOTES = [
 ];
 
 export const AULA2_WRITING_EXERCISES = [
-  { prompt: 'Este é o seu filho?', answer: '这是您儿子吗', hint: '这是 + 您儿子 + 吗' },
-  { prompt: 'Ele não é meu filho.', answer: '他不是我儿子', hint: '他 + 不是 + 我儿子' },
-  { prompt: 'Quantos filhos o senhor ou a senhora tem?', answer: '您有几个孩子', hint: '您 + 有 + 几个 + 孩子' },
-  { prompt: 'Tenho dois filhos: um filho e uma filha.', answer: '我有两个孩子一个儿子一个女儿', hint: '两 + 个; depois enumere os dois.' },
-  { prompt: 'Quantos anos tem o seu filho?', answer: '您儿子几岁', hint: 'Use 几岁 para a idade.' },
-  { prompt: 'Ele tem cinco anos.', answer: '他今年五岁', hint: '他 + 今年 + 五岁' },
-  { prompt: 'Quantos anos tem a sua filha?', answer: '您女儿多大', hint: 'Use 多大.' },
-  { prompt: 'Ela tem doze anos.', answer: '她今年十二岁', hint: 'Atenção: 她 para “ela”.' },
-  { prompt: 'Minha mãe tem cinquenta e oito anos.', answer: '我妈妈今年五十八岁', hint: '五十八 = 58.' },
-  { prompt: 'Meu irmão mais velho tem trinta e seis anos.', answer: '我哥哥三十六岁', hint: '三十六 = 36.' },
-  { prompt: 'Em que ano escolar você está?', answer: '你上几年级了', hint: '上 + 几年级' },
-  { prompt: 'Estou no primeiro ano.', answer: '我上一年级', hint: '我 + 上 + 一年级' },
+  { prompt: 'Este é o seu filho?', answer: '这是您儿子吗', hint: 'Use tratamento respeitoso e uma pergunta de sim ou não.' },
+  { prompt: 'Ele não é meu filho.', answer: '他不是我儿子', hint: 'Negue o verbo “ser”.' },
+  { prompt: 'Quantos filhos o senhor ou a senhora tem?', answer: '您有几个孩子', hint: 'Use tratamento respeitoso e uma pergunta de quantidade pequena.' },
+  { prompt: 'Tenho dois filhos: um filho e uma filha.', answer: '我有两个孩子一个儿子一个女儿', hint: 'Informe o total primeiro e depois detalhe quem são.' },
+  { prompt: 'Quantos anos tem o seu filho?', answer: '您儿子几岁', hint: 'Use a forma de perguntar idade mais comum para crianças.' },
+  { prompt: 'Ele tem cinco anos.', answer: '他今年五岁', hint: 'Diga a pessoa, o ano atual e depois a idade.' },
+  { prompt: 'Quantos anos tem a sua filha?', answer: '您女儿多大', hint: 'Use a pergunta de idade baseada em “quão grande”.' },
+  { prompt: 'Ela tem doze anos.', answer: '她今年十二岁', hint: 'Use o pronome feminino e indique que é a idade deste ano.' },
+  { prompt: 'Minha mãe tem cinquenta e oito anos.', answer: '我妈妈今年五十八岁', hint: 'Monte 58 como cinco dezenas e oito unidades.' },
+  { prompt: 'Meu irmão mais velho tem trinta e seis anos.', answer: '我哥哥三十六岁', hint: 'Monte 36 como três dezenas e seis unidades.' },
+  { prompt: 'Em que ano escolar você está?', answer: '你上几年级了', hint: 'Pergunte qual é o nível escolar frequentado.' },
+  { prompt: 'Estou no primeiro ano.', answer: '我上一年级', hint: 'Responda com o verbo “frequentar” e o nível escolar.' },
 ];
 
 export const AULA2_LISTENING_EXERCISES = [

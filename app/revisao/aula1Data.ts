@@ -212,18 +212,18 @@ export const PINYIN_NOTES = [
 ];
 
 export const WRITING_EXERCISES = [
-  { prompt: 'Eu tenho dois filhos.', answer: '我有两个孩子', hint: '我 + 有 + 两个 + 孩子' },
-  { prompt: 'Quantos alunos ele tem?', answer: '他有多少个学生', hint: '他 + 有 + 多少个 + 学生' },
-  { prompt: 'Ele tem vinte alunos.', answer: '他有二十个学生', hint: '他 + 有 + 二十个 + 学生' },
-  { prompt: 'Eu não tenho irmã mais velha.', answer: '我没有姐姐', hint: 'A negação de 有 é 没有.' },
-  { prompt: 'Você tem irmão mais velho ou não?', answer: '你有没有哥哥', hint: 'Use a forma A-não-A: 有没有.' },
-  { prompt: 'Quantas pessoas há na sua família?', answer: '你家有几口人', hint: 'Para família, use o classificador 口.' },
-  { prompt: 'Minha família tem quatro pessoas.', answer: '我家有四口人', hint: '我家 + 有 + 四口人' },
-  { prompt: 'Este é o seu pai?', answer: '这是你爸爸吗', hint: 'Use 吗 no final.' },
-  { prompt: 'Ele não é o meu pai.', answer: '他不是我爸爸', hint: 'A negação de 是 é 不是.' },
-  { prompt: 'E a sua mãe?', answer: '你妈妈呢', hint: 'Use 呢 para perguntar de volta/onde está.' },
-  { prompt: 'Minha mãe está em casa.', answer: '我妈妈在家', hint: '我妈妈 + 在 + 家' },
-  { prompt: 'Eu tenho dois irmãos mais velhos. E você?', answer: '我有两个哥哥你呢', hint: 'Finalize com 你呢？' },
+  { prompt: 'Eu tenho dois filhos.', answer: '我有两个孩子', hint: 'Use a estrutura de posse com numeral e classificador.' },
+  { prompt: 'Quantos alunos ele tem?', answer: '他有多少个学生', hint: 'É uma pergunta aberta de quantidade.' },
+  { prompt: 'Ele tem vinte alunos.', answer: '他有二十个学生', hint: 'A quantidade fica entre o verbo e o substantivo.' },
+  { prompt: 'Eu não tenho irmã mais velha.', answer: '我没有姐姐', hint: 'Lembre-se da forma negativa do verbo “ter”.' },
+  { prompt: 'Você tem irmão mais velho ou não?', answer: '你有没有哥哥', hint: 'Use o padrão afirmativo–negativo para perguntar.' },
+  { prompt: 'Quantas pessoas há na sua família?', answer: '你家有几口人', hint: 'Pessoas da mesma família usam um classificador próprio.' },
+  { prompt: 'Minha família tem quatro pessoas.', answer: '我家有四口人', hint: 'Comece apresentando a sua família e depois informe a quantidade.' },
+  { prompt: 'Este é o seu pai?', answer: '这是你爸爸吗', hint: 'Transforme uma afirmação em pergunta de sim ou não.' },
+  { prompt: 'Ele não é o meu pai.', answer: '他不是我爸爸', hint: 'Negue o verbo “ser”.' },
+  { prompt: 'E a sua mãe?', answer: '你妈妈呢', hint: 'Retome o assunto anterior com a partícula adequada.' },
+  { prompt: 'Minha mãe está em casa.', answer: '我妈妈在家', hint: 'Use a estrutura pessoa + estar + lugar.' },
+  { prompt: 'Eu tenho dois irmãos mais velhos. E você?', answer: '我有两个哥哥你呢', hint: 'Depois da afirmação, devolva a pergunta ao interlocutor.' },
 ];
 
 export const LISTENING_EXERCISES = [
