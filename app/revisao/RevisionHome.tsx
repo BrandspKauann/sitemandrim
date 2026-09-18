@@ -1,6 +1,6 @@
 'use client';
 
-import { pinyin } from 'pinyin-pro';
+import { convert, pinyin } from 'pinyin-pro';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useClientSession } from '../components/ClientSession';
@@ -74,6 +74,40 @@ function getPinyin(text: string) {
     nonZh: 'consecutive',
     toneSandhi: true,
   })
+    .replace(/\s+([，。！？；：、])/g, '$1')
+    .replace(/([，。！？；：、])(?=\S)/g, '$1 ')
+    .trim();
+}
+
+function getSpokenPinyin(text: string) {
+  const syllables = pinyin(text, {
+    type: 'array',
+    toneType: 'num',
+    nonZh: 'consecutive',
+    toneSandhi: true,
+  });
+
+  let runStart = -1;
+  const spoken = [...syllables];
+
+  function applyThirdToneSandhi(runEnd: number) {
+    if (runStart < 0 || runEnd - runStart < 2) return;
+    for (let index = runStart; index < runEnd - 1; index += 1) {
+      spoken[index] = spoken[index].replace(/3(r?)$/, '2$1');
+    }
+  }
+
+  for (let index = 0; index <= spoken.length; index += 1) {
+    const isThirdTone = index < spoken.length && /3r?$/.test(spoken[index]);
+    if (isThirdTone && runStart < 0) runStart = index;
+    if (!isThirdTone && runStart >= 0) {
+      applyThirdToneSandhi(index);
+      runStart = -1;
+    }
+  }
+
+  return convert(spoken, { format: 'numToSymbol' })
+    .join(' ')
     .replace(/\s+([，。！？；：、])/g, '$1')
     .replace(/([，。！？；：、])(?=\S)/g, '$1 ')
     .trim();
@@ -364,6 +398,7 @@ export default function RevisionHome() {
                 <div className={styles.sectionHeading}>
                   <span>06 · Frases da aula</span>
                   <h3 id="phrases-title">Leia, escute e repita</h3>
+                  <p>O pinyin abaixo acompanha os tons como são pronunciados na fala, incluindo as mudanças de 3º tom, 一 e 不.</p>
                 </div>
                 <ol className={styles.phraseList}>
                   {lesson.keyPhrases.map((phrase, index) => (
@@ -371,7 +406,7 @@ export default function RevisionHome() {
                       <span>{String(index + 1).padStart(2, '0')}</span>
                       <div>
                         <strong lang="zh-CN">{phrase.hanzi}</strong>
-                        <b>{getPinyin(phrase.hanzi)}</b>
+                        <b>{getSpokenPinyin(phrase.hanzi)}</b>
                         <p>{phrase.translation}</p>
                         {phrase.note && <small>{phrase.note}</small>}
                       </div>
