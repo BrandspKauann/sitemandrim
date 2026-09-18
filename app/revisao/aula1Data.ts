@@ -2,6 +2,7 @@ export type LessonPhrase = {
   id: string;
   hanzi: string;
   translation: string;
+  spokenPinyin?: string;
   note?: string;
 };
 
@@ -20,31 +21,31 @@ export type VocabularyGroup = {
 };
 
 export const KEY_PHRASES: LessonPhrase[] = [
-  { id: 'children-question', hanzi: '你有多少个孩子？', translation: 'Quantos filhos você tem?', note: 'Dois terceiros tons juntos: 你有 costuma soar ní yǒu na fala.' },
-  { id: 'two-children', hanzi: '我有两个孩子。', translation: 'Eu tenho dois filhos.' },
-  { id: 'yifei-busy', hanzi: '一飞忙吗？', translation: 'Yifei está ocupado?' },
-  { id: 'very-busy', hanzi: '他很忙。', translation: 'Ele está muito ocupado.' },
-  { id: 'students-question', hanzi: '他有多少个学生？', translation: 'Quantos alunos ele tem?' },
-  { id: 'twenty-students', hanzi: '他有二十个学生。', translation: 'Ele tem vinte alunos.' },
-  { id: 'one-friend', hanzi: '我有一个朋友。', translation: 'Eu tenho um amigo.' },
-  { id: 'no-friend', hanzi: '我没有一个朋友。', translation: 'Eu não tenho um amigo.' },
-  { id: 'pen-positive', hanzi: '你有一支笔。', translation: 'Você tem uma caneta.' },
-  { id: 'pen-negative', hanzi: '你没有一支笔。', translation: 'Você não tem uma caneta.' },
-  { id: 'older-brother-question', hanzi: '你有几个哥哥？', translation: 'Quantos irmãos mais velhos você tem?' },
-  { id: 'two-brothers', hanzi: '我有两个哥哥。', translation: 'Eu tenho dois irmãos mais velhos.' },
-  { id: 'father-question', hanzi: '这是你爸爸吗？', translation: 'Este é o seu pai?' },
-  { id: 'not-father', hanzi: '他不是我爸爸。', translation: 'Ele não é o meu pai.' },
-  { id: 'brother-where', hanzi: '你哥哥呢？我哥哥在那儿。', translation: 'E o seu irmão mais velho? Meu irmão está ali.' },
-  { id: 'father-where', hanzi: '你爸爸呢？我爸爸在学校。', translation: 'E o seu pai? Meu pai está na escola.' },
-  { id: 'mother-where', hanzi: '你妈妈呢？我妈妈在家。', translation: 'E a sua mãe? Minha mãe está em casa.' },
-  { id: 'family-count', hanzi: '你家有几口人？', translation: 'Quantas pessoas há na sua família?' },
-  { id: 'four-family', hanzi: '我家有四口人：爸爸、妈妈、妹妹和我。', translation: 'Minha família tem quatro pessoas: pai, mãe, irmã mais nova e eu.' },
-  { id: 'have-brother', hanzi: '你有没有哥哥？', translation: 'Você tem irmão mais velho ou não?' },
-  { id: 'sister-answer', hanzi: '我没有哥哥，我有妹妹。', translation: 'Eu não tenho irmão mais velho; tenho uma irmã mais nova.' },
-  { id: 'and-you', hanzi: '我有两个哥哥。你呢？', translation: 'Eu tenho dois irmãos mais velhos. E você?' },
-  { id: 'nationality', hanzi: '你是哪国人？我是美国人。你呢？', translation: 'De que país você é? Sou americano. E você?' },
-  { id: 'name', hanzi: '你好，你叫什么名字？我叫高安。', translation: 'Olá, como você se chama? Eu me chamo Gao An.' },
-  { id: 'teacher-student', hanzi: '我是老师。你呢？我是学生。', translation: 'Eu sou professora. E você? Eu sou aluno.' },
+  { id: 'children-question', hanzi: '你有多少个孩子？', spokenPinyin: 'ní yǒu | duōshao ge | háizi?', translation: 'Quantos filhos você tem?', note: 'Blocos de fala: 你有 | 多少个 | 孩子.' },
+  { id: 'two-children', hanzi: '我有两个孩子。', spokenPinyin: 'wó yǒu | liǎng ge | háizi.', translation: 'Eu tenho dois filhos.' },
+  { id: 'yifei-busy', hanzi: '一飞忙吗？', spokenPinyin: 'Yīfēi | máng ma?', translation: 'Yifei está ocupado?' },
+  { id: 'very-busy', hanzi: '他很忙。', spokenPinyin: 'tā hěn máng.', translation: 'Ele está muito ocupado.' },
+  { id: 'students-question', hanzi: '他有多少个学生？', spokenPinyin: 'tā yǒu | duōshao ge | xuésheng?', translation: 'Quantos alunos ele tem?' },
+  { id: 'twenty-students', hanzi: '他有二十个学生。', spokenPinyin: 'tā yǒu | èrshí ge | xuésheng.', translation: 'Ele tem vinte alunos.' },
+  { id: 'one-friend', hanzi: '我有一个朋友。', spokenPinyin: 'wó yǒu | yí ge | péngyou.', translation: 'Eu tenho um amigo.' },
+  { id: 'no-friend', hanzi: '我没有一个朋友。', spokenPinyin: 'wǒ méiyǒu | yí ge | péngyou.', translation: 'Eu não tenho um amigo.' },
+  { id: 'pen-positive', hanzi: '你有一支笔。', spokenPinyin: 'ní yǒu | yì zhī bǐ.', translation: 'Você tem uma caneta.' },
+  { id: 'pen-negative', hanzi: '你没有一支笔。', spokenPinyin: 'nǐ méiyǒu | yì zhī bǐ.', translation: 'Você não tem uma caneta.' },
+  { id: 'older-brother-question', hanzi: '你有几个哥哥？', spokenPinyin: 'ní yǒu | jǐ ge | gēge?', translation: 'Quantos irmãos mais velhos você tem?' },
+  { id: 'two-brothers', hanzi: '我有两个哥哥。', spokenPinyin: 'wó yǒu | liǎng ge | gēge.', translation: 'Eu tenho dois irmãos mais velhos.' },
+  { id: 'father-question', hanzi: '这是你爸爸吗？', spokenPinyin: 'zhè shì | nǐ bàba ma?', translation: 'Este é o seu pai?' },
+  { id: 'not-father', hanzi: '他不是我爸爸。', spokenPinyin: 'tā bú shì | wǒ bàba.', translation: 'Ele não é o meu pai.' },
+  { id: 'brother-where', hanzi: '你哥哥呢？我哥哥在那儿。', spokenPinyin: 'nǐ gēge ne? | wǒ gēge zài nàr.', translation: 'E o seu irmão mais velho? Meu irmão está ali.' },
+  { id: 'father-where', hanzi: '你爸爸呢？我爸爸在学校。', spokenPinyin: 'nǐ bàba ne? | wǒ bàba zài xuéxiào.', translation: 'E o seu pai? Meu pai está na escola.' },
+  { id: 'mother-where', hanzi: '你妈妈呢？我妈妈在家。', spokenPinyin: 'nǐ māma ne? | wǒ māma zài jiā.', translation: 'E a sua mãe? Minha mãe está em casa.' },
+  { id: 'family-count', hanzi: '你家有几口人？', spokenPinyin: 'nǐ jiā | yǒu | jí kǒu rén?', translation: 'Quantas pessoas há na sua família?', note: 'Blocos de fala: 你家 | 有 | 几口人.' },
+  { id: 'four-family', hanzi: '我家有四口人：爸爸、妈妈、妹妹和我。', spokenPinyin: 'wǒ jiā yǒu | sì kǒu rén: bàba, māma, mèimei hé wǒ.', translation: 'Minha família tem quatro pessoas: pai, mãe, irmã mais nova e eu.' },
+  { id: 'have-brother', hanzi: '你有没有哥哥？', spokenPinyin: 'ní yǒu | méiyǒu | gēge?', translation: 'Você tem irmão mais velho ou não?' },
+  { id: 'sister-answer', hanzi: '我没有哥哥，我有妹妹。', spokenPinyin: 'wǒ méiyǒu gēge, | wó yǒu mèimei.', translation: 'Eu não tenho irmão mais velho; tenho uma irmã mais nova.' },
+  { id: 'and-you', hanzi: '我有两个哥哥。你呢？', spokenPinyin: 'wó yǒu | liǎng ge | gēge. | nǐ ne?', translation: 'Eu tenho dois irmãos mais velhos. E você?' },
+  { id: 'nationality', hanzi: '你是哪国人？我是美国人。你呢？', spokenPinyin: 'nǐ shì nǎ guó rén? | wǒ shì Měiguó rén. | nǐ ne?', translation: 'De que país você é? Sou americano. E você?' },
+  { id: 'name', hanzi: '你好，你叫什么名字？我叫高安。', spokenPinyin: 'ní hǎo, | nǐ jiào shénme míngzi? | wǒ jiào Gāo’ān.', translation: 'Olá, como você se chama? Eu me chamo Gao An.' },
+  { id: 'teacher-student', hanzi: '我是老师。你呢？我是学生。', spokenPinyin: 'wǒ shì lǎoshī. | nǐ ne? | wǒ shì xuésheng.', translation: 'Eu sou professora. E você? Eu sou aluno.' },
 ];
 
 export const LESSON_TOPICS: LessonTopic[] = [
