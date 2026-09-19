@@ -48,15 +48,15 @@ const LESSONS = {
     numberRule: <><b>1528 como valor:</b> 一千五百二十八. <b>Como número de quarto:</b> 一、五、二、八.</>,
   },
   aula2: {
-    number: '02', tabTitle: 'Aula 2', tabSubtitle: 'Filhos e idade', title: 'Filhos, idade e escrita dos caracteres',
-    objective: 'Perguntar e responder sobre filhos, idade e ano escolar.',
-    description: 'A aula trabalhou 儿子/女儿/孩子, 几岁/多大, 今年 + idade, tratamento respeitoso com 您 e os princípios básicos da ordem dos traços.',
+    number: '02', tabTitle: 'Aula 2', tabSubtitle: 'Datas e habilidades', title: 'Datas, rotina e o que você sabe fazer',
+    objective: 'Falar sobre datas, dias da semana, descanso e habilidades.',
+    description: 'A aula trabalhou 年/月/日/号, os dias da semana, perguntas com 几号 e 什么时候, o verbo 会, 一些, 也 e vocabulário de comida e rotina.',
     topics: AULA2_LESSON_TOPICS, pinyinNotes: AULA2_PINYIN_NOTES, numberRows: AULA2_NUMBER_ROWS, vocabularyGroups: AULA2_VOCABULARY_GROUPS,
     hanziCorrections: AULA2_HANZI_CORRECTIONS, keyPhrases: AULA2_KEY_PHRASES, homework: AULA2_HOMEWORK,
     writingExercises: AULA2_WRITING_EXERCISES, listeningExercises: AULA2_LISTENING_EXERCISES,
-    numbersTitle: 'Idades trabalhadas na aula',
-    numbersDescription: 'Leia o número e acrescente 岁. Dê atenção especial à diferença entre 十二 (12) e 二十 (20).',
-    numberRule: <><b>Modelo:</b> 我妈妈今年五十八岁。 O número vem antes de 岁; 今年 pode aparecer antes da idade.</>,
+    numbersTitle: 'Datas, meses, semana e horas',
+    numbersDescription: 'Leia a informação do maior para o menor: ano, mês, dia, período do dia, hora e minuto.',
+    numberRule: <><b>Modelo:</b> 二〇二六年九月十九日上午九点二十一分. <b>Na conversa:</b> 日 pode ser trocado por 号.</>,
   },
 } as const;
 
