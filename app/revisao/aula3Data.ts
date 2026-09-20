@@ -41,6 +41,20 @@ export const AULA3_KEY_PHRASES: LessonPhrase[] = [
   { id: 'a3-baozi-there', hanzi: '那边的包子非常好吃。', spokenPinyin: 'nàbian de bāozi | fēicháng hǎochī.', translation: 'Os baozi de lá são muito gostosos.' },
   { id: 'a3-rice-not-baozi', hanzi: '他想吃米饭，不想吃包子。', spokenPinyin: 'tā xiǎng chī mǐfàn, | bù xiǎng chī bāozi.', translation: 'Ele quer comer arroz, mas não quer baozi.' },
   { id: 'a3-supermarket-milk', hanzi: '我想去超市买牛奶。', spokenPinyin: 'wǒ xiǎng qù chāoshì | mǎi niúnǎi.', translation: 'Quero ir ao supermercado comprar leite.' },
+  { id: 'a3-book-date-question', hanzi: '今天几号？', spokenPinyin: 'jīntiān | jǐ hào?', translation: 'Que dia é hoje?' },
+  { id: 'a3-book-date-answer', hanzi: '今天九月八号。', spokenPinyin: 'jīntiān | jiǔ yuè bā hào.', translation: 'Hoje é 8 de setembro.' },
+  { id: 'a3-book-weekday-question', hanzi: '星期几？', spokenPinyin: 'xīngqī jǐ?', translation: 'Que dia da semana é?' },
+  { id: 'a3-book-weekday-answer', hanzi: '星期日。今天我休息。', spokenPinyin: 'xīngqīrì. | jīntiān | wǒ xiūxi.', translation: 'Domingo. Hoje eu descanso.' },
+  { id: 'a3-book-phone-question', hanzi: '家月，你的手机号是多少？', spokenPinyin: 'Jiāyuè, | nǐ de shǒujī hào | shì duōshao?', translation: 'Jiayue, qual é o número do seu celular?' },
+  { id: 'a3-book-phone-france', hanzi: '我的手机号是三三六〇幺四九三幺九〇。', spokenPinyin: 'wǒ de | shǒujī hào shì | sān sān liù líng, | yāo sì jiǔ sān, | yāo jiǔ líng.', translation: 'Meu número de celular é +33 601493190.', note: 'O código +33 também é lido algarismo por algarismo. O número 1 soa yāo.' },
+  { id: 'a3-book-phone-china', hanzi: '我的手机号是八六幺三五五二七二幺幺六〇。', spokenPinyin: 'wǒ de | shǒujī hào shì | bā liù yāo, | sān wǔ wǔ, | èr qī èr, | yāo yāo liù líng.', translation: 'Meu número de celular é +86 13552721160.', note: 'Em números telefônicos, 幺 representa o algarismo 1 e se pronuncia yāo.' },
+  { id: 'a3-book-okay', hanzi: '好的。', spokenPinyin: 'hǎo de.', translation: 'Está bem.' },
+  { id: 'a3-book-dinner-where', hanzi: '星期天我们去哪儿吃晚饭？', spokenPinyin: 'xīngqītiān | wǒmen qù nǎr | chī wǎnfàn?', translation: 'Onde vamos jantar no domingo?' },
+  { id: 'a3-book-xian-restaurant', hanzi: '我还想去西安饭店。', spokenPinyin: 'wǒ hái xiǎng qù | Xī’ān fàndiàn.', translation: 'Eu ainda quero ir ao restaurante Xi’an.' },
+  { id: 'a3-book-baozi-tasty', hanzi: '那边的包子非常好吃，我想吃包子。', spokenPinyin: 'nàbian de bāozi | fēicháng hǎochī, | wǒ xiǎng chī bāozi.', translation: 'Os baozi de lá são muito gostosos; quero comer baozi.' },
+  { id: 'a3-book-rice-not-baozi', hanzi: '妈妈，我想吃米饭，不想吃包子。', spokenPinyin: 'māma, | wǒ xiǎng chī mǐfàn, | bù xiǎng chī bāozi.', translation: 'Mamãe, quero comer arroz; não quero comer baozi.' },
+  { id: 'a3-book-how-go', hanzi: '好的。我们怎么去？', spokenPinyin: 'hǎo de. | wǒmen zěnme qù?', translation: 'Está bem. Como vamos?' },
+  { id: 'a3-book-taxi-go', hanzi: '坐出租车去。', spokenPinyin: 'zuò chūzūchē qù.', translation: 'Vamos de táxi.' },
 ];
 
 export const AULA3_LESSON_TOPICS: LessonTopic[] = [
@@ -238,6 +252,12 @@ export const AULA3_LISTENING_EXERCISES = [
   { phraseId: 'a3-how-restaurant', choices: ['Como vamos ao restaurante Xi’an?', 'Onde fica o restaurante Xi’an?', 'O restaurante Xi’an é bom?'] },
   { phraseId: 'a3-mother-market', choices: ['Mamãe vai à feira comprar verduras.', 'Mamãe vai ao mercado vender frutas.', 'Mamãe cozinha no restaurante.'] },
   { phraseId: 'a3-subway-school', choices: ['Vou de metrô à escola ter aula.', 'Vou de táxi à biblioteca estudar.', 'Vou a pé ao trabalho.'] },
+  { phraseId: 'a3-book-date-answer', choices: ['Hoje é 8 de setembro.', 'Hoje é domingo.', 'Hoje é 9 de agosto.'] },
+  { phraseId: 'a3-book-weekday-answer', choices: ['Domingo. Hoje eu descanso.', 'Sábado. Hoje eu trabalho.', 'Hoje é segunda-feira.'] },
+  { phraseId: 'a3-book-phone-question', choices: ['Jiayue, qual é o número do seu celular?', 'Jiayue, este é o seu celular?', 'Jiayue, onde está o seu telefone?'] },
+  { phraseId: 'a3-book-dinner-where', choices: ['Onde vamos jantar no domingo?', 'O que vamos comprar no domingo?', 'Como vamos ao supermercado?'] },
+  { phraseId: 'a3-book-rice-not-baozi', choices: ['Mamãe, quero comer arroz; não quero comer baozi.', 'Mamãe, quero comprar arroz e baozi.', 'Mamãe, o baozi está muito gostoso.'] },
+  { phraseId: 'a3-book-how-go', choices: ['Está bem. Como vamos?', 'Está bem. Aonde vamos?', 'Como está o jantar?'] },
 ];
 
 export const AULA3_HOMEWORK = [

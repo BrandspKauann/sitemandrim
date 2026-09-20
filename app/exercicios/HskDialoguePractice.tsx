@@ -210,6 +210,89 @@ const DIALOGUES: Dialogue[] = [
       },
     ] satisfies DialogueLineSource[]).map(prepareLine),
   },
+  {
+    id: 'dialogue-7',
+    tab: 'Diálogo 7',
+    lessonLabel: '课文 7',
+    title: 'Data e dia da semana',
+    subtitle: 'Uma conversa entre Wang Yixue e Liu Ming.',
+    lines: ([
+      {
+        id: 'dialogue-7-line-1', speaker: 'Wang Yixue', speakerHanzi: '王一雪', speakerKey: 'yixue', useDefaultVoice: true,
+        hanzi: '今天几号？', translation: 'Que dia é hoje?',
+      },
+      {
+        id: 'dialogue-7-line-2', speaker: 'Liu Ming', speakerHanzi: '刘明', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '今天九月八号。', translation: 'Hoje é 8 de setembro.',
+      },
+      {
+        id: 'dialogue-7-line-3', speaker: 'Wang Yixue', speakerHanzi: '王一雪', speakerKey: 'yixue', useDefaultVoice: true,
+        hanzi: '星期几？', translation: 'Que dia da semana é?',
+      },
+      {
+        id: 'dialogue-7-line-4', speaker: 'Liu Ming', speakerHanzi: '刘明', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '星期日。今天我休息。', translation: 'Domingo. Hoje eu descanso.',
+      },
+    ] satisfies DialogueLineSource[]).map(prepareLine),
+  },
+  {
+    id: 'dialogue-8',
+    tab: 'Diálogo 8',
+    lessonLabel: '课文 8',
+    title: 'Números de celular',
+    subtitle: 'Li Wen e Bai Jiayue trocam seus números de celular.',
+    lines: ([
+      {
+        id: 'dialogue-8-line-1', speaker: 'Li Wen', speakerHanzi: '李文', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '家月，你的手机号是多少？', translation: 'Jiayue, qual é o número do seu celular?',
+      },
+      {
+        id: 'dialogue-8-line-2', speaker: 'Bai Jiayue', speakerHanzi: '白家月', speakerKey: 'jiayue', useDefaultVoice: true,
+        hanzi: '我的手机号是三三六零幺四九三幺九零。', translation: 'Meu número de celular é +33 601493190.',
+      },
+      {
+        id: 'dialogue-8-line-3', speaker: 'Li Wen', speakerHanzi: '李文', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '我的手机号是八六幺三五五二七二幺幺六零。', translation: 'Meu número de celular é +86 13552721160.',
+      },
+      {
+        id: 'dialogue-8-line-4', speaker: 'Bai Jiayue', speakerHanzi: '白家月', speakerKey: 'jiayue', useDefaultVoice: true,
+        hanzi: '好的。', translation: 'Está bem.',
+      },
+    ] satisfies DialogueLineSource[]).map(prepareLine),
+  },
+  {
+    id: 'dialogue-9',
+    tab: 'Diálogo 9',
+    lessonLabel: '课文 9',
+    title: 'Jantar e transporte',
+    subtitle: 'A família escolhe o que comer e como ir ao restaurante.',
+    lines: ([
+      {
+        id: 'dialogue-9-line-1', speaker: 'Wang Yixue', speakerHanzi: '王一雪', speakerKey: 'yixue', useDefaultVoice: true,
+        hanzi: '星期天我们去哪儿吃晚饭？', translation: 'Onde vamos jantar no domingo?',
+      },
+      {
+        id: 'dialogue-9-line-2', speaker: 'Liu Ming', speakerHanzi: '刘明', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '我还想去西安饭店。', translation: 'Eu ainda quero ir ao restaurante Xi’an.',
+      },
+      {
+        id: 'dialogue-9-line-3', speaker: 'Liu Xiaoxue', speakerHanzi: '刘小雪', speakerKey: 'jiayue', useDefaultVoice: true,
+        hanzi: '那边的包子非常好吃，我想吃包子。', translation: 'Os baozi de lá são muito gostosos; quero comer baozi.',
+      },
+      {
+        id: 'dialogue-9-line-4', speaker: 'Liu Xiaoming', speakerHanzi: '刘小明', speakerKey: 'yifei', useDefaultVoice: true,
+        hanzi: '妈妈，我想吃米饭，不想吃包子。', translation: 'Mamãe, quero comer arroz; não quero comer baozi.',
+      },
+      {
+        id: 'dialogue-9-line-5', speaker: 'Wang Yixue', speakerHanzi: '王一雪', speakerKey: 'yixue', useDefaultVoice: true,
+        hanzi: '好的。我们怎么去？', translation: 'Está bem. Como vamos?',
+      },
+      {
+        id: 'dialogue-9-line-6', speaker: 'Liu Ming', speakerHanzi: '刘明', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '坐出租车去。', translation: 'Vamos de táxi.',
+      },
+    ] satisfies DialogueLineSource[]).map(prepareLine),
+  },
 ];
 
 type HskDialoguePracticeProps = {
