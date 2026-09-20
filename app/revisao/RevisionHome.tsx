@@ -29,11 +29,22 @@ import {
   AULA2_VOCABULARY_GROUPS,
   AULA2_WRITING_EXERCISES,
 } from './aula2Data';
+import {
+  AULA3_HANZI_CORRECTIONS,
+  AULA3_HOMEWORK,
+  AULA3_KEY_PHRASES,
+  AULA3_LESSON_TOPICS,
+  AULA3_LISTENING_EXERCISES,
+  AULA3_NUMBER_ROWS,
+  AULA3_PINYIN_NOTES,
+  AULA3_VOCABULARY_GROUPS,
+  AULA3_WRITING_EXERCISES,
+} from './aula3Data';
 import styles from './page.module.css';
 
 type StudyMode = 'resumo' | 'escrever' | 'falar' | 'ouvir';
 type ExerciseStatus = 'idle' | 'correct' | 'incorrect' | 'revealed';
-type LessonId = 'aula1' | 'aula2';
+type LessonId = 'aula1' | 'aula2' | 'aula3';
 
 const LESSONS = {
   aula1: {
@@ -57,6 +68,17 @@ const LESSONS = {
     numbersTitle: 'Datas, meses, semana e horas',
     numbersDescription: 'Leia a informação do maior para o menor: ano, mês, dia, período do dia, hora e minuto.',
     numberRule: <><b>Modelo:</b> 二〇二六年九月十九日上午九点二十一分. <b>Na conversa:</b> 日 pode ser trocado por 号.</>,
+  },
+  aula3: {
+    number: '03', tabTitle: 'Aula 3', tabSubtitle: 'Telefone, lugares e planos', title: 'Telefone, lugares e planos',
+    objective: 'Informar telefone, dizer o que quer fazer e explicar para onde e como vai.',
+    description: 'A aula trabalhou 手机号, 想/不想, 哪儿/怎么, compras, refeições, meios de transporte e frases com duas ações em sequência.',
+    topics: AULA3_LESSON_TOPICS, pinyinNotes: AULA3_PINYIN_NOTES, numberRows: AULA3_NUMBER_ROWS, vocabularyGroups: AULA3_VOCABULARY_GROUPS,
+    hanziCorrections: AULA3_HANZI_CORRECTIONS, keyPhrases: AULA3_KEY_PHRASES, homework: AULA3_HOMEWORK,
+    writingExercises: AULA3_WRITING_EXERCISES, listeningExercises: AULA3_LISTENING_EXERCISES,
+    numbersTitle: 'Números de telefone',
+    numbersDescription: 'Em telefone, quarto e códigos, leia os algarismos separadamente. O número 1 costuma soar yāo.',
+    numberRule: <><b>Modelo:</b> 6985806 → liù jiǔ bā, wǔ bā líng liù. <b>Com 1:</b> prefira yāo em números de telefone.</>,
   },
 } as const;
 
