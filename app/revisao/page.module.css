@@ -170,6 +170,19 @@
 .homework h3 { color: #fff8ef; }
 .homework ol { margin: 0; padding-left: 22px; color: #cbbeba; font-size: 14px; line-height: 1.55; }
 .homework li + li { margin-top: 10px; }
+.homeworkAudio { grid-column: 1 / -1; padding: 20px; display: grid; gap: 15px; border: 1px solid rgb(255 248 239 / 18%); background: rgb(255 255 255 / 5%); }
+.homeworkAudioHeading { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.homeworkAudioHeading > div { display: grid; gap: 4px; }
+.homeworkAudioHeading > div > span { color: #d89a8f; font-size: 12px; font-weight: 780; letter-spacing: .09em; text-transform: uppercase; }
+.homeworkAudioHeading strong { color: #fff8ef; font-family: Georgia, 'Times New Roman', serif; font-size: 20px; font-weight: 520; }
+.homeworkAudioHeading > span { color: #d9ccc7; font-size: 13px; font-weight: 700; }
+.homeworkAudio audio { width: 100%; min-height: 42px; }
+.homeworkAudioControls { display: flex; align-items: center; gap: 18px; }
+.homeworkAudioControls button { min-height: 42px; padding: 0 16px; border: 1px solid rgb(255 248 239 / 28%); background: transparent; color: #fff8ef; font-size: 14px; font-weight: 740; cursor: pointer; }
+.homeworkAudioControls button.activeAudioLoop { border-color: #db7469; background: #ba3f36; }
+.homeworkAudioControls label { min-width: 0; flex: 1; display: grid; grid-template-columns: auto minmax(120px, 1fr) auto; align-items: center; gap: 12px; color: #d9ccc7; font-size: 14px; }
+.homeworkAudioControls input { width: 100%; accent-color: #d85f54; }
+.homeworkAudioControls b { min-width: 76px; color: #fff8ef; text-align: right; }
 
 .exerciseMode { min-height: 650px; margin: 0 27px; padding: 54px 0 38px; }
 .exerciseIntro { max-width: 840px; }
@@ -236,6 +249,7 @@
   .phraseList > li { grid-template-columns: 29px minmax(0, 1fr); align-items: start; }
   .phraseAudio { grid-column: 2; }
   .homework { grid-template-columns: 1fr; gap: 24px; }
+  .homeworkAudio { grid-column: auto; }
   .listeningPrompt { grid-template-columns: auto minmax(0, 1fr); }
   .listeningAudio { grid-column: 1 / -1; }
 }
@@ -260,6 +274,9 @@
   .phraseList strong { font-size: 20px; }
   .phraseAudio { flex-wrap: wrap; }
   .homework { margin-top: 45px; padding: 24px 20px; }
+  .homeworkAudioHeading, .homeworkAudioControls { align-items: stretch; flex-direction: column; }
+  .homeworkAudioControls label { grid-template-columns: 1fr auto; }
+  .homeworkAudioControls label input { grid-column: 1 / -1; grid-row: 2; }
   .exerciseMode { min-height: 580px; padding-top: 42px; }
   .writingCard, .listeningCard { padding: 21px 17px; }
   .writingCard textarea { font-size: 24px; }

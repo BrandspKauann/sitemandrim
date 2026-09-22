@@ -148,6 +148,72 @@ function MandarinButton({ phrase, slow = false, label }: { phrase: LessonPhrase;
   );
 }
 
+function HomeworkAudioLoop() {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const replayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [repeat, setRepeat] = useState(true);
+  const [pauseSeconds, setPauseSeconds] = useState(1);
+  const [waiting, setWaiting] = useState(false);
+
+  useEffect(() => () => {
+    if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
+  }, []);
+
+  function cancelReplay() {
+    if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
+    replayTimerRef.current = null;
+    setWaiting(false);
+  }
+
+  function handleEnded() {
+    cancelReplay();
+    if (!repeat) return;
+    setWaiting(true);
+    replayTimerRef.current = setTimeout(() => {
+      replayTimerRef.current = null;
+      setWaiting(false);
+      if (!audioRef.current) return;
+      audioRef.current.currentTime = 0;
+      void audioRef.current.play();
+    }, pauseSeconds * 1000);
+  }
+
+  function toggleRepeat() {
+    setRepeat((current) => {
+      if (current) cancelReplay();
+      return !current;
+    });
+  }
+
+  return (
+    <div className={styles.homeworkAudio}>
+      <div className={styles.homeworkAudioHeading}>
+        <div>
+          <span>Áudio da lição de casa</span>
+          <strong>Escute e repita com a fala original</strong>
+        </div>
+        <span>{waiting ? `Repetindo em ${pauseSeconds}s` : repeat ? 'Loop ativo' : 'Uma reprodução'}</span>
+      </div>
+      <audio ref={audioRef} controls preload="metadata" src="/audio/revisao/aula-3-licao-de-casa.mp3"
+        onEnded={handleEnded} onPlay={cancelReplay} onPause={() => {
+          if (audioRef.current && !audioRef.current.ended) cancelReplay();
+        }}>
+        Seu navegador não conseguiu reproduzir este áudio.
+      </audio>
+      <div className={styles.homeworkAudioControls}>
+        <button type="button" className={repeat ? styles.activeAudioLoop : ''} onClick={toggleRepeat}
+          aria-pressed={repeat}>↻ Reproduzir em looping</button>
+        <label htmlFor="homework-loop-pause">
+          Pausa entre repetições
+          <input id="homework-loop-pause" type="range" min="1" max="10" step="1" value={pauseSeconds}
+            onChange={(event) => setPauseSeconds(Number(event.target.value))} />
+          <b>{pauseSeconds} {pauseSeconds === 1 ? 'segundo' : 'segundos'}</b>
+        </label>
+      </div>
+    </div>
+  );
+}
+
 export default function RevisionHome() {
   const router = useRouter();
   const { sessionId } = useClientSession();
@@ -417,6 +483,7 @@ export default function RevisionHome() {
                   <h3 id="homework-title">Plano de revisão</h3>
                 </div>
                 <ol>{lesson.homework.map((item) => <li key={item}>{item}</li>)}</ol>
+                {lessonId === 'aula3' && <HomeworkAudioLoop />}
               </section>
             </div>
           )}
