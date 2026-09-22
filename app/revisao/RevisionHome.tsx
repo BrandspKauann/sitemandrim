@@ -148,12 +148,28 @@ function MandarinButton({ phrase, slow = false, label }: { phrase: LessonPhrase;
   );
 }
 
+const HOMEWORK_AUDIO_CUES = [
+  { start: 0, end: 2.72, hanzi: '今天几月几日？', pinyin: 'jīntiān jǐ yuè jǐ rì?', translation: 'Qual é a data de hoje?' },
+  { start: 2.72, end: 6.48, hanzi: '今天五月二十日。', pinyin: 'jīntiān wǔ yuè èrshí rì.', translation: 'Hoje é 20 de maio.' },
+  { start: 7, end: 10.14, hanzi: '昨天几月几日？', pinyin: 'zuótiān jǐ yuè jǐ rì?', translation: 'Qual foi a data de ontem?' },
+  { start: 10.14, end: 13.9, hanzi: '昨天五月十九日。', pinyin: 'zuótiān wǔ yuè shíjiǔ rì.', translation: 'Ontem foi 19 de maio.' },
+  { start: 13.9, end: 17.42, hanzi: '明天几月几日？', pinyin: 'míngtiān jǐ yuè jǐ rì?', translation: 'Qual será a data de amanhã?' },
+  { start: 17.42, end: 21.02, hanzi: '明天五月二十一日。', pinyin: 'míngtiān wǔ yuè èrshíyī rì.', translation: 'Amanhã será 21 de maio.' },
+  { start: 21.02, end: 23.38, hanzi: '今天', pinyin: 'jīntiān', translation: 'hoje' },
+  { start: 24, end: 26.06, hanzi: '昨天', pinyin: 'zuótiān', translation: 'ontem' },
+  { start: 27, end: 28.98, hanzi: '明天', pinyin: 'míngtiān', translation: 'amanhã' },
+  { start: 28.98, end: 32.64, hanzi: '几日', pinyin: 'jǐ rì', translation: 'que dia?' },
+  { start: 32.64, end: 34.9, hanzi: '月', pinyin: 'yuè', translation: 'mês' },
+  { start: 34.9, end: 37.4, hanzi: '日', pinyin: 'rì', translation: 'dia' },
+] as const;
+
 function HomeworkAudioLoop() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const replayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [repeat, setRepeat] = useState(true);
   const [pauseSeconds, setPauseSeconds] = useState(1);
   const [waiting, setWaiting] = useState(false);
+  const [activeCue, setActiveCue] = useState(-1);
 
   useEffect(() => () => {
     if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
@@ -167,6 +183,7 @@ function HomeworkAudioLoop() {
 
   function handleEnded() {
     cancelReplay();
+    setActiveCue(-1);
     if (!repeat) return;
     setWaiting(true);
     replayTimerRef.current = setTimeout(() => {
@@ -176,6 +193,20 @@ function HomeworkAudioLoop() {
       audioRef.current.currentTime = 0;
       void audioRef.current.play();
     }, pauseSeconds * 1000);
+  }
+
+  function updateActiveCue() {
+    const currentTime = audioRef.current?.currentTime ?? 0;
+    setActiveCue(HOMEWORK_AUDIO_CUES.findIndex((cue) => currentTime >= cue.start && currentTime < cue.end));
+  }
+
+  function playCue(index: number) {
+    const audio = audioRef.current;
+    if (!audio) return;
+    cancelReplay();
+    audio.currentTime = HOMEWORK_AUDIO_CUES[index].start;
+    setActiveCue(index);
+    void audio.play();
   }
 
   function toggleRepeat() {
@@ -195,7 +226,7 @@ function HomeworkAudioLoop() {
         <span>{waiting ? `Repetindo em ${pauseSeconds}s` : repeat ? 'Loop ativo' : 'Uma reprodução'}</span>
       </div>
       <audio ref={audioRef} controls preload="metadata" src="/audio/revisao/aula-3-licao-de-casa.mp3"
-        onEnded={handleEnded} onPlay={cancelReplay} onPause={() => {
+        onEnded={handleEnded} onTimeUpdate={updateActiveCue} onSeeked={updateActiveCue} onPlay={cancelReplay} onPause={() => {
           if (audioRef.current && !audioRef.current.ended) cancelReplay();
         }}>
         Seu navegador não conseguiu reproduzir este áudio.
@@ -209,6 +240,23 @@ function HomeworkAudioLoop() {
             onChange={(event) => setPauseSeconds(Number(event.target.value))} />
           <b>{pauseSeconds} {pauseSeconds === 1 ? 'segundo' : 'segundos'}</b>
         </label>
+      </div>
+      <div className={styles.homeworkTranscript} aria-label="Texto sincronizado com o áudio">
+        <div>
+          <span>Acompanhe a gravação</span>
+          <p>A linha em destaque mostra o trecho que está sendo pronunciado. Clique em qualquer linha para começar a ouvir dali.</p>
+        </div>
+        <ol>
+          {HOMEWORK_AUDIO_CUES.map((cue, index) => (
+            <li key={`${cue.start}-${cue.hanzi}`} className={activeCue === index ? styles.activeHomeworkCue : ''}>
+              <button type="button" onClick={() => playCue(index)} aria-label={`Ouvir: ${cue.translation}`}>
+                <span lang="zh-CN">{cue.hanzi}</span>
+                <b>{cue.pinyin}</b>
+                <small>{cue.translation}</small>
+              </button>
+            </li>
+          ))}
+        </ol>
       </div>
     </div>
   );

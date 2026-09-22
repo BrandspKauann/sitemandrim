@@ -183,6 +183,19 @@
 .homeworkAudioControls label { min-width: 0; flex: 1; display: grid; grid-template-columns: auto minmax(120px, 1fr) auto; align-items: center; gap: 12px; color: #d9ccc7; font-size: 14px; }
 .homeworkAudioControls input { width: 100%; accent-color: #d85f54; }
 .homeworkAudioControls b { min-width: 76px; color: #fff8ef; text-align: right; }
+.homeworkTranscript { display: grid; gap: 13px; padding-top: 4px; }
+.homeworkTranscript > div > span { color: #d89a8f; font-size: 12px; font-weight: 780; letter-spacing: .09em; text-transform: uppercase; }
+.homeworkTranscript > div > p { margin: 5px 0 0; color: #cbbeba; font-size: 14px; line-height: 1.5; }
+.homeworkTranscript ol { margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; list-style: none; }
+.homeworkTranscript li { margin: 0; min-width: 0; }
+.homeworkTranscript li + li { margin-top: 0; }
+.homeworkTranscript button { width: 100%; min-height: 96px; padding: 13px 15px; display: grid; gap: 3px; border: 1px solid rgb(255 248 239 / 15%); background: rgb(255 255 255 / 4%); color: #fff8ef; text-align: left; cursor: pointer; transition: border-color .18s, background .18s, transform .18s; }
+.homeworkTranscript button:hover { border-color: rgb(216 95 84 / 70%); }
+.homeworkTranscript button > span { font-family: 'Noto Serif SC', SimSun, serif; font-size: 22px; line-height: 1.35; }
+.homeworkTranscript button b { color: #e1b1a9; font-size: 14px; font-weight: 700; }
+.homeworkTranscript button small { color: #cbbeba; font-size: 13px; }
+.homeworkTranscript .activeHomeworkCue button { border-color: #ee8c80; background: #ba3f36; box-shadow: 0 8px 22px rgb(0 0 0 / 18%); transform: translateY(-2px); }
+.homeworkTranscript .activeHomeworkCue button b, .homeworkTranscript .activeHomeworkCue button small { color: #fff8ef; }
 
 .exerciseMode { min-height: 650px; margin: 0 27px; padding: 54px 0 38px; }
 .exerciseIntro { max-width: 840px; }
@@ -277,6 +290,7 @@
   .homeworkAudioHeading, .homeworkAudioControls { align-items: stretch; flex-direction: column; }
   .homeworkAudioControls label { grid-template-columns: 1fr auto; }
   .homeworkAudioControls label input { grid-column: 1 / -1; grid-row: 2; }
+  .homeworkTranscript ol { grid-template-columns: 1fr; }
   .exerciseMode { min-height: 580px; padding-top: 42px; }
   .writingCard, .listeningCard { padding: 21px 17px; }
   .writingCard textarea { font-size: 24px; }
