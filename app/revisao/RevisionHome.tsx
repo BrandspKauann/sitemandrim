@@ -40,11 +40,22 @@ import {
   AULA3_VOCABULARY_GROUPS,
   AULA3_WRITING_EXERCISES,
 } from './aula3Data';
+import {
+  AULA4_HANZI_CORRECTIONS,
+  AULA4_HOMEWORK,
+  AULA4_KEY_PHRASES,
+  AULA4_LESSON_TOPICS,
+  AULA4_LISTENING_EXERCISES,
+  AULA4_NUMBER_ROWS,
+  AULA4_PINYIN_NOTES,
+  AULA4_VOCABULARY_GROUPS,
+  AULA4_WRITING_EXERCISES,
+} from './aula4Data';
 import styles from './page.module.css';
 
 type StudyMode = 'resumo' | 'escrever' | 'falar' | 'ouvir';
 type ExerciseStatus = 'idle' | 'correct' | 'incorrect' | 'revealed';
-type LessonId = 'aula1' | 'aula2' | 'aula3';
+type LessonId = 'aula1' | 'aula2' | 'aula3' | 'aula4';
 
 const LESSONS = {
   aula1: {
@@ -79,6 +90,17 @@ const LESSONS = {
     numbersTitle: 'Números de telefone',
     numbersDescription: 'Em telefone, quarto e códigos, leia os algarismos separadamente. O número 1 costuma soar yāo.',
     numberRule: <><b>Modelo:</b> 6985806 → liù jiǔ bā, wǔ bā líng liù. <b>Com 1:</b> prefira yāo em números de telefone.</>,
+  },
+  aula4: {
+    number: '04', tabTitle: 'Aula 4', tabSubtitle: 'Horários, rotina e planos', title: 'Horas, momentos do dia e compromissos',
+    objective: 'Perguntar e dizer as horas, combinar encontros e falar do que está acontecendo ou planejado.',
+    description: 'A aula trabalhou 点/分/刻/半, os períodos do dia, 在, 呢, 吧, 后/之后, lugares e diálogos sobre rotina, cinema e compromissos.',
+    topics: AULA4_LESSON_TOPICS, pinyinNotes: AULA4_PINYIN_NOTES, numberRows: AULA4_NUMBER_ROWS, vocabularyGroups: AULA4_VOCABULARY_GROUPS,
+    hanziCorrections: AULA4_HANZI_CORRECTIONS, keyPhrases: AULA4_KEY_PHRASES, homework: AULA4_HOMEWORK,
+    writingExercises: AULA4_WRITING_EXERCISES, listeningExercises: AULA4_LISTENING_EXERCISES,
+    numbersTitle: 'Horas, minutos e partes do dia',
+    numbersDescription: 'Em chinês, diga primeiro o período do dia e depois a hora: 下午四点半.',
+    numberRule: <><b>Modelo:</b> 下午四点半 = 16h30. <b>Outra forma:</b> 四点三十分 = 4h30.</>,
   },
 } as const;
 

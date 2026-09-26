@@ -1,0 +1,208 @@
+import type { LessonPhrase, LessonTopic, VocabularyGroup } from './aula1Data';
+
+export const AULA4_KEY_PHRASES: LessonPhrase[] = [
+  { id: 'a4-time-now', hanzi: '现在几点？', spokenPinyin: 'xiànzài | jí diǎn?', translation: 'Que horas são agora?', note: 'No bloco 几点, o primeiro 3º tom sobe: jí diǎn.' },
+  { id: 'a4-nine-morning', hanzi: '现在是上午九点。', spokenPinyin: 'xiànzài shì | shàngwǔ jiú diǎn.', translation: 'Agora são nove da manhã.', note: '九点 forma um bloco 3º + 3º e soa jiú diǎn.' },
+  { id: 'a4-morning-class-question', hanzi: '你上午有课吗？', spokenPinyin: 'nǐ shàngwǔ | yǒu kè ma?', translation: 'Você tem aula de manhã?' },
+  { id: 'a4-ten-class', hanzi: '我上午十点有课。', spokenPinyin: 'wǒ shàngwǔ | shí diǎn yǒu kè.', translation: 'Tenho aula às dez da manhã.' },
+  { id: 'a4-eight-thirty-class', hanzi: '我们八点半上课。', spokenPinyin: 'wǒmen bā diǎn bàn | shàngkè.', translation: 'Temos aula às oito e meia.' },
+  { id: 'a4-where-afternoon', hanzi: '你下午去哪儿？', spokenPinyin: 'nǐ xiàwǔ | qù nǎr?', translation: 'Aonde você vai à tarde?' },
+  { id: 'a4-supermarket-afternoon', hanzi: '我下午去超市。', spokenPinyin: 'wǒ xiàwǔ | qù chāoshì.', translation: 'Vou ao supermercado à tarde.' },
+  { id: 'a4-library-four-thirty', hanzi: '他下午四点半去图书馆。', spokenPinyin: 'tā xiàwǔ sì diǎn bàn | qù túshūguǎn.', translation: 'Ele vai à biblioteca às quatro e meia da tarde.' },
+  { id: 'a4-meet-afternoon', hanzi: '我们下午见，好吗？', spokenPinyin: 'wǒmen xiàwǔ jiàn, | hǎo ma?', translation: 'Vamos nos encontrar à tarde, está bem?' },
+  { id: 'a4-meet-two', hanzi: '好的，下午两点见。', spokenPinyin: 'hǎo de, | xiàwǔ liáng diǎn jiàn.', translation: 'Está bem, nos vemos às duas da tarde.', note: '两点 soa liáng diǎn na fala natural.' },
+  { id: 'a4-meet-three-ba', hanzi: '我们下午三点见吧。', spokenPinyin: 'wǒmen xiàwǔ sān diǎn jiàn ba.', translation: 'Vamos nos encontrar às três da tarde.' },
+  { id: 'a4-school-afternoon', hanzi: '我下午去学校。', spokenPinyin: 'wǒ xiàwǔ | qù xuéxiào.', translation: 'Vou à escola à tarde.' },
+  { id: 'a4-where-now', hanzi: '你现在在哪儿？', spokenPinyin: 'nǐ xiànzài | zài nǎr?', translation: 'Onde você está agora?' },
+  { id: 'a4-at-hospital', hanzi: '我在医院。', spokenPinyin: 'wǒ zài yīyuàn.', translation: 'Estou no hospital.' },
+  { id: 'a4-home-question', hanzi: '你现在在家吗？', spokenPinyin: 'nǐ xiànzài | zài jiā ma?', translation: 'Você está em casa agora?' },
+  { id: 'a4-at-home', hanzi: '我在家里。', spokenPinyin: 'wǒ zài jiāli.', translation: 'Estou em casa.' },
+  { id: 'a4-read-home', hanzi: '他在家里看书。', spokenPinyin: 'tā zài jiāli | kànshū.', translation: 'Ele lê em casa.' },
+  { id: 'a4-class-progress', hanzi: '他在上课。', spokenPinyin: 'tā zài shàngkè.', translation: 'Ele está tendo aula.' },
+  { id: 'a4-cooking-progress', hanzi: '他在做饭。', spokenPinyin: 'tā zài zuòfàn.', translation: 'Ele está cozinhando.' },
+  { id: 'a4-school-location', hanzi: '他们在学校。', spokenPinyin: 'tāmen zài xuéxiào.', translation: 'Eles estão na escola.' },
+  { id: 'a4-doing-now', hanzi: '你现在在做什么？', spokenPinyin: 'nǐ xiànzài | zài zuò shénme?', translation: 'O que você está fazendo agora?' },
+  { id: 'a4-cinema-afternoon', hanzi: '下午我想去电影院看电影。', spokenPinyin: 'xiàwǔ | wó xiǎng qù diànyǐngyuàn | kàn diànyǐng.', translation: 'À tarde quero ir ao cinema assistir a um filme.' },
+  { id: 'a4-will-you-go', hanzi: '你去吗？', spokenPinyin: 'nǐ qù ma?', translation: 'Você vai?' },
+  { id: 'a4-no-go-busy', hanzi: '我不想去，下午还有事。', spokenPinyin: 'wǒ bù xiǎng qù, | xiàwǔ hái yǒu shì.', translation: 'Não quero ir; ainda tenho compromisso à tarde.' },
+  { id: 'a4-tomorrow-ne', hanzi: '好的。明天呢？', spokenPinyin: 'hǎo de. | míngtiān ne?', translation: 'Está bem. E amanhã?' },
+  { id: 'a4-class-tomorrow', hanzi: '我明天下午两点还上课呢。', spokenPinyin: 'wǒ míngtiān xiàwǔ liáng diǎn | hái shàngkè ne.', translation: 'Amanhã às duas da tarde ainda tenho aula.' },
+  { id: 'a4-movie-eight', hanzi: '我八点去看电影。', spokenPinyin: 'wǒ bā diǎn | qù kàn diànyǐng.', translation: 'Vou assistir a um filme às oito.' },
+  { id: 'a4-busy-ne', hanzi: '我下午还有事呢。', spokenPinyin: 'wǒ xiàwǔ | hái yǒu shì ne.', translation: 'Ainda tenho compromisso à tarde.' },
+  { id: 'a4-tomorrow-busy', hanzi: '你明天有事吗？', spokenPinyin: 'nǐ míngtiān | yǒu shì ma?', translation: 'Você tem compromisso amanhã?' },
+  { id: 'a4-want-movie', hanzi: '我想去看电影。', spokenPinyin: 'wó xiǎng qù | kàn diànyǐng.', translation: 'Quero ir assistir a um filme.' },
+  { id: 'a4-plan-fruit', hanzi: '我打算买一些水果。', spokenPinyin: 'wǒ | dǎsuàn mǎi yìxiē shuíguǒ.', translation: 'Pretendo comprar algumas frutas.', note: '水果 forma um bloco 3º + 3º e soa shuíguǒ.' },
+  { id: 'a4-minutes-arrive-question', hanzi: '你还要几分钟才能到？', spokenPinyin: 'nǐ hái yào | jǐ fēnzhōng | cái néng dào?', translation: 'Quantos minutos ainda faltam para você chegar?' },
+  { id: 'a4-five-minutes-arrive', hanzi: '我大概五分钟就到。', spokenPinyin: 'wǒ dàgài | wǔ fēnzhōng | jiù dào.', translation: 'Chego em aproximadamente cinco minutos.' },
+  { id: 'a4-after-work-question', hanzi: '下班之后你做什么？', spokenPinyin: 'xiàbān zhīhòu | nǐ zuò shénme?', translation: 'O que você faz depois do trabalho?' },
+  { id: 'a4-movie-home', hanzi: '我在家看电影。', spokenPinyin: 'wǒ zài jiā | kàn diànyǐng.', translation: 'Assisto a filmes em casa.' },
+  { id: 'a4-phone-where-ne', hanzi: '喂，你在哪儿呢？', spokenPinyin: 'wèi, | nǐ zài nǎr ne?', translation: 'Alô, onde você está?' },
+  { id: 'a4-home-ne', hanzi: '我在家里呢。', spokenPinyin: 'wǒ zài jiāli ne.', translation: 'Estou em casa.' },
+  { id: 'a4-off-six-thirty', hanzi: '我晚上六点半下班。', spokenPinyin: 'wǒ wǎnshang | liù diǎn bàn xiàbān.', translation: 'Saio do trabalho às seis e meia da noite.' },
+  { id: 'a4-hospital-eight', hanzi: '我八点去医院上班。', spokenPinyin: 'wǒ bā diǎn | qù yīyuàn shàngbān.', translation: 'Vou trabalhar no hospital às oito.' },
+  { id: 'a4-buy-vegetables', hanzi: '你去店里买些菜吧。', spokenPinyin: 'nǐ qù diànli | mǎi xiē cài ba.', translation: 'Vá à loja comprar algumas verduras.' },
+  { id: 'a4-go-ten-minutes', hanzi: '好，我十分钟后去。', spokenPinyin: 'hǎo, | wǒ shí fēnzhōng hòu qù.', translation: 'Está bem, vou em dez minutos.' },
+  { id: 'a4-can-swim-ne', hanzi: '我会游泳呢。', spokenPinyin: 'wǒ huì yóuyǒng ne.', translation: 'Eu sei nadar.' },
+  { id: 'a4-can-cook-chinese', hanzi: '我会做中国菜呢。', spokenPinyin: 'wǒ huì zuò Zhōngguó cài ne.', translation: 'Eu sei fazer comida chinesa.' },
+  { id: 'a4-cinema-question', hanzi: '你想去电影院吗？', spokenPinyin: 'ní xiǎng qù | diànyǐngyuàn ma?', translation: 'Você quer ir ao cinema?' },
+  { id: 'a4-no-busy', hanzi: '我不想去，我有事。', spokenPinyin: 'wǒ bù xiǎng qù, | wó yǒu shì.', translation: 'Não quero ir; tenho compromisso.' },
+];
+
+export const AULA4_LESSON_TOPICS: LessonTopic[] = [
+  {
+    marker: '点', title: 'Perguntar e dizer as horas',
+    summary: '点 marca a hora, 分 marca os minutos, 半 significa meia hora e 刻 corresponde a um quarto de hora.',
+    points: ['Estrutura: número + 点 + minutos.', '八点半 é 8h30; 十点一刻 é 10h15; 三点三刻 é 3h45.', '整 reforça que a hora é exata: 九点整.'],
+    examples: [AULA4_KEY_PHRASES[0], AULA4_KEY_PHRASES[1], AULA4_KEY_PHRASES[4]],
+  },
+  {
+    marker: '午', title: 'Partes do dia e ordem da informação',
+    summary: 'O período do dia vem antes da hora. O chinês organiza a informação do intervalo maior para o menor.',
+    points: ['早上 é começo da manhã; 上午 é manhã; 中午 é meio-dia.', '下午 é tarde; 晚上 é noite; 凌晨 é madrugada.', 'Modelo: amanhã + à tarde + duas horas + ação.'],
+    examples: [AULA4_KEY_PHRASES[3], AULA4_KEY_PHRASES[7], AULA4_KEY_PHRASES[25]],
+  },
+  {
+    marker: '在', title: '在: localização ou ação em andamento',
+    summary: 'Antes de um lugar, 在 indica onde alguém está. Antes de um verbo, indica o que está acontecendo agora.',
+    points: ['在 + lugar: 我在医院。', '在 + verbo: 他在做饭。', 'Observe a palavra depois de 在 para identificar o sentido.'],
+    examples: [AULA4_KEY_PHRASES[13], AULA4_KEY_PHRASES[18], AULA4_KEY_PHRASES[20]],
+  },
+  {
+    marker: '呢', title: '呢 no fim da frase',
+    summary: '呢 suaviza a fala, mantém o assunto em andamento ou destaca uma situação atual.',
+    points: ['明天呢？ retoma o assunto: “e amanhã?”.', '你在哪儿呢？ soa mais conversacional que uma pergunta seca.', 'Com 还, pode destacar que uma situação continua: 还上课呢.'],
+    examples: [AULA4_KEY_PHRASES[24], AULA4_KEY_PHRASES[25], AULA4_KEY_PHRASES[36]],
+  },
+  {
+    marker: '吧', title: '吧 para convite e sugestão',
+    summary: '吧 no fim transforma uma ordem ou afirmação em proposta, convite ou pedido mais leve.',
+    points: ['我们下午三点见吧: vamos nos encontrar às três.', '去买些菜吧: vá comprar algumas verduras.', 'A resposta pode ser 好, 好的 ou 可以.'],
+    examples: [AULA4_KEY_PHRASES[10], AULA4_KEY_PHRASES[39], AULA4_KEY_PHRASES[40]],
+  },
+  {
+    marker: '后', title: 'Planos, sequência e intervalo',
+    summary: '后 e 之后 colocam uma ação depois de um momento; 打算 apresenta um plano e 大概 marca aproximação.',
+    points: ['十分钟后 é “daqui a dez minutos”.', '下班之后 é “depois de sair do trabalho”.', 'A ordem mais comum é tempo + lugar + ação.'],
+    examples: [AULA4_KEY_PHRASES[30], AULA4_KEY_PHRASES[33], AULA4_KEY_PHRASES[40]],
+  },
+];
+
+export const AULA4_VOCABULARY_GROUPS: VocabularyGroup[] = [
+  { title: 'Partes do dia', description: 'Palavras que vêm antes da hora.', words: [
+    { hanzi: '凌晨', translation: 'madrugada' }, { hanzi: '早上', translation: 'cedo de manhã' }, { hanzi: '上午', translation: 'manhã' },
+    { hanzi: '中午', translation: 'meio-dia' }, { hanzi: '下午', translation: 'tarde' }, { hanzi: '晚上', translation: 'noite' }, { hanzi: '现在', translation: 'agora' },
+  ] },
+  { title: 'Relógio e intervalos', description: 'Unidades para montar horários.', words: [
+    { hanzi: '点', translation: 'hora' }, { hanzi: '分', translation: 'minuto' }, { hanzi: '分钟', translation: 'minutos' },
+    { hanzi: '刻', translation: 'quarto de hora' }, { hanzi: '半', translation: 'meia hora' }, { hanzi: '整', translation: 'em ponto' },
+    { hanzi: '大概', translation: 'aproximadamente' }, { hanzi: '后', translation: 'depois / em' }, { hanzi: '之后', translation: 'depois de' },
+  ] },
+  { title: 'Rotina e ações', description: 'Ações para responder o que alguém faz.', words: [
+    { hanzi: '上课', translation: 'ter aula' }, { hanzi: '上班', translation: 'trabalhar' }, { hanzi: '下班', translation: 'sair do trabalho' },
+    { hanzi: '加班', translation: 'fazer hora extra' }, { hanzi: '休息', translation: 'descansar' }, { hanzi: '看电影', translation: 'ver filme' },
+    { hanzi: '看电视', translation: 'ver televisão' }, { hanzi: '看书', translation: 'ler' }, { hanzi: '写作业', translation: 'fazer tarefa' },
+    { hanzi: '做饭', translation: 'cozinhar' }, { hanzi: '买菜', translation: 'comprar verduras' }, { hanzi: '见', translation: 'encontrar' }, { hanzi: '到', translation: 'chegar' },
+  ] },
+  { title: 'Lugares', description: 'Locais usados com 在 e 去.', words: [
+    { hanzi: '家', translation: 'casa' }, { hanzi: '家里', translation: 'em casa' }, { hanzi: '医院', translation: 'hospital' },
+    { hanzi: '学校', translation: 'escola' }, { hanzi: '公司', translation: 'empresa' }, { hanzi: '超市', translation: 'supermercado' },
+    { hanzi: '商场', translation: 'shopping' }, { hanzi: '菜市场', translation: 'feira' }, { hanzi: '文具店', translation: 'papelaria' },
+    { hanzi: '饭店', translation: 'restaurante' }, { hanzi: '图书馆', translation: 'biblioteca' }, { hanzi: '电影院', translation: 'cinema' },
+  ] },
+  { title: 'Planos e compromisso', description: 'Palavras para combinar ou recusar atividades.', words: [
+    { hanzi: '想', translation: 'querer' }, { hanzi: '打算', translation: 'planejar' }, { hanzi: '还', translation: 'ainda / também' },
+    { hanzi: '有事', translation: 'ter compromisso' }, { hanzi: '呢', translation: 'partícula de continuidade' }, { hanzi: '吧', translation: 'partícula de sugestão' },
+  ] },
+  { title: 'Perguntas úteis', description: 'Blocos frequentes nos diálogos da aula.', words: [
+    { hanzi: '几点', translation: 'que horas' }, { hanzi: '去哪儿', translation: 'ir aonde' }, { hanzi: '在哪儿', translation: 'estar onde' },
+    { hanzi: '做什么', translation: 'fazer o quê' }, { hanzi: '几分钟', translation: 'quantos minutos' }, { hanzi: '好吗', translation: 'está bem?' },
+  ] },
+];
+
+export const AULA4_HANZI_CORRECTIONS = [
+  { hanzi: '点', title: 'Hora / ponto', detail: 'Mantenha a parte superior compacta e distribua os quatro pontos inferiores com ritmo regular.' },
+  { hanzi: '早', title: 'Cedo', detail: '日 fica em cima e 十 sustenta o caractere. A haste vertical atravessa a linha inferior.' },
+  { hanzi: '上', title: 'Em cima / começar', detail: 'A linha inferior é a base e deve ser mais longa que o pequeno traço superior.' },
+  { hanzi: '午', title: 'Meio-dia', detail: 'O traço horizontal inferior é mais longo; a haste vertical desce pelo centro.' },
+  { hanzi: '课', title: 'Aula', detail: 'Deixe 讠 estreito à esquerda e dê mais espaço a 果 do lado direito.' },
+  { hanzi: '分', title: 'Minuto / dividir', detail: 'Na parte 八, o traço esquerdo começa mais baixo e o direito mais alto. 刀 fica centralizado embaixo.' },
+  { hanzi: '下', title: 'Embaixo / terminar', detail: 'Comece pela linha horizontal longa, faça a haste vertical e termine com o ponto à direita.' },
+  { hanzi: '见', title: 'Ver / encontrar', detail: 'A moldura superior deve ficar compacta e 儿 abre espaço na parte inferior.' },
+  { hanzi: '家', title: 'Casa', detail: '宀 forma o teto; a parte 豕 precisa caber abaixo sem ultrapassar demais as laterais.' },
+  { hanzi: '里', title: 'Dentro', detail: 'Mantenha o centro alinhado. Sozinho é lǐ; em 家里, costuma ficar leve: jiāli.' },
+  { hanzi: '晚', title: 'Noite / tarde', detail: '日 fica estreito à esquerda para que 免 tenha espaço suficiente à direita.' },
+  { hanzi: '医', title: 'Medicina', detail: 'A moldura 匚 envolve 矢 e só é fechada pelo último traço.' },
+  { hanzi: '院', title: 'Instituição / pátio', detail: '阝 fica estreito à esquerda; 完 ocupa a maior parte do quadrado.' },
+  { hanzi: '班', title: 'Turma / turno', detail: 'O componente central separa as duas partes de 王; preserve as três colunas.' },
+  { hanzi: '店', title: 'Loja', detail: '店 é loja e não deve ser confundido com 电, “eletricidade”. 广 cobre 占.' },
+  { hanzi: '钟', title: 'Relógio / minuto', detail: '钅 fica estreito à esquerda e 中 alinhado verticalmente à direita.' },
+  { hanzi: '后', title: 'Depois', detail: 'Faça os dois traços inclinados primeiro e mantenha 口 compacto no canto inferior direito.' },
+];
+
+export const AULA4_NUMBER_ROWS = [
+  { hanzi: '一点、两点、三点', translation: '1h, 2h, 3h — 点 marca a hora' },
+  { hanzi: '九点整', translation: '9h em ponto' },
+  { hanzi: '八点半', translation: '8h30 — meia hora' },
+  { hanzi: '十点一刻', translation: '10h15 — um quarto' },
+  { hanzi: '四点两刻 / 四点半', translation: '4h30 — dois quartos ou meia hora' },
+  { hanzi: '三点三刻', translation: '3h45 — três quartos' },
+  { hanzi: '七点二十分', translation: '7h20' },
+  { hanzi: '十点十分', translation: '10h10' },
+  { hanzi: '下午三点四十分', translation: '15h40' },
+  { hanzi: '晚上六点半', translation: '18h30' },
+];
+
+export const AULA4_PINYIN_NOTES = [
+  { title: '几点 — jí diǎn', detail: '几 e 点 são dois 3º tons no mesmo bloco; 几 sobe e soa como 2º tom.' },
+  { title: '两点 — liáng diǎn', detail: 'Na fala natural, 两 muda de 3º para 2º tom antes de 点.' },
+  { title: '九点 — jiú diǎn', detail: '九 também sobe antes de 点: o bloco 3º + 3º se realiza como 2º + 3º.' },
+  { title: '上午 — shàngwǔ', detail: '上 é 4º tom e 午 é 3º tom. Não transforme o primeiro em 2º tom.' },
+  { title: '下午 — xiàwǔ', detail: '下 é 4º tom e 午 é 3º tom; mantenha a queda forte de xià.' },
+  { title: '晚上 — wǎnshang', detail: 'Em uso frequente, 上 costuma ficar leve e neutro depois de 晚.' },
+  { title: '分钟 — fēnzhōng', detail: 'As duas sílabas são de 1º tom: voz alta e estável.' },
+  { title: '医院 — yīyuàn', detail: '医 é 1º tom e 院 é 4º: comece alto e termine com queda.' },
+  { title: '电影院 — diànyǐngyuàn', detail: 'A sequência é 4º, 3º, 4º. Não perca a queda final de 院.' },
+  { title: '水果 — shuíguǒ', detail: 'Em 水果, o primeiro 3º tom sobe antes do segundo: shuíguǒ.' },
+];
+
+export const AULA4_WRITING_EXERCISES = [
+  { id: 'a4-write-time', prompt: 'Que horas são agora?', answer: '现在几点？', hint: 'Pergunta de horário + referência ao momento presente.' },
+  { id: 'a4-write-nine', prompt: 'Agora são nove da manhã.', answer: '现在是上午九点。', hint: 'Organize do período maior para o menor.' },
+  { id: 'a4-write-class-question', prompt: 'Você tem aula de manhã?', answer: '你上午有课吗？', hint: 'Use uma pergunta de sim ou não.' },
+  { id: 'a4-write-class-ten', prompt: 'Tenho aula às dez da manhã.', answer: '我上午十点有课。', hint: 'Coloque o horário antes da atividade.' },
+  { id: 'a4-write-where-go', prompt: 'Aonde você vai à tarde?', answer: '你下午去哪儿？', hint: 'Pergunte pelo destino, não pela localização atual.' },
+  { id: 'a4-write-meet', prompt: 'Vamos nos encontrar às duas da tarde.', answer: '我们下午两点见吧。', hint: 'Use a partícula de sugestão no fim.' },
+  { id: 'a4-write-location', prompt: 'Onde você está agora?', answer: '你现在在哪儿？', hint: 'Use a estrutura de localização.' },
+  { id: 'a4-write-home', prompt: 'Estou em casa.', answer: '我在家里。', hint: 'Indique o lugar depois do verbo de localização.' },
+  { id: 'a4-write-movie-home', prompt: 'Assisto a filmes em casa.', answer: '我在家看电影。', hint: 'Lugar antes da ação principal.' },
+  { id: 'a4-write-busy', prompt: 'Não quero ir; tenho compromisso à tarde.', answer: '我不想去，下午还有事。', hint: 'Negue a vontade e depois explique o motivo.' },
+  { id: 'a4-write-after-work', prompt: 'O que você faz depois do trabalho?', answer: '下班之后你做什么？', hint: 'Comece pelo momento que vem antes da ação.' },
+  { id: 'a4-write-ten-minutes', prompt: 'Vou em dez minutos.', answer: '我十分钟后去。', hint: 'O intervalo vem antes do marcador “depois”.' },
+];
+
+export const AULA4_LISTENING_EXERCISES = [
+  { phraseId: 'a4-time-now', choices: ['Que horas são agora?', 'Que dia é hoje?', 'Onde você está?'] },
+  { phraseId: 'a4-nine-morning', choices: ['Agora são nove da manhã.', 'Agora são nove da noite.', 'Agora são dez da manhã.'] },
+  { phraseId: 'a4-eight-thirty-class', choices: ['Temos aula às oito e meia.', 'Temos aula às oito.', 'Temos aula às nove e meia.'] },
+  { phraseId: 'a4-library-four-thirty', choices: ['Ele vai à biblioteca às quatro e meia da tarde.', 'Ele vai ao hospital às quatro.', 'Ele vai ao cinema às cinco e meia.'] },
+  { phraseId: 'a4-meet-two', choices: ['Está bem, nos vemos às duas da tarde.', 'Nos vemos às três da tarde.', 'Está bem, nos vemos às duas da manhã.'] },
+  { phraseId: 'a4-at-hospital', choices: ['Estou no hospital.', 'Estou na escola.', 'Estou em casa.'] },
+  { phraseId: 'a4-cooking-progress', choices: ['Ele está cozinhando.', 'Ele está lendo.', 'Ele está trabalhando.'] },
+  { phraseId: 'a4-cinema-afternoon', choices: ['À tarde quero ir ao cinema assistir a um filme.', 'À tarde quero ir ao supermercado.', 'À tarde quero ir à biblioteca.'] },
+  { phraseId: 'a4-no-go-busy', choices: ['Não quero ir; ainda tenho compromisso à tarde.', 'Não quero ir porque estou cansado.', 'Não gosto de cinema.'] },
+  { phraseId: 'a4-class-tomorrow', choices: ['Amanhã às duas da tarde ainda tenho aula.', 'Amanhã trabalho às oito.', 'Amanhã vou ao cinema às duas.'] },
+  { phraseId: 'a4-five-minutes-arrive', choices: ['Chego em aproximadamente cinco minutos.', 'Chego em dez minutos.', 'Chego em quinze minutos.'] },
+  { phraseId: 'a4-off-six-thirty', choices: ['Saio do trabalho às seis e meia da noite.', 'Saio do trabalho às seis.', 'Entro no trabalho às oito.'] },
+  { phraseId: 'a4-hospital-eight', choices: ['Vou trabalhar no hospital às oito.', 'Vou ao cinema às oito.', 'Vou para casa às oito.'] },
+  { phraseId: 'a4-go-ten-minutes', choices: ['Está bem, vou em dez minutos.', 'Está bem, vou agora.', 'Está bem, vou em cinco minutos.'] },
+];
+
+export const AULA4_HOMEWORK = [
+  'Leia em voz alta todos os diálogos da aula até conseguir manter o ritmo sem interromper a frase.',
+  'Crie oito frases com horário + lugar + ação, usando sua rotina real.',
+  'Pratique no relógio: diga em chinês cinco horários com 分, 半 e 刻.',
+  'Monte pares com 在: uma frase de localização e outra de ação em andamento.',
+  'Reescreva o diálogo do cinema trocando horário, lugar e atividade.',
+  'Treine os caracteres 点、早、上、午、课、分、下、见、家、里、晚、医、院、班、店、钟、后 respeitando a ordem dos traços.',
+  'Digite as frases diretamente com pinyin e escolha os caracteres corretos, sem usar tradução automática.',
+];
