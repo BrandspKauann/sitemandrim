@@ -14,6 +14,64 @@
 .nav a:hover { color: var(--red); }
 .nav .activeNav { background: var(--ink); color: #fff8ed; }
 
+.exerciseTabs { width: min(1050px, calc(100% - 48px)); margin: 34px auto 20px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.exerciseTabs button { min-height: 68px; padding: 12px 18px; display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 12px; align-items: center; border: 1px solid #d9cdbf; background: #fffaf4; color: var(--ink); border-radius: 3px; text-align: left; cursor: pointer; }
+.exerciseTabs button > span { grid-row: 1 / 3; color: #a99791; font-family: Georgia, serif; font-size: 24px; }
+.exerciseTabs button strong { align-self: end; font-size: 15px; }
+.exerciseTabs button small { align-self: start; color: #887b78; font-size: 12px; }
+.exerciseTabs button:hover { border-color: var(--red); }
+.exerciseTabs .activeExerciseTab { border-color: var(--ink); background: var(--ink); color: #fff8ef; box-shadow: 8px 8px 0 rgb(117 85 67 / 7%); }
+.exerciseTabs .activeExerciseTab > span { color: #ef887c; }
+.exerciseTabs .activeExerciseTab small { color: #b9aaa6; }
+
+.ruleGame { width: min(1050px, calc(100% - 48px)); margin: 0 auto 86px; border-top: 4px solid var(--red); background: #fffdf9; box-shadow: 18px 18px 0 rgb(117 85 67 / 7%), 0 24px 70px rgb(84 51 38 / 10%); }
+.ruleGameHeader { padding: 22px 26px; display: flex; align-items: center; justify-content: space-between; gap: 30px; border-bottom: 1px solid #e2d7ca; }
+.ruleGameHeader > div:first-child > span { color: var(--red); font-size: 12px; font-weight: 780; letter-spacing: .12em; text-transform: uppercase; }
+.ruleGameHeader h1 { margin: 7px 0 5px; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(27px, 3.6vw, 40px); font-weight: 500; letter-spacing: -.035em; }
+.ruleGameHeader p { margin: 0; color: #7c706d; font-size: 15px; line-height: 1.5; }
+.ruleScore { min-width: 112px; padding: 11px 15px; display: grid; grid-template-columns: auto 1fr; align-items: baseline; border-left: 3px solid var(--red); background: #f5eee6; }
+.ruleScore strong { grid-row: 1 / 3; margin-right: 9px; font-family: Georgia, serif; font-size: 40px; font-weight: 500; line-height: 1; }
+.ruleScore span { color: #6f6361; font-size: 12px; font-weight: 700; }
+.ruleScore small { color: #9a8d89; font-size: 12px; }
+.ruleProgress { height: 4px; background: #eee5dc; }
+.ruleProgress i { height: 100%; display: block; background: var(--red); transition: width .28s ease; }
+.ruleQuestion { min-height: 520px; display: grid; grid-template-columns: minmax(0, .9fr) minmax(440px, 1.1fr); }
+.rulePrompt { padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid #e2d7ca; text-align: center; }
+.ruleCounter { color: var(--red); font-size: 12px; font-weight: 760; letter-spacing: .08em; text-transform: uppercase; }
+.rulePrompt > strong { margin-top: 22px; font-family: 'Noto Serif SC', 'Songti SC', SimSun, serif; font-size: clamp(58px, 7vw, 88px); font-weight: 500; line-height: 1.15; }
+.ruleWrittenPinyin { margin: 10px 0 24px; color: var(--red-dark); font-size: clamp(24px, 3vw, 34px); font-weight: 720; }
+.rulePrompt dl { width: min(100%, 380px); margin: 0; display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #ddd0c2; }
+.rulePrompt dl div { min-width: 0; padding: 12px; }
+.rulePrompt dl div + div { border-left: 1px solid #ddd0c2; }
+.rulePrompt dt { color: #978a87; font-size: 11px; font-weight: 760; text-transform: uppercase; }
+.rulePrompt dd { margin: 6px 0 0; overflow-wrap: anywhere; color: #4e4241; font-size: 14px; font-weight: 700; }
+.ruleInstruction { margin: 22px 0 0; color: #756965; font-size: 15px; font-weight: 650; }
+.ruleAnswers { padding: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: center; background: #f8f2ea; }
+.ruleAnswers > button { min-height: 88px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; border: 1px solid #d9cdbf; background: #fffdf9; color: var(--ink); border-radius: 3px; cursor: pointer; text-align: left; transition: transform .16s, border-color .16s, box-shadow .16s; }
+.ruleAnswers > button:hover:not(:disabled) { border-color: var(--red); transform: translateY(-2px); box-shadow: 0 7px 18px rgb(84 51 38 / 8%); }
+.ruleAnswers > button span { width: 29px; height: 29px; display: grid; place-items: center; flex: 0 0 auto; border: 1px solid #d6c8ba; color: var(--red); border-radius: 50%; font-size: 12px; font-weight: 800; }
+.ruleAnswers > button strong { font-size: 15px; line-height: 1.45; }
+.ruleAnswers > button:disabled { cursor: default; }
+.ruleAnswers > button.ruleSelected { border-color: var(--red); box-shadow: inset 3px 0 0 var(--red); }
+.ruleAnswers > button.ruleCorrect { border-color: var(--green); background: rgb(61 128 98 / 7%); box-shadow: inset 3px 0 0 var(--green); }
+.ruleAnswers > button.ruleWrong { background: rgb(186 63 54 / 6%); }
+.ruleFeedback { grid-column: 1 / -1; padding: 17px 18px; border: 1px solid #d8cabc; background: #fffdf9; }
+.ruleFeedback > span { color: var(--red); font-size: 12px; font-weight: 780; letter-spacing: .07em; text-transform: uppercase; }
+.ruleFeedback > strong { display: block; margin-top: 5px; font-size: 24px; }
+.ruleFeedback > p { margin: 7px 0 13px; color: #665b58; font-size: 14px; line-height: 1.55; }
+.ruleFeedback > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.ruleFeedback button { min-height: 39px; padding: 0 14px; border: 1px solid var(--ink); background: var(--ink); color: #fff; border-radius: 3px; font-size: 13px; font-weight: 740; cursor: pointer; }
+.ruleFeedback button:last-child { border-color: var(--red); background: var(--red); }
+.ruleFeedbackCorrect { border-left: 4px solid var(--green); }
+.ruleFeedbackWrong { border-left: 4px solid var(--red); }
+.ruleFinished { min-height: 590px; padding: 60px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.ruleFinished > span { color: var(--red); font-size: 12px; font-weight: 780; letter-spacing: .11em; text-transform: uppercase; }
+.ruleFinished > strong { margin-top: 20px; font-family: Georgia, serif; font-size: 88px; font-weight: 500; line-height: 1; }
+.ruleFinished > strong small { color: #978a87; font-size: 24px; }
+.ruleFinished h1 { max-width: 650px; margin: 22px 0 10px; font-family: Georgia, serif; font-size: clamp(31px, 4vw, 46px); font-weight: 500; letter-spacing: -.04em; }
+.ruleFinished p { max-width: 590px; margin: 0; color: #766a67; font-size: 15px; line-height: 1.6; }
+.ruleFinished button { min-height: 46px; margin-top: 24px; padding: 0 19px; border: 0; background: var(--red); color: #fff; border-radius: 3px; font-size: 14px; font-weight: 760; cursor: pointer; }
+
 .hero { width: min(1180px, calc(100% - 48px)); margin: 0 auto; padding: 70px 0 52px; display: grid; grid-template-columns: 1fr 280px; gap: clamp(45px, 8vw, 110px); align-items: end; }
 .eyebrow, .toneLegend > div:first-child > span { color: var(--red); font-size: 11px; font-weight: 780; letter-spacing: .13em; text-transform: uppercase; }
 .heroCopy h1 { margin: 18px 0 21px; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(48px, 5.5vw, 72px); font-weight: 500; line-height: .96; letter-spacing: -.055em; }
@@ -168,6 +226,8 @@
 @keyframes sound-blink { to { opacity: .35; transform: scale(.82); } }
 
 @media (max-width: 900px) {
+  .ruleQuestion { grid-template-columns: 1fr; }
+  .rulePrompt { border-right: 0; border-bottom: 1px solid #e2d7ca; }
   .hero { grid-template-columns: 1fr; }
   .scoreCard { max-width: 360px; }
   .challengeLayout { grid-template-columns: 1fr; }
@@ -177,7 +237,7 @@
 }
 
 @media (max-width: 620px) {
-  .topbar, .hero, .exerciseArea, .toneLegend, .bookExercises, .footer { width: min(100% - 30px, 1180px); }
+  .topbar, .exerciseTabs, .ruleGame, .hero, .exerciseArea, .toneLegend, .bookExercises, .footer { width: min(100% - 30px, 1180px); }
   .topbar { height: auto; min-height: 72px; padding: 10px 0; }
   .brand > span:last-child { display: none; }
   .brand { display: none; }
@@ -185,6 +245,21 @@
   .nav :global(.session-badge) { display: none; }
   .nav a { padding: 8px 5px; font-size: 10px; }
   .hero { padding: 48px 0 40px; gap: 34px; }
+  .exerciseTabs { margin-top: 20px; }
+  .exerciseTabs button { min-height: 64px; padding: 10px; column-gap: 8px; }
+  .exerciseTabs button > span { font-size: 19px; }
+  .exerciseTabs button strong { font-size: 13px; }
+  .exerciseTabs button small { font-size: 10px; }
+  .ruleGame { margin-bottom: 64px; box-shadow: 8px 8px 0 rgb(117 85 67 / 7%); }
+  .ruleGameHeader { align-items: flex-start; flex-direction: column; padding: 19px 17px; }
+  .ruleScore { min-width: 135px; }
+  .rulePrompt { padding: 34px 16px; }
+  .rulePrompt > strong { font-size: 54px; }
+  .rulePrompt dl { grid-template-columns: 1fr; }
+  .rulePrompt dl div + div { border-top: 1px solid #ddd0c2; border-left: 0; }
+  .ruleAnswers { grid-template-columns: 1fr; padding: 13px; }
+  .ruleAnswers > button { min-height: 68px; }
+  .ruleFeedback { grid-column: 1; }
   .heroCopy h1 { font-size: 44px; }
   .exerciseArea { min-height: 0; margin-bottom: 64px; box-shadow: 8px 8px 0 rgb(117 85 67 / 7%); }
   .exerciseTop { align-items: stretch; flex-direction: column; gap: 12px; }

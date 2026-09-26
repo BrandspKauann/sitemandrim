@@ -5,6 +5,7 @@ import { pinyin } from 'pinyin-pro';
 import { useEffect, useMemo, useState } from 'react';
 import { useClientSession } from '../components/ClientSession';
 import HskDialoguePractice from './HskDialoguePractice';
+import ToneRulesGame from './ToneRulesGame';
 import styles from './page.module.css';
 
 type Challenge = {
@@ -110,6 +111,7 @@ function shuffledChallenges() {
 
 export default function ExercisesPage() {
   const { sessionId, shortId } = useClientSession();
+  const [exerciseTab, setExerciseTab] = useState<'rules' | 'listening'>('rules');
   const [phase, setPhase] = useState<Phase>('intro');
   const [deck, setDeck] = useState<Challenge[]>([]);
   const [roundIndex, setRoundIndex] = useState(0);
@@ -219,6 +221,19 @@ export default function ExercisesPage() {
           <Link href="/revisao">Revisão</Link>
         </nav>
       </header>
+
+      <div className={styles.exerciseTabs} role="tablist" aria-label="Tipos de exercício">
+        <button type="button" role="tab" aria-selected={exerciseTab === 'rules'} className={exerciseTab === 'rules' ? styles.activeExerciseTab : ''} onClick={() => setExerciseTab('rules')}>
+          <span>01</span><strong>Regras de tons</strong><small>36 exercícios</small>
+        </button>
+        <button type="button" role="tab" aria-selected={exerciseTab === 'listening'} className={exerciseTab === 'listening' ? styles.activeExerciseTab : ''} onClick={() => setExerciseTab('listening')}>
+          <span>02</span><strong>Identificar o tom</strong><small>Treino de ouvido</small>
+        </button>
+      </div>
+
+      {exerciseTab === 'rules' && <ToneRulesGame />}
+
+      {exerciseTab === 'listening' && <>
 
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
@@ -344,6 +359,7 @@ export default function ExercisesPage() {
           ))}
         </div>
       </section>
+      </>}
 
       <HskDialoguePractice sessionId={sessionId} onBeforePlay={() => {
         setSpeaking(false);
