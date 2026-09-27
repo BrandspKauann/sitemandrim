@@ -224,7 +224,7 @@ export default function ExercisesPage() {
 
       <div className={styles.exerciseTabs} role="tablist" aria-label="Tipos de exercício">
         <button type="button" role="tab" aria-selected={exerciseTab === 'rules'} className={exerciseTab === 'rules' ? styles.activeExerciseTab : ''} onClick={() => setExerciseTab('rules')}>
-          <span>01</span><strong>Regras de tons</strong><small>36 exercícios</small>
+          <span>01</span><strong>Sequências de 3º tom</strong><small>36 exercícios</small>
         </button>
         <button type="button" role="tab" aria-selected={exerciseTab === 'listening'} className={exerciseTab === 'listening' ? styles.activeExerciseTab : ''} onClick={() => setExerciseTab('listening')}>
           <span>02</span><strong>Identificar o tom</strong><small>Treino de ouvido</small>

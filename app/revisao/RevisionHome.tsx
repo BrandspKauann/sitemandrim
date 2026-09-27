@@ -51,11 +51,22 @@ import {
   AULA4_VOCABULARY_GROUPS,
   AULA4_WRITING_EXERCISES,
 } from './aula4Data';
+import {
+  AULA5_HANZI_CORRECTIONS,
+  AULA5_HOMEWORK,
+  AULA5_KEY_PHRASES,
+  AULA5_LESSON_TOPICS,
+  AULA5_LISTENING_EXERCISES,
+  AULA5_NUMBER_ROWS,
+  AULA5_PINYIN_NOTES,
+  AULA5_VOCABULARY_GROUPS,
+  AULA5_WRITING_EXERCISES,
+} from './aula5Data';
 import styles from './page.module.css';
 
 type StudyMode = 'resumo' | 'escrever' | 'falar' | 'ouvir';
 type ExerciseStatus = 'idle' | 'correct' | 'incorrect' | 'revealed';
-type LessonId = 'aula1' | 'aula2' | 'aula3' | 'aula4';
+type LessonId = 'aula1' | 'aula2' | 'aula3' | 'aula4' | 'aula5';
 
 const LESSONS = {
   aula1: {
@@ -101,6 +112,17 @@ const LESSONS = {
     numbersTitle: 'Horas, minutos e partes do dia',
     numbersDescription: 'Em chinês, diga primeiro o período do dia e depois a hora: 下午四点半.',
     numberRule: <><b>Modelo:</b> 下午四点半 = 16h30. <b>Outra forma:</b> 四点三十分 = 4h30.</>,
+  },
+  aula5: {
+    number: '05', tabTitle: 'Aula 5', tabSubtitle: 'Locais, posições e 能', title: 'Locais, posições e encontros',
+    objective: 'Descrever onde pessoas e objetos estão, combinar um encontro e dizer se alguém consegue fazer algo.',
+    description: 'A aula trabalhou 上/下/里/外/前/后/左/右/中间, 在 + lugar, lugar antes da ação, 有/没有, 能/不能, 到 e vocabulário de casa, cidade, hospital e profissões.',
+    topics: AULA5_LESSON_TOPICS, pinyinNotes: AULA5_PINYIN_NOTES, numberRows: AULA5_NUMBER_ROWS, vocabularyGroups: AULA5_VOCABULARY_GROUPS,
+    hanziCorrections: AULA5_HANZI_CORRECTIONS, keyPhrases: AULA5_KEY_PHRASES, homework: AULA5_HOMEWORK,
+    writingExercises: AULA5_WRITING_EXERCISES, listeningExercises: AULA5_LISTENING_EXERCISES,
+    numbersTitle: 'Horários e classificadores da aula',
+    numbersDescription: 'Use o horário antes da ação e escolha o classificador de acordo com o substantivo: 个, 只 ou 名.',
+    numberRule: <><b>Encontro:</b> 下午两点你能到吗？ <b>Existência:</b> 房间外有一只小猫.</>,
   },
 } as const;
 
