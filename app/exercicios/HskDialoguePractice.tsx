@@ -293,6 +293,147 @@ const DIALOGUES: Dialogue[] = [
       },
     ] satisfies DialogueLineSource[]).map(prepareLine),
   },
+  {
+    id: 'dialogue-10',
+    tab: 'Diálogo 10',
+    lessonLabel: '课文 10',
+    title: 'Cinema e compromissos',
+    subtitle: 'Li Wen e Bai Jiayue tentam combinar um horário para ir ao cinema.',
+    lines: ([
+      {
+        id: 'dialogue-10-line-1', speaker: 'Li Wen', speakerHanzi: '李文', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '下午我想去电影院看电影，你去吗？', translation: 'À tarde, quero ir ao cinema assistir a um filme. Você vai?',
+      },
+      {
+        id: 'dialogue-10-line-2', speaker: 'Bai Jiayue', speakerHanzi: '白家月', speakerKey: 'jiayue', useDefaultVoice: true,
+        hanzi: '我不想去，下午还有事。', translation: 'Não quero ir. Ainda tenho um compromisso à tarde.',
+      },
+      {
+        id: 'dialogue-10-line-3', speaker: 'Li Wen', speakerHanzi: '李文', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '好的。明天呢？', translation: 'Está bem. E amanhã?',
+      },
+      {
+        id: 'dialogue-10-line-4', speaker: 'Bai Jiayue', speakerHanzi: '白家月', speakerKey: 'jiayue', useDefaultVoice: true,
+        hanzi: '我明天下午两点还上课呢，四点半下课。', translation: 'Amanhã ainda tenho aula às duas da tarde e termino às quatro e meia.',
+      },
+    ] satisfies DialogueLineSource[]).map(prepareLine),
+  },
+  {
+    id: 'dialogue-11',
+    tab: 'Diálogo 11',
+    lessonLabel: '课文 11',
+    title: 'Em casa e antes do trabalho',
+    subtitle: 'Wang Yixue e Liu Ming falam por telefone sobre horários e uma compra.',
+    lines: ([
+      {
+        id: 'dialogue-11-line-1', speaker: 'Wang Yixue', speakerHanzi: '王一雪', speakerKey: 'yixue', useDefaultVoice: true,
+        hanzi: '喂，你在哪儿呢？', translation: 'Alô, onde você está?',
+      },
+      {
+        id: 'dialogue-11-line-2', speaker: 'Liu Ming', speakerHanzi: '刘明', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '我在家里呢。', translation: 'Estou em casa.',
+      },
+      {
+        id: 'dialogue-11-line-3', speaker: 'Wang Yixue', speakerHanzi: '王一雪', speakerKey: 'yixue', useDefaultVoice: true,
+        hanzi: '我晚上六点半下班。', translation: 'Saio do trabalho às seis e meia da noite.',
+      },
+      {
+        id: 'dialogue-11-line-4', speaker: 'Liu Ming', speakerHanzi: '刘明', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '我八点去医院上班。', translation: 'Vou trabalhar no hospital às oito.',
+      },
+      {
+        id: 'dialogue-11-line-5', speaker: 'Wang Yixue', speakerHanzi: '王一雪', speakerKey: 'yixue', useDefaultVoice: true,
+        hanzi: '好的，你去店里买些菜吧。', translation: 'Está bem. Vá à loja comprar algumas verduras.',
+      },
+      {
+        id: 'dialogue-11-line-6', speaker: 'Liu Ming', speakerHanzi: '刘明', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '好，我十分钟后去。', translation: 'Está bem. Vou daqui a dez minutos.',
+      },
+    ] satisfies DialogueLineSource[]).map(prepareLine),
+  },
+  {
+    id: 'dialogue-12',
+    tab: 'Diálogo 12',
+    lessonLabel: '课文 12',
+    title: 'O gatinho fora do quarto',
+    subtitle: 'Bai Jiayue e Chen Tianzhong procuram um gatinho.',
+    lines: ([
+      {
+        id: 'dialogue-12-line-1', speaker: 'Bai Jiayue', speakerHanzi: '白家月', speakerKey: 'jiayue', useDefaultVoice: true,
+        hanzi: '房间外有一只小猫。', translation: 'Há um gatinho fora do quarto.',
+      },
+      {
+        id: 'dialogue-12-line-2', speaker: 'Chen Tianzhong', speakerHanzi: '陈天中', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '我没看见，它在哪儿呢？', translation: 'Eu não vi. Onde ele está?',
+      },
+      {
+        id: 'dialogue-12-line-3', speaker: 'Bai Jiayue', speakerHanzi: '白家月', speakerKey: 'jiayue', useDefaultVoice: true,
+        hanzi: '它在桌子下呢。', translation: 'Ele está debaixo da mesa.',
+      },
+      {
+        id: 'dialogue-12-line-4', speaker: 'Chen Tianzhong', speakerHanzi: '陈天中', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '这只小猫真漂亮！', translation: 'Este gatinho é muito bonito!',
+      },
+    ] satisfies DialogueLineSource[]).map(prepareLine),
+  },
+  {
+    id: 'dialogue-13',
+    tab: 'Diálogo 13',
+    lessonLabel: '课文 13',
+    title: 'Combinando um encontro',
+    subtitle: 'Bai Jiayue e Li Wen combinam o lugar e o horário do encontro.',
+    lines: ([
+      {
+        id: 'dialogue-13-line-1', speaker: 'Bai Jiayue', speakerHanzi: '白家月', speakerKey: 'jiayue', useDefaultVoice: true,
+        hanzi: '我们在哪儿见呢？', translation: 'Onde vamos nos encontrar?',
+      },
+      {
+        id: 'dialogue-13-line-2', speaker: 'Li Wen', speakerHanzi: '李文', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '在学校书店前见吧。', translation: 'Vamos nos encontrar em frente à livraria da escola.',
+      },
+      {
+        id: 'dialogue-13-line-3', speaker: 'Bai Jiayue', speakerHanzi: '白家月', speakerKey: 'jiayue', useDefaultVoice: true,
+        hanzi: '好的。下午两点你能到吗？', translation: 'Está bem. Você consegue chegar às duas da tarde?',
+      },
+      {
+        id: 'dialogue-13-line-4', speaker: 'Li Wen', speakerHanzi: '李文', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '我能到。我在学校吃午饭。', translation: 'Eu consigo chegar. Vou almoçar na escola.',
+      },
+    ] satisfies DialogueLineSource[]).map(prepareLine),
+  },
+  {
+    id: 'dialogue-14',
+    tab: 'Diálogo 14',
+    lessonLabel: '课文 14',
+    title: 'Médicos ocupados',
+    subtitle: 'Liu Ming e o doutor Hu conversam sobre o trabalho no hospital.',
+    lines: ([
+      {
+        id: 'dialogue-14-line-1', speaker: 'Liu Ming', speakerHanzi: '刘明', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '小胡，还没吃饭呢？', translation: 'Xiao Hu, ainda não comeu?',
+      },
+      {
+        id: 'dialogue-14-line-2', speaker: 'Doutor Hu', speakerHanzi: '胡医生', speakerKey: 'yifei', useDefaultVoice: true,
+        hanzi: '没吃呢。', translation: 'Ainda não comi.',
+      },
+      {
+        id: 'dialogue-14-line-3', speaker: 'Liu Ming', speakerHanzi: '刘明', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '大医院病人多，医生非常忙。', translation: 'Hospitais grandes têm muitos pacientes, e os médicos ficam muito ocupados.',
+      },
+      {
+        id: 'dialogue-14-line-4', speaker: 'Doutor Hu', speakerHanzi: '胡医生', speakerKey: 'yifei', useDefaultVoice: true,
+        hanzi: '是的。我爸爸也在医院工作，他也非常忙。', translation: 'Sim. Meu pai também trabalha no hospital e também é muito ocupado.',
+      },
+      {
+        id: 'dialogue-14-line-5', speaker: 'Liu Ming', speakerHanzi: '刘明', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '你家有两个医生？', translation: 'Há dois médicos na sua família?',
+      },
+      {
+        id: 'dialogue-14-line-6', speaker: 'Doutor Hu', speakerHanzi: '胡医生', speakerKey: 'yifei', useDefaultVoice: true,
+        hanzi: '对。', translation: 'Sim.',
+      },
+    ] satisfies DialogueLineSource[]).map(prepareLine),
+  },
 ];
 
 type HskDialoguePracticeProps = {

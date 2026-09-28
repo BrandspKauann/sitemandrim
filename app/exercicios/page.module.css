@@ -164,6 +164,7 @@
 .dialogueTabs button { min-height: 36px; padding: 0 15px; border: 1px solid #d9cdbf; background: #fffaf4; color: #776b69; border-radius: 3px; font-size: 10px; font-weight: 750; cursor: pointer; transition: border-color .18s, background .18s, color .18s; }
 .dialogueTabs button:hover { border-color: var(--red); color: var(--red); }
 .dialogueTabs .activeDialogueTab { border-color: var(--red); background: var(--red); color: #fff; box-shadow: 0 6px 16px rgb(186 63 54 / 18%); }
+.dialogueTabs .activeDialogueTab:hover { color: #fff; }
 
 .dialoguePanel { margin-top: 14px; border-top: 4px solid var(--red); background: #fffdf9; box-shadow: 16px 16px 0 rgb(117 85 67 / 7%), 0 24px 60px rgb(84 51 38 / 9%); }
 .dialoguePanelHead { min-height: 104px; padding: 22px 27px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid #e3d8cc; }
