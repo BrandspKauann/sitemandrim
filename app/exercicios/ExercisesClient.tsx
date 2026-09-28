@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useClientSession } from '../components/ClientSession';
 import HskDialoguePractice from './HskDialoguePractice';
 import ToneRulesGame from './ToneRulesGame';
+import TranslationGame, { TRANSLATION_PHRASE_COUNT } from './TranslationGame';
 import styles from './page.module.css';
 
 type Challenge = {
@@ -111,7 +112,7 @@ function shuffledChallenges() {
 
 export default function ExercisesPage() {
   const { sessionId, shortId } = useClientSession();
-  const [exerciseTab, setExerciseTab] = useState<'rules' | 'listening'>('rules');
+  const [exerciseTab, setExerciseTab] = useState<'rules' | 'listening' | 'translation'>('rules');
   const [phase, setPhase] = useState<Phase>('intro');
   const [deck, setDeck] = useState<Challenge[]>([]);
   const [roundIndex, setRoundIndex] = useState(0);
@@ -229,9 +230,14 @@ export default function ExercisesPage() {
         <button type="button" role="tab" aria-selected={exerciseTab === 'listening'} className={exerciseTab === 'listening' ? styles.activeExerciseTab : ''} onClick={() => setExerciseTab('listening')}>
           <span>02</span><strong>Identificar o tom</strong><small>Treino de ouvido</small>
         </button>
+        <button type="button" role="tab" aria-selected={exerciseTab === 'translation'} className={exerciseTab === 'translation' ? styles.activeExerciseTab : ''} onClick={() => setExerciseTab('translation')}>
+          <span>03</span><strong>Significado das frases</strong><small>{TRANSLATION_PHRASE_COUNT} frases das aulas</small>
+        </button>
       </div>
 
       {exerciseTab === 'rules' && <ToneRulesGame />}
+
+      {exerciseTab === 'translation' && <TranslationGame />}
 
       {exerciseTab === 'listening' && <>
 
