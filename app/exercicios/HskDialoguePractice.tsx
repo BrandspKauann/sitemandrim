@@ -434,6 +434,56 @@ const DIALOGUES: Dialogue[] = [
       },
     ] satisfies DialogueLineSource[]).map(prepareLine),
   },
+  {
+    id: 'dialogue-15',
+    tab: 'Diálogo 15',
+    lessonLabel: '课文 15',
+    title: 'Encontro no cinema',
+    subtitle: 'Li Wen e Bai Jiayue combinam um filme e o ponto de encontro.',
+    lines: ([
+      {
+        id: 'dialogue-15-line-1', speaker: 'Li Wen', speakerHanzi: '李文', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '学校前边有一家电影院。', translation: 'Há um cinema em frente à escola.',
+      },
+      {
+        id: 'dialogue-15-line-2', speaker: 'Bai Jiayue', speakerHanzi: '白家月', speakerKey: 'jiayue', useDefaultVoice: true,
+        hanzi: '对。我们晚上去那个电影院看电影吧。', translation: 'Sim. Vamos àquele cinema assistir a um filme à noite.',
+      },
+      {
+        id: 'dialogue-15-line-3', speaker: 'Li Wen', speakerHanzi: '李文', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '好！我们七点在电影院外边见，好吗？', translation: 'Ótimo! Vamos nos encontrar fora do cinema às sete, está bem?',
+      },
+      {
+        id: 'dialogue-15-line-4', speaker: 'Bai Jiayue', speakerHanzi: '白家月', speakerKey: 'jiayue', useDefaultVoice: true,
+        hanzi: '好的，晚上七点见！', translation: 'Está bem. Nos vemos às sete da noite!',
+      },
+    ] satisfies DialogueLineSource[]).map(prepareLine),
+  },
+  {
+    id: 'dialogue-16',
+    tab: 'Diálogo 16',
+    lessonLabel: '课文 16',
+    title: 'O livro sobre a cadeira',
+    subtitle: 'Bai Jiayue e Chen Tianzhong conversam sobre um livro e os planos de amanhã.',
+    lines: ([
+      {
+        id: 'dialogue-16-line-1', speaker: 'Bai Jiayue', speakerHanzi: '白家月', speakerKey: 'jiayue', useDefaultVoice: true,
+        hanzi: '椅子上有一本中文书，那是谁的书？', translation: 'Há um livro de chinês sobre a cadeira. De quem é esse livro?',
+      },
+      {
+        id: 'dialogue-16-line-2', speaker: 'Chen Tianzhong', speakerHanzi: '陈天中', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '是我的书，谢谢。这是我的第二本中文书。', translation: 'É o meu livro, obrigado. Este é o meu segundo livro de chinês.',
+      },
+      {
+        id: 'dialogue-16-line-3', speaker: 'Bai Jiayue', speakerHanzi: '白家月', speakerKey: 'jiayue', useDefaultVoice: true,
+        hanzi: '不客气。你明天上午在哪儿？', translation: 'De nada. Onde você estará amanhã de manhã?',
+      },
+      {
+        id: 'dialogue-16-line-4', speaker: 'Chen Tianzhong', speakerHanzi: '陈天中', speakerKey: 'tianzhong', useDefaultVoice: true,
+        hanzi: '我明天上午在学校学习。', translation: 'Amanhã de manhã, estudarei na escola.',
+      },
+    ] satisfies DialogueLineSource[]).map(prepareLine),
+  },
 ];
 
 type HskDialoguePracticeProps = {
