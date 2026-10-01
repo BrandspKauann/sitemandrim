@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useClientSession } from '../components/ClientSession';
 import PracticeRecorder from '../components/PracticeRecorder';
 import RevisionHeader from './RevisionHeader';
+import VocabularyPractice from './VocabularyPractice';
 import {
   HANZI_CORRECTIONS,
   HOMEWORK,
@@ -509,24 +510,7 @@ export default function RevisionHome() {
                   <span>04 · Vocabulário</span>
                   <h3 id="vocabulary-title">Palavras trabalhadas na aula</h3>
                 </div>
-                <div className={styles.vocabularyGroups}>
-                  {lesson.vocabularyGroups.map((group, groupIndex) => (
-                    <details key={group.title} open={groupIndex === 0}>
-                      <summary><span>{group.title}</span><small>{group.words.length} itens</small></summary>
-                      <p>{group.description}</p>
-                      <div className={styles.wordGrid}>
-                        {group.words.map((word) => (
-                          <article key={word.hanzi}>
-                            <span lang="zh-CN">{word.hanzi}</span>
-                            <b>{getPinyin(word.hanzi)}</b>
-                            <small>{word.translation}</small>
-                            {word.note && <em>{word.note}</em>}
-                          </article>
-                        ))}
-                      </div>
-                    </details>
-                  ))}
-                </div>
+                <VocabularyPractice key={lessonId} groups={lesson.vocabularyGroups} />
               </section>
 
               <section className={styles.contentSection} aria-labelledby="hanzi-title">

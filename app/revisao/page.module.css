@@ -136,6 +136,17 @@
 .numberRule p { margin: 7px 0 0; color: #655956; font-size: 14px; line-height: 1.55; }
 
 .vocabularyGroups { margin-top: 24px; display: grid; gap: 10px; }
+.vocabularyPlayer { margin-top: 24px; padding: 20px; border: 1px solid #ded2c6; border-left: 4px solid var(--red); background: #f5eee6; }
+.vocabularyPlayer p { margin: 0 0 14px; color: #766a67; font-size: 14px; }
+.vocabularyControls { display: flex; flex-wrap: wrap; gap: 8px; }
+.vocabularyControls button, .vocabularyPlayer label button, .vocabularyGroupPlay, .wordGrid article button { min-height: 38px; padding: 8px 12px; border: 1px solid #d4c4b5; border-radius: 3px; background: #fffaf5; color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
+.vocabularyControls button:first-child, .vocabularyControls button[aria-pressed="true"] { border-color: var(--red); background: var(--red); color: white; }
+.vocabularyControls button:disabled { opacity: .45; cursor: default; }
+.vocabularyPlayer label { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 18px; font-size: 13px; }
+.vocabularyPlayer input { width: 72px; padding: 8px; border: 1px solid #d4c4b5; border-radius: 3px; background: white; color: var(--ink); font: inherit; }
+.vocabularyGroupPlay { margin: 0 20px 16px; }
+.wordGrid article.activeVocabularyWord { border-color: var(--red); background: #fff0e5; box-shadow: inset 3px 0 0 var(--red); }
+.wordGrid article button { margin-top: 12px; align-self: flex-start; }
 .vocabularyGroups details { border: 1px solid #ded2c6; background: #fffaf5; }
 .vocabularyGroups summary { padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px; cursor: pointer; }
 .vocabularyGroups summary span { font-size: 16px; font-weight: 760; }
