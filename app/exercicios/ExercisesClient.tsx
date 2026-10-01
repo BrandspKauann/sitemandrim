@@ -7,6 +7,7 @@ import { useClientSession } from '../components/ClientSession';
 import HskDialoguePractice from './HskDialoguePractice';
 import ToneRulesGame from './ToneRulesGame';
 import TranslationGame, { TRANSLATION_PHRASE_COUNT } from './TranslationGame';
+import ImageVocabularyGame, { IMAGE_WORD_COUNT } from './ImageVocabularyGame';
 import styles from './page.module.css';
 
 type Challenge = {
@@ -112,7 +113,7 @@ function shuffledChallenges() {
 
 export default function ExercisesPage() {
   const { sessionId, shortId } = useClientSession();
-  const [exerciseTab, setExerciseTab] = useState<'rules' | 'listening' | 'translation'>('rules');
+  const [exerciseTab, setExerciseTab] = useState<'rules' | 'listening' | 'translation' | 'images'>('rules');
   const [phase, setPhase] = useState<Phase>('intro');
   const [deck, setDeck] = useState<Challenge[]>([]);
   const [roundIndex, setRoundIndex] = useState(0);
@@ -233,8 +234,12 @@ export default function ExercisesPage() {
         <button type="button" role="tab" aria-selected={exerciseTab === 'translation'} className={exerciseTab === 'translation' ? styles.activeExerciseTab : ''} onClick={() => setExerciseTab('translation')}>
           <span>03</span><strong>Significado das frases</strong><small>{TRANSLATION_PHRASE_COUNT} frases das aulas</small>
         </button>
+        <button type="button" role="tab" aria-selected={exerciseTab === 'images'} className={exerciseTab === 'images' ? styles.activeExerciseTab : ''} onClick={() => setExerciseTab('images')}>
+          <span>04</span><strong>Objetos e lugares</strong><small>{IMAGE_WORD_COUNT} imagens para praticar</small>
+        </button>
       </div>
 
+      {exerciseTab === 'images' && <ImageVocabularyGame />}
       {exerciseTab === 'rules' && <ToneRulesGame />}
 
       {exerciseTab === 'translation' && <TranslationGame />}

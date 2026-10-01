@@ -14,7 +14,7 @@
 .nav a:hover { color: var(--red); }
 .nav .activeNav { background: var(--ink); color: #fff8ed; }
 
-.exerciseTabs { width: min(1050px, calc(100% - 48px)); margin: 34px auto 20px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.exerciseTabs { width: min(1050px, calc(100% - 48px)); margin: 34px auto 20px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .exerciseTabs button { min-height: 68px; padding: 12px 18px; display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 12px; align-items: center; border: 1px solid #d9cdbf; background: #fffaf4; color: var(--ink); border-radius: 3px; text-align: left; cursor: pointer; }
 .exerciseTabs button > span { grid-row: 1 / 3; color: #a99791; font-family: Georgia, serif; font-size: 24px; }
 .exerciseTabs button strong { align-self: end; font-size: 15px; }
@@ -73,6 +73,11 @@
 .ruleFinished button { min-height: 46px; margin-top: 24px; padding: 0 19px; border: 0; background: var(--red); color: #fff; border-radius: 3px; font-size: 14px; font-weight: 760; cursor: pointer; }
 
 .translationGame { width: min(1050px, calc(100% - 48px)); margin: 0 auto 86px; border-top: 4px solid var(--red); background: #fffdf9; box-shadow: 18px 18px 0 rgb(117 85 67 / 7%), 0 24px 70px rgb(84 51 38 / 10%); }
+.imageQuizPrompt { display: grid; place-items: center; padding: 20px; background: #fffaf4; }
+.imageQuizPrompt img { display: block; width: 100%; height: auto; max-height: 480px; object-fit: contain; border-radius: 5px; }
+.imageQuizChoices > button div { display: flex; flex-direction: column; gap: 7px; }
+.imageQuizChoices > button div strong { font-family: 'Noto Serif SC', SimSun, serif; font-size: 28px; line-height: 1.4; }
+.imageQuizChoices > button div small { color: #7c706d; font-size: 16px; }
 .translationGameHeader { padding: 22px 26px; display: flex; align-items: center; justify-content: space-between; gap: 30px; border-bottom: 1px solid #e2d7ca; }
 .translationGameHeader > div:first-child > span { color: var(--red); font-size: 12px; font-weight: 780; letter-spacing: .12em; text-transform: uppercase; }
 .translationGameHeader h1 { margin: 7px 0 5px; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(27px, 3.6vw, 40px); font-weight: 500; letter-spacing: -.035em; }
