@@ -270,7 +270,7 @@ function HomeworkAudioLoop() {
         </div>
         <span>{waiting ? `Repetindo em ${pauseSeconds}s` : repeat ? 'Loop ativo' : 'Uma reprodução'}</span>
       </div>
-      <audio ref={audioRef} controls preload="metadata" src="/audio/revisao/aula-3-licao-de-casa.mp3"
+      <audio data-media-title="Mandarim · lição de casa" ref={audioRef} controls preload="metadata" src="/audio/revisao/aula-3-licao-de-casa.mp3"
         onEnded={handleEnded} onTimeUpdate={updateActiveCue} onSeeked={updateActiveCue} onPlay={cancelReplay} onPause={() => {
           if (audioRef.current && !audioRef.current.ended) cancelReplay();
         }}>

@@ -139,6 +139,7 @@ const RealMandarinDialogues = forwardRef<RealMandarinDialoguesHandle, Props>(fun
   const runId = useRef(0);
   const animationFrame = useRef<number | null>(null);
   const timer = useRef<number | null>(null);
+  const boundaryWatcher = useRef<(() => void) | null>(null);
   const gapRef = useRef(1);
   const stopRef = useRef<() => void>(() => undefined);
   const [phase, setPhase] = useState<Phase>('idle');
@@ -162,6 +163,7 @@ const RealMandarinDialogues = forwardRef<RealMandarinDialoguesHandle, Props>(fun
 
   function stop() {
     runId.current += 1;
+    boundaryWatcher.current = null;
     clearScheduledWork();
     audioRef.current?.pause();
     setPhase('idle');
@@ -186,6 +188,14 @@ const RealMandarinDialogues = forwardRef<RealMandarinDialoguesHandle, Props>(fun
   }, [savedGap]);
 
   useEffect(() => () => stopRef.current(), []);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const stopped = () => stopRef.current();
+    audio.addEventListener('background-audio-stop', stopped);
+    return () => audio.removeEventListener('background-audio-stop', stopped);
+  }, []);
 
   function scheduleNext(activeRun: number, queue: typeof lines, currentIndex: number, shouldLoop: boolean) {
     if (runId.current !== activeRun) return;
@@ -224,17 +234,23 @@ const RealMandarinDialogues = forwardRef<RealMandarinDialoguesHandle, Props>(fun
       return;
     }
 
-    const watchEnd = () => {
-      if (runId.current !== activeRun) return;
+    let completed = false;
+    const watchEnd = (animate = true) => {
+      if (runId.current !== activeRun || completed) return;
       if (audio.currentTime >= line.end || audio.ended) {
+        completed = true;
+        boundaryWatcher.current = null;
         audio.pause();
         animationFrame.current = null;
         scheduleNext(activeRun, queue, currentIndex, shouldLoop);
         return;
       }
-      animationFrame.current = window.requestAnimationFrame(watchEnd);
+      if (animate) animationFrame.current = window.requestAnimationFrame(() => watchEnd());
     };
-    animationFrame.current = window.requestAnimationFrame(watchEnd);
+    // Animation frames stop in hidden tabs. Media time updates remain the
+    // fallback for phrase boundaries while the operating system plays audio.
+    boundaryWatcher.current = () => watchEnd(false);
+    animationFrame.current = window.requestAnimationFrame(() => watchEnd());
   }
 
   function start(queue: typeof lines, nextMode: PlayMode) {
@@ -260,7 +276,8 @@ const RealMandarinDialogues = forwardRef<RealMandarinDialoguesHandle, Props>(fun
 
   return (
     <section className={styles.section} id="dialogos-mandarim-real" aria-labelledby="real-dialogue-title">
-      <audio ref={audioRef} src={REAL_DIALOGUE_AUDIO} preload="metadata" />
+      <audio data-media-title="Diálogos em mandarim real" ref={audioRef} src={REAL_DIALOGUE_AUDIO} preload="metadata"
+        onTimeUpdate={() => boundaryWatcher.current?.()} onEnded={() => boundaryWatcher.current?.()} />
       <div className={styles.intro}>
         <div>
           <span className={styles.eyebrow}>Escuta com voz real</span>

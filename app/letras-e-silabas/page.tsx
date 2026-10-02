@@ -556,6 +556,7 @@ export default function LettersAndSyllablesPage() {
           </div>
           <audio
             ref={vowelAudioRef}
+            data-media-title="Vogais em mandarim · quatro tons"
             className={styles.recordedAudio}
             controls
             loop={recordedAudioLoop}

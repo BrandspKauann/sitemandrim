@@ -129,6 +129,7 @@ const RecordedNumberSequence = forwardRef<PhraseSequenceHandle, RecordedNumberSe
             </div>
 
             <audio
+              data-media-title="Números em chinês · 1 a 10"
               ref={audioRef}
               className="numbers-native-audio"
               controls

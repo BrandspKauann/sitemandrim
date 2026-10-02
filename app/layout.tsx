@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 import { ClientSessionProvider } from './components/ClientSession';
 import SessionUsageTracker from './components/SessionUsageTracker';
+import BackgroundAudio from './components/BackgroundAudio';
 import './globals.css';
 
 const geist = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="pt-BR">
       <body className={geist.variable}>
         <ClientSessionProvider>
+          <BackgroundAudio />
           {children}
           <SessionUsageTracker />
         </ClientSessionProvider>
