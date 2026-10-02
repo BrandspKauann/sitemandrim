@@ -54,4 +54,4 @@ export function formatDuration(ms: number, tenths = false) {
   return tenths ? `${base}.${Math.floor(safe % 1000 / 100)}` : base;
 }
 
-export const PAGE_LABELS: Record<string, string> = { '/': 'Frases', '/letras-e-silabas': 'Letras e sílabas', '/exercicios': 'Exercícios', '/tons': 'Tons', '/hsk1': 'HSK1', '/revisao': 'Revisão' };
+export const PAGE_LABELS: Record<string, string> = { '/': 'Frases', '/letras-e-silabas': 'Letras e sílabas', '/exercicios': 'Exercícios', '/tons': 'Tons', '/hsk1': 'HSK1', '/revisao': 'Revisão', '/simulado': 'Simulado HSK' };

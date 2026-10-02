@@ -7,6 +7,7 @@ type PracticeRecorderProps = {
   pinyin: string;
   sessionId: string;
   storageScope?: string;
+  maxSeconds?: number;
   onBeforeRecord?: () => void;
   onRecordingStart?: () => void;
   onRecordingStop?: () => void;
@@ -31,7 +32,6 @@ type RecorderStatus = 'idle' | 'requesting' | 'recording' | 'preview';
 const DB_NAME = 'tons-de-mandarim';
 const STORE_NAME = 'practice-recordings';
 const MAX_RECORDINGS = 3;
-const MAX_SECONDS = 30;
 
 function openDatabase() {
   return new Promise<IDBDatabase>((resolve, reject) => {
@@ -90,7 +90,7 @@ async function removeRecording(id: string) {
 }
 
 function formatTime(seconds: number) {
-  return `00:${String(seconds).padStart(2, '0')}`;
+  return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
 }
 
 function recorderOptions() {
@@ -104,6 +104,7 @@ export default function PracticeRecorder({
   pinyin,
   sessionId,
   storageScope = 'phrases',
+  maxSeconds = 30,
   onBeforeRecord,
   onRecordingStart,
   onRecordingStop,
@@ -282,9 +283,9 @@ export default function PracticeRecorder({
       recorder.start(250);
       onRecordingStart?.();
       timerRef.current = window.setInterval(() => {
-        const elapsed = Math.min(MAX_SECONDS, Math.floor((Date.now() - startedAtRef.current) / 1000));
+        const elapsed = Math.min(maxSeconds, Math.floor((Date.now() - startedAtRef.current) / 1000));
         setSeconds(elapsed);
-        if (elapsed >= MAX_SECONDS && recorder.state === 'recording') recorder.stop();
+        if (elapsed >= maxSeconds && recorder.state === 'recording') recorder.stop();
       }, 200);
     } catch (error) {
       releaseMicrophone();
@@ -370,9 +371,9 @@ export default function PracticeRecorder({
         <div className="recording-live" role="status">
           <div className="recording-live-top">
             <span><i aria-hidden="true" /> Gravando</span>
-            <strong>{formatTime(seconds)} / 00:30</strong>
+            <strong>{formatTime(seconds)} / {formatTime(maxSeconds)}</strong>
           </div>
-          <div className="recording-progress" aria-hidden="true"><i style={{ width: `${(seconds / MAX_SECONDS) * 100}%` }} /></div>
+          <div className="recording-progress" aria-hidden="true"><i style={{ width: `${(seconds / maxSeconds) * 100}%` }} /></div>
           <div className="recording-actions">
             <button className="finish-recording" type="button" onClick={finishRecording}>■ Concluir gravação</button>
             <button className="discard-recording" type="button" onClick={discardRecording}>Descartar agora</button>
@@ -410,7 +411,7 @@ export default function PracticeRecorder({
             {slotsLeft > 0 ? 'Gravar minha voz' : 'Limite de 3 gravações'}
           </button>
           <p>{slotsLeft > 0
-            ? `${slotsLeft} ${slotsLeft === 1 ? 'espaço disponível' : 'espaços disponíveis'} · até 30 segundos por tentativa`
+            ? `${slotsLeft} ${slotsLeft === 1 ? 'espaço disponível' : 'espaços disponíveis'} · até ${maxSeconds} segundos por tentativa`
             : 'Exclua uma tentativa para gravar novamente.'}</p>
         </div>
       )}

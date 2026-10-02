@@ -490,6 +490,7 @@ export default function Hsk1Client() {
           <Link href="/tons">Tons</Link>
           <Link className={styles.activeNav} href="/hsk1">HSK1</Link>
           <Link href="/revisao">Revisão</Link>
+          <Link href="/simulado">Simulado HSK</Link>
         </nav>
       </header>
 

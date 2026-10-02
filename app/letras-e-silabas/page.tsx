@@ -482,6 +482,7 @@ export default function LettersAndSyllablesPage() {
           <Link href="/tons">Tons</Link>
           <Link href="/hsk1">HSK1</Link>
           <Link href="/revisao">Revisão</Link>
+          <Link href="/simulado">Simulado HSK</Link>
         </nav>
       </header>
 

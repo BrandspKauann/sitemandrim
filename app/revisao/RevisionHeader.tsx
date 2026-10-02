@@ -15,6 +15,7 @@ export default function RevisionHeader() {
         <Link href="/tons">Tons</Link>
         <Link href="/hsk1">HSK1</Link>
         <Link className={styles.activeNav} href="/revisao">Revisão</Link>
+        <Link href="/simulado">Simulado HSK</Link>
       </nav>
     </header>
   );
