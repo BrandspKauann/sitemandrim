@@ -75,6 +75,31 @@
 .empty { margin: 0; color: #887b77; font-size: 12px; line-height: 1.5; }
 .privacy { margin: 0; padding: 0 26px 24px; color: #8d807c; font-size: 11px; line-height: 1.5; }
 
+.goal { margin: 0 26px 18px; display: grid; gap: 8px; font-size: 13px; color: #6e605d; }
+.goal progress, .pageList progress { width: 100%; height: 8px; accent-color: #ba3f36; }
+.reportTabs { margin: 20px 26px 0; display: flex; gap: 6px; flex-wrap: wrap; }
+.reportTabs button, .filters button, .settings button { padding: 10px 14px; border: 1px solid #dfd2c6; border-radius: 4px; color: #4a3539; background: #fffdf9; cursor: pointer; font-weight: 600; }
+.reportTabs button[aria-pressed=true] { background: #ba3f36; color: white; border-color: #ba3f36; }
+.filters { margin: 18px 26px; display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.filters > div { display: flex; flex-wrap: wrap; gap: 5px; width: 100%; }
+.filters label, .settings label { display: grid; gap: 6px; color: #6e605d; font-size: 13px; }
+.filters input, .settings input[type=number] { border: 1px solid #dfd2c6; background: #fffdf9; color: #33272d; padding: 9px; border-radius: 4px; max-width: 100%; }
+.details { padding: 0 26px 20px; display: grid; gap: 10px; }
+.dayDetail { border: 1px solid #dfd2c6; background: #fffdf9; }
+.dayDetail summary, .studyDetail summary { cursor: pointer; padding: 15px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; }
+.dayDetail summary > span::before, .studyDetail summary > span::before { content: '▸ '; color: #ba3f36; }
+.dayDetail[open] > summary > span::before, .studyDetail[open] > summary > span::before { content: '▾ '; }
+.dayDetail summary strong { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.studyDetail { margin: 0 12px 12px; border-top: 1px solid #e3d8cd; }
+.studyDetail summary small { display: block; color: #8d807c; margin-top: 5px; font-size: 11px; line-height: 1.5; }
+.studyDetail .pageList { margin: 0 12px 12px; }
+.settings { padding: 24px 26px; display: grid; gap: 18px; }
+.settings label:has(input[type=checkbox]) { display: flex; align-items: center; }
+.settings p { color: #6e605d; font-size: 13px; line-height: 1.6; margin: 0; }
+.pageList span { flex: 1; }
+.details .privacy { padding: 12px 0 0; }
+.report button:focus-visible, .report summary:focus-visible, .report input:focus-visible { outline: 3px solid #ba3f36; outline-offset: 3px; }
+
 @media (max-width: 720px) {
   .timerButton { right: 12px; bottom: 12px; min-width: 154px; min-height: 49px; }
   .backdrop { padding: 12px; place-items: end center; }
@@ -85,4 +110,7 @@
   .definition { margin: 0 18px; }
   .reportSections { padding: 21px 18px 24px; grid-template-columns: 1fr; }
   .privacy { padding: 0 18px 22px; }
+  .goal, .reportTabs, .filters { margin-left: 18px; margin-right: 18px; }
+  .details, .settings { padding-left: 18px; padding-right: 18px; }
+  .dayDetail summary, .studyDetail summary { padding: 12px; }
 }

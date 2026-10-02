@@ -17,7 +17,25 @@ type UsagePayload = {
   dailyMs?: unknown;
   dailyVisibleMs?: unknown;
   pages?: unknown;
+  studyDays?: unknown;
 };
+
+function cleanStudyDays(value: unknown) {
+  if (value === undefined) return {};
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const cleaned: Record<string, { startedAt: number; lastSeenAt: number; visibleMs: number; pages: NumericMap }> = {};
+  for (const [date, entry] of Object.entries(value).slice(0, 7400)) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !entry || typeof entry !== 'object') return null;
+    const day = entry as Record<string, unknown>;
+    const startedAt = finiteInteger(day.startedAt, 1_577_836_800_000, Date.now() + 86_400_000);
+    const lastSeenAt = finiteInteger(day.lastSeenAt, 1_577_836_800_000, Date.now() + 86_400_000);
+    const visibleMs = finiteInteger(day.visibleMs, 0, MAX_DURATION_MS);
+    const pages = cleanMap(day.pages, /^\/[a-zA-Z0-9/_-]{0,119}$/, 40);
+    if (startedAt === null || lastSeenAt === null || lastSeenAt < startedAt || visibleMs === null || !pages) return null;
+    cleaned[date] = { startedAt, lastSeenAt, visibleMs, pages };
+  }
+  return cleaned;
+}
 
 function databaseUnavailable() {
   return Response.json({ error: 'O relatório de uso não está disponível agora.' }, { status: 503 });
@@ -56,9 +74,10 @@ function cleanPayload(payload: UsagePayload) {
   const dailyMs = cleanMap(payload.dailyMs, /^\d{4}-\d{2}-\d{2}$/, 7400);
   const dailyVisibleMs = cleanMap(payload.dailyVisibleMs, /^\d{4}-\d{2}-\d{2}$/, 7400);
   const pages = cleanMap(payload.pages, /^\/[a-zA-Z0-9/_-]{0,119}$/, 40);
+  const studyDays = cleanStudyDays(payload.studyDays);
 
   if (startedAt === null || lastSeenAt === null || endedAt === null && payload.endedAt !== null
-    || openMs === null || visibleMs === null || !dailyMs || !dailyVisibleMs || !pages) return null;
+    || openMs === null || visibleMs === null || !dailyMs || !dailyVisibleMs || !pages || !studyDays) return null;
 
   return {
     ownerId: payload.ownerId,
@@ -71,6 +90,7 @@ function cleanPayload(payload: UsagePayload) {
     dailyMs,
     dailyVisibleMs,
     pages,
+    studyDays,
   };
 }
 
@@ -107,7 +127,7 @@ export async function POST(request: Request) {
     payload.visibleMs,
     JSON.stringify(payload.dailyMs),
     JSON.stringify(payload.dailyVisibleMs),
-    JSON.stringify(payload.pages),
+    JSON.stringify({ version: 2, pages: payload.pages, studyDays: payload.studyDays }),
   ).run();
 
   return Response.json({ ok: true });
@@ -121,6 +141,19 @@ function parseStoredMap(value: unknown): NumericMap {
   } catch {
     return {};
   }
+}
+
+function parsePageDetails(value: unknown) {
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (parsed?.version === 2) return {
+        pages: cleanMap(parsed.pages, /^\/[a-zA-Z0-9/_-]{0,119}$/, 40) ?? {},
+        studyDays: cleanStudyDays(parsed.studyDays) ?? {},
+      };
+    } catch { /* Legacy or invalid JSON is handled below. */ }
+  }
+  return { pages: parseStoredMap(value) };
 }
 
 export async function GET(request: Request) {
@@ -149,7 +182,7 @@ export async function GET(request: Request) {
     visibleMs: Number(row.visible_ms),
     dailyMs: parseStoredMap(row.daily_json),
     dailyVisibleMs: parseStoredMap(row.daily_visible_json),
-    pages: parseStoredMap(row.pages_json),
+    ...parsePageDetails(row.pages_json),
   }));
 
   return Response.json({ records }, { headers: { 'Cache-Control': 'private, no-store' } });

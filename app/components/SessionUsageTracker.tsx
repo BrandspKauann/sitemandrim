@@ -1,56 +1,21 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useClientSession } from './ClientSession';
 import styles from './SessionUsageTracker.module.css';
+import UsageReport, { type StudyPreferences } from './UsageReport';
+import { dayKey, formatDuration, trackStudy, type UsageRecord } from './usageStats';
 
 type NumericMap = Record<string, number>;
 
-type UsageRecord = {
-  ownerId: string;
-  sessionId: string;
-  startedAt: number;
-  lastSeenAt: number;
-  endedAt: number | null;
-  openMs: number;
-  visibleMs: number;
-  dailyMs: NumericMap;
-  dailyVisibleMs: NumericMap;
-  pages: NumericMap;
-};
 
 const OWNER_KEY = 'tons-de-mandarim:usage-owner';
 const RECORD_PREFIX = 'tons-de-mandarim:usage-session:';
-const RESET_KEY = 'tons-de-mandarim:usage-reset-version';
-const RESET_VERSION = '2026-09-08-active-view-v1';
+const PREFS_KEY = 'tons-de-mandarim:study-preferences';
+const PAUSE_KEY = 'tons-de-mandarim:study-paused';
 const REPORT_ENDPOINT = '/api/usage';
-const PAGE_LABELS: Record<string, string> = {
-  '/': 'Frases',
-  '/letras-e-silabas': 'Letras e sílabas',
-  '/exercicios': 'Exercícios',
-  '/tons': 'Tons',
-  '/hsk1': 'HSK1',
-  '/revisao': 'Revisão',
-};
 let memoryOwnerId = '';
-
-function resetUsageHistoryOnce() {
-  try {
-    if (window.localStorage.getItem(RESET_KEY) === RESET_VERSION) return;
-    const usageKeys: string[] = [];
-    for (let index = 0; index < window.localStorage.length; index += 1) {
-      const key = window.localStorage.key(index);
-      if (key?.startsWith(RECORD_PREFIX)) usageKeys.push(key);
-    }
-    usageKeys.forEach((key) => window.localStorage.removeItem(key));
-    window.localStorage.removeItem(OWNER_KEY);
-    window.localStorage.setItem(RESET_KEY, RESET_VERSION);
-    memoryOwnerId = '';
-  } catch {
-    memoryOwnerId = '';
-  }
-}
 
 function pageIsActive() {
   return document.visibilityState === 'visible' && document.hasFocus();
@@ -72,11 +37,6 @@ function ownerId() {
   } catch {
     return (memoryOwnerId = newId());
   }
-}
-
-function dayKey(timestamp: number) {
-  const date = new Date(timestamp);
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
 function addAcrossDays(target: NumericMap, startedAt: number, endedAt: number) {
@@ -130,29 +90,23 @@ function localRecords(currentOwnerId: string) {
   return records;
 }
 
-function formatDuration(milliseconds: number, tenths = false) {
-  const safe = Math.max(0, milliseconds);
-  const totalSeconds = Math.floor(safe / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  const base = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  return tenths ? `${base}.${Math.floor((safe % 1000) / 100)}` : base;
-}
-
 function mergeRecords(remote: UsageRecord[], local: UsageRecord[]) {
   const merged = new Map<string, UsageRecord>();
   [...remote, ...local].forEach((record) => {
     const current = merged.get(record.sessionId);
-    if (!current || record.lastSeenAt >= current.lastSeenAt) merged.set(record.sessionId, record);
+    if (!current || record.lastSeenAt >= current.lastSeenAt) merged.set(record.sessionId, { ...record, studyDays: record.studyDays ?? current?.studyDays });
+    else if (!current.studyDays && record.studyDays) merged.set(record.sessionId, { ...current, studyDays: record.studyDays });
   });
   return [...merged.values()].sort((a, b) => b.startedAt - a.startedAt);
 }
 
 export default function SessionUsageTracker() {
-  const { sessionId, shortId } = useClientSession();
+  const { sessionId } = useClientSession();
   const pathname = usePathname();
   const [reportOpen, setReportOpen] = useState(false);
+  const [preferences, setPreferences] = useState<StudyPreferences>({ goal: 30, tenths: true });
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
   const [liveActiveMs, setLiveActiveMs] = useState(0);
   const [currentDay, setCurrentDay] = useState('');
   const [records, setRecords] = useState<UsageRecord[]>([]);
@@ -165,7 +119,13 @@ export default function SessionUsageTracker() {
 
   useEffect(() => {
     if (!sessionId) return;
-    resetUsageHistoryOnce();
+    try {
+      const settings = JSON.parse(localStorage.getItem(PREFS_KEY) ?? 'null');
+      if (settings && Number.isInteger(settings.goal) && settings.goal >= 1 && settings.goal <= 1440) queueMicrotask(() => setPreferences({ goal: settings.goal, tenths: Boolean(settings.tenths) }));
+      pausedRef.current = sessionStorage.getItem(PAUSE_KEY) === 'true';
+      const isPaused = pausedRef.current;
+      queueMicrotask(() => setPaused(isPaused));
+    } catch { /* Defaults when storage is unavailable. */ }
     const now = Date.now();
     const currentOwnerId = ownerId();
     ownerRef.current = currentOwnerId;
@@ -184,9 +144,10 @@ export default function SessionUsageTracker() {
     };
 
     record.endedAt = null;
+    record.studyDays ??= {};
     recordRef.current = record;
     openAnchorRef.current = now;
-    visibleAnchorRef.current = pageIsActive() ? now : null;
+    visibleAnchorRef.current = pageIsActive() && !pausedRef.current ? now : null;
     pageRef.current = window.location.pathname;
     writeRecord(record);
 
@@ -218,6 +179,7 @@ export default function SessionUsageTracker() {
       if (visibleAnchorRef.current !== null) {
         const activeDuration = Math.max(0, timestamp - visibleAnchorRef.current);
         addAcrossDays(active.dailyVisibleMs, visibleAnchorRef.current, timestamp);
+        trackStudy(active, pageRef.current, visibleAnchorRef.current, timestamp);
         active.visibleMs += activeDuration;
         active.pages[pageRef.current] = (active.pages[pageRef.current] ?? 0) + activeDuration;
         visibleAnchorRef.current = timestamp;
@@ -252,7 +214,7 @@ export default function SessionUsageTracker() {
 
     const onActivityChange = () => {
       checkpoint(false, true);
-      visibleAnchorRef.current = pageIsActive() ? Date.now() : null;
+      visibleAnchorRef.current = pageIsActive() && !pausedRef.current ? Date.now() : null;
     };
     const onPageHide = () => { checkpoint(true, true); };
     document.addEventListener('visibilitychange', onActivityChange);
@@ -296,7 +258,7 @@ export default function SessionUsageTracker() {
         });
         if (!response.ok) return;
         const data = await response.json() as { records?: UsageRecord[] };
-        const remote = (data.records ?? []).filter(validRecord);
+        const remote = (data.records ?? []).filter(validRecord).filter((item) => item.ownerId === currentOwnerId);
         if (!cancelled) setRecords(mergeRecords(remote, localRecords(currentOwnerId)));
       } catch { /* The precise local report remains available offline. */ }
     };
@@ -314,20 +276,6 @@ export default function SessionUsageTracker() {
     };
   }, [reportOpen]);
 
-  const report = useMemo(() => {
-    const totalMs = records.reduce((sum, record) => sum + record.visibleMs, 0);
-    const todayMs = records.reduce((sum, record) => sum + (record.dailyVisibleMs[currentDay] ?? 0), 0);
-    const pages: NumericMap = {};
-    records.forEach((record) => Object.entries(record.pages).forEach(([page, duration]) => {
-      pages[page] = (pages[page] ?? 0) + duration;
-    }));
-    return {
-      totalMs,
-      todayMs,
-      pages: Object.entries(pages).sort(([, a], [, b]) => b - a),
-    };
-  }, [currentDay, records]);
-
   const openReport = () => {
     checkpointRef.current(false, true);
     setCurrentDay(dayKey(Date.now()));
@@ -340,63 +288,21 @@ export default function SessionUsageTracker() {
       <button className={styles.timerButton} type="button" onClick={openReport}
         aria-haspopup="dialog" aria-expanded={reportOpen}>
         <span>Tempo de estudo</span>
-        <strong>{formatDuration(liveActiveMs, true)}</strong>
+        <strong>{formatDuration(liveActiveMs, preferences.tenths)}</strong>
       </button>
 
-      {reportOpen && (
-        <div className={styles.backdrop} onMouseDown={(event) => {
-          if (event.target === event.currentTarget) setReportOpen(false);
-        }}>
-          <section className={styles.report} role="dialog" aria-modal="true" aria-labelledby="usage-report-title">
-            <header className={styles.reportHeader}>
-              <div><span>Meu tempo de estudo</span><h2 id="usage-report-title">Relatório de uso</h2></div>
-              <button className={styles.closeButton} type="button" onClick={() => setReportOpen(false)} aria-label="Fechar relatório">×</button>
-            </header>
+      {reportOpen && <UsageReport records={records} today={currentDay} liveMs={liveActiveMs} paused={paused}
+        preferences={preferences} onClose={() => setReportOpen(false)}
+        onPreferences={(next) => { setPreferences(next); try { localStorage.setItem(PREFS_KEY, JSON.stringify(next)); } catch { /* In-memory settings remain usable. */ } }}
+        onPause={() => {
+          checkpointRef.current(false, true);
+          setRecords(localRecords(ownerRef.current).sort((a, b) => b.startedAt - a.startedAt));
+          pausedRef.current = !pausedRef.current;
+          setPaused(pausedRef.current);
+          visibleAnchorRef.current = !pausedRef.current && pageIsActive() ? Date.now() : null;
+          try { sessionStorage.setItem(PAUSE_KEY, String(pausedRef.current)); } catch { /* In-memory pause remains usable. */ }
+        }} />}
 
-            <div className={styles.summaryGrid}>
-              <div className={styles.summaryCard}><span>Sessão atual</span><strong>{formatDuration(liveActiveMs)}</strong></div>
-              <div className={styles.summaryCard}><span>Estudo de hoje</span><strong>{formatDuration(report.todayMs)}</strong></div>
-              <div className={styles.summaryCard}><span>Tempo total</span><strong>{formatDuration(report.totalMs)}</strong></div>
-              <div className={styles.summaryCard}><span>Sessões registradas</span><strong>{records.length}</strong></div>
-            </div>
-
-            <p className={styles.definition}>O contador só avança enquanto esta aba do site está selecionada e visível. Ao trocar de aba, ele pausa automaticamente e continua do mesmo ponto quando você volta.</p>
-
-            <div className={styles.reportSections}>
-              <div>
-                <h3 className={styles.sectionTitle}>Tempo por área</h3>
-                {report.pages.length ? (
-                  <ul className={styles.pageList}>
-                    {report.pages.map(([page, duration]) => (
-                      <li key={page}><span>{PAGE_LABELS[page] ?? page}</span><strong>{formatDuration(duration)}</strong></li>
-                    ))}
-                  </ul>
-                ) : <p className={styles.empty}>O tempo desta sessão aparecerá aqui em alguns segundos.</p>}
-              </div>
-
-              <div>
-                <h3 className={styles.sectionTitle}>Sessões recentes</h3>
-                {records.length ? (
-                  <ol className={styles.sessionList}>
-                    {records.slice(0, 10).map((record) => (
-                      <li key={record.sessionId}>
-                        <div className={styles.sessionMain}>
-                          <b>{record.sessionId === sessionId ? `Sessão atual · ${shortId}` : `Sessão ${record.sessionId.replaceAll('-', '').slice(0, 8).toUpperCase()}`}</b>
-                          <span>{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'medium' }).format(record.startedAt)}</span>
-                          <small>{record.endedAt ? 'encerrada' : 'em andamento'}</small>
-                        </div>
-                        <strong>{formatDuration(record.visibleMs)}</strong>
-                      </li>
-                    ))}
-                  </ol>
-                ) : <p className={styles.empty}>Esta é a primeira sessão registrada.</p>}
-              </div>
-            </div>
-
-            <p className={styles.privacy}>O relatório começa a contar a partir desta versão. Cada navegador recebe um histórico próprio e cada aba continua sendo uma sessão independente.</p>
-          </section>
-        </div>
-      )}
     </>
   );
 }
