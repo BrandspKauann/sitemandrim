@@ -63,11 +63,16 @@ import {
   AULA5_VOCABULARY_GROUPS,
   AULA5_WRITING_EXERCISES,
 } from './aula5Data';
+import {
+  AULA6_HANZI_CORRECTIONS, AULA6_HOMEWORK, AULA6_KEY_PHRASES, AULA6_LESSON_TOPICS,
+  AULA6_LISTENING_EXERCISES, AULA6_NUMBER_ROWS, AULA6_PINYIN_NOTES,
+  AULA6_VOCABULARY_GROUPS, AULA6_WRITING_EXERCISES,
+} from './aula6Data';
 import styles from './page.module.css';
 
 type StudyMode = 'resumo' | 'escrever' | 'falar' | 'ouvir';
 type ExerciseStatus = 'idle' | 'correct' | 'incorrect' | 'revealed';
-type LessonId = 'aula1' | 'aula2' | 'aula3' | 'aula4' | 'aula5';
+type LessonId = 'aula1' | 'aula2' | 'aula3' | 'aula4' | 'aula5' | 'aula6';
 
 const LESSONS = {
   aula1: {
@@ -124,6 +129,17 @@ const LESSONS = {
     numbersTitle: 'Horários e classificadores da aula',
     numbersDescription: 'Use o horário antes da ação e escolha o classificador de acordo com o substantivo: 个, 只 ou 名.',
     numberRule: <><b>Encontro:</b> 下午两点你能到吗？ <b>Existência:</b> 房间外有一只小猫.</>,
+  },
+  aula6: {
+    number: '06', tabTitle: 'Aula 6', tabSubtitle: 'Livros, ordinais e rotina', title: 'Livros, ordem e planos de fim de semana',
+    objective: 'Dizer de quem são os objetos, distinguir quantidade de ordem e conversar sobre atividades e companhia.',
+    description: 'A aula trabalhou 本/把/只, 谁的, 第 e 次, 学习, 做/坐, 白天/晚上, 读书, 和, 唱歌, 好听, 看电视 e 玩. Exemplos didáticos foram normalizados onde a transcrição automática trocou caracteres ou traduções; conversas pessoais e trechos ambíguos ficaram de fora.',
+    topics: AULA6_LESSON_TOPICS, pinyinNotes: AULA6_PINYIN_NOTES, numberRows: AULA6_NUMBER_ROWS, vocabularyGroups: AULA6_VOCABULARY_GROUPS,
+    hanziCorrections: AULA6_HANZI_CORRECTIONS, keyPhrases: AULA6_KEY_PHRASES, homework: AULA6_HOMEWORK,
+    writingExercises: AULA6_WRITING_EXERCISES, listeningExercises: AULA6_LISTENING_EXERCISES,
+    numbersTitle: 'Quantidade, ordem e duração',
+    numbersDescription: 'Compare 两本书 com 第二本书 e 两次 com 第二次. O classificador depende do que está sendo contado.',
+    numberRule: <><b>Quantidade:</b> 两本书 = dois livros. <b>Ordem:</b> 第二本书 = o segundo livro. <b>Duração:</b> 半个小时 = meia hora.</>,
   },
 } as const;
 
@@ -426,7 +442,7 @@ export default function RevisionHome() {
               <p>{lesson.description}</p>
             </div>
             <dl>
-              <div><dt>Gramática</dt><dd>6 blocos</dd></div>
+              <div><dt>Gramática</dt><dd>{lesson.topics.length} blocos</dd></div>
               <div><dt>Vocabulário</dt><dd>{lesson.vocabularyGroups.reduce((total, group) => total + group.words.length, 0)} itens</dd></div>
               <div><dt>Prática</dt><dd>escrita, fala e escuta</dd></div>
             </dl>
