@@ -1,7 +1,7 @@
 import type { LessonPhrase, LessonTopic, VocabularyGroup } from './aula1Data';
 
 export const AULA2_KEY_PHRASES: LessonPhrase[] = [
-  { id: 'a2-date-question', hanzi: '今天是几月几号？', spokenPinyin: 'jīntiān shì | jǐ yuè jǐ hào?', translation: 'Que dia é hoje?' },
+  { id: 'a2-date-question', hanzi: '今天是几月几号？', spokenPinyin: 'jīntiān shì | jǐ yuè jǐ hào?', translation: 'Em que mês e em que dia do mês estamos hoje?' },
   { id: 'a2-date-answer', hanzi: '今天是九月十九号。', spokenPinyin: 'jīntiān shì | jiǔ yuè shíjiǔ hào.', translation: 'Hoje é 19 de setembro.' },
   { id: 'a2-weekday-question', hanzi: '今天星期几？', spokenPinyin: 'jīntiān | xīngqī jǐ?', translation: 'Que dia da semana é hoje?' },
   { id: 'a2-weekday-answer', hanzi: '今天星期四。', spokenPinyin: 'jīntiān | xīngqīsì.', translation: 'Hoje é quinta-feira.' },
@@ -24,7 +24,7 @@ export const AULA2_KEY_PHRASES: LessonPhrase[] = [
   { id: 'a2-eat-what', hanzi: '我们今天吃什么？', spokenPinyin: 'wǒmen jīntiān chī shénme?', translation: 'O que vamos comer hoje?' },
   { id: 'a2-eat-noodles', hanzi: '吃面条吧。', spokenPinyin: 'chī miàntiáo ba.', translation: 'Vamos comer macarrão.' },
   { id: 'a2-buy-what', hanzi: '你买什么？', spokenPinyin: 'ní mǎi | shénme?', translation: 'O que você vai comprar?', note: 'Na fala natural, 你买 forma um bloco 3º + 3º e soa ní mǎi.' },
-  { id: 'a2-buy-vegetables', hanzi: '我买一些蔬菜。', spokenPinyin: 'wó mǎi | yìxiē shūcài.', translation: 'Vou comprar alguns vegetais.' },
+  { id: 'a2-buy-vegetables', hanzi: '我买一些蔬菜。', spokenPinyin: 'wó mǎi | yìxiē shūcài.', translation: 'Eu compro alguns vegetais.' },
   { id: 'a2-finish-work-question', hanzi: '你几点下班？', spokenPinyin: 'nǐ | jí diǎn | xiàbān?', translation: 'A que horas você sai do trabalho?' },
   { id: 'a2-finish-work-answer', hanzi: '我五点下班。', spokenPinyin: 'wǒ | wú diǎn | xiàbān.', translation: 'Eu saio do trabalho às cinco.' },
   { id: 'a2-new-computer-question', hanzi: '这是你的新电脑吗？', spokenPinyin: 'zhè shì | nǐ de | xīn diànnǎo ma?', translation: 'Este é o seu computador novo?' },
@@ -202,7 +202,7 @@ export const AULA2_PINYIN_NOTES = [
 ];
 
 export const AULA2_WRITING_EXERCISES = [
-  { prompt: 'Que dia é hoje?', answer: '今天是几月几号', hint: 'Monte a pergunta seguindo a ordem mês → dia.' },
+  { prompt: 'Em que mês e em que dia do mês estamos hoje?', answer: '今天是几月几号', hint: 'Monte a pergunta seguindo a ordem mês → dia.' },
   { prompt: 'Hoje é 19 de setembro.', answer: '今天是九月十九号', hint: 'Informe primeiro o mês e depois o dia.' },
   { prompt: 'Que dia da semana é hoje?', answer: '今天星期几', hint: 'Use a forma de perguntar por um elemento de uma sequência curta.' },
   { prompt: 'Qual é a data do seu aniversário?', answer: '你的生日是几月几日', hint: 'Pergunte mês e dia na mesma frase.' },
@@ -211,19 +211,19 @@ export const AULA2_WRITING_EXERCISES = [
   { prompt: 'Você sabe cozinhar?', answer: '你会做饭吗', hint: 'Pergunte sobre uma habilidade aprendida.' },
   { prompt: 'Eu não sei cantar.', answer: '我不会唱歌', hint: 'Negue a habilidade antes da ação.' },
   { prompt: 'O que você está fazendo?', answer: '你在做什么呢', hint: 'Marque uma ação em andamento e termine com a partícula de continuidade.' },
-  { prompt: 'Vou comprar alguns vegetais.', answer: '我买一些蔬菜', hint: 'A quantidade indefinida vem antes do substantivo.' },
+  { prompt: 'Eu compro alguns vegetais.', answer: '我买一些蔬菜', hint: 'A quantidade indefinida vem antes do substantivo.' },
   { prompt: 'Hoje eu também descanso.', answer: '今天我也休息', hint: 'O advérbio de inclusão fica depois do sujeito e antes da ação.' },
   { prompt: 'Qual é o número do seu celular?', answer: '你的手机号是多少', hint: 'Para um número longo ou desconhecido, use a pergunta geral de quantidade.' },
 ];
 
 export const AULA2_LISTENING_EXERCISES = [
-  { phraseId: 'a2-date-question', choices: ['Que dia é hoje?', 'Que horas são?', 'Em que ano estamos?'] },
+  { phraseId: 'a2-date-question', choices: ['Em que mês e em que dia do mês estamos hoje?', 'Que horas são?', 'Em que ano estamos?'] },
   { phraseId: 'a2-weekday-question', choices: ['Que dia da semana é hoje?', 'Quando você descansa?', 'Qual é o seu aniversário?'] },
   { phraseId: 'a2-rest-weekly', choices: ['Eu descanso todo domingo.', 'Eu trabalho todo sábado.', 'Hoje eu não descanso.'] },
   { phraseId: 'a2-can-cook', choices: ['Você sabe cozinhar?', 'Você quer comer?', 'Você está fazendo a tarefa?'] },
   { phraseId: 'a2-can-two-foods', choices: ['Eu gosto de macarrão e arroz.', 'Eu sei fazer macarrão e também jiaozi.', 'Eu não sei cozinhar.'] },
   { phraseId: 'a2-making-question', choices: ['O que você está fazendo?', 'O que você sabe fazer?', 'O que você vai comprar?'] },
-  { phraseId: 'a2-buy-vegetables', choices: ['Vou comprar alguns vegetais.', 'Vou cozinhar alguns pratos.', 'Quero comer fruta.'] },
+  { phraseId: 'a2-buy-vegetables', choices: ['Eu compro alguns vegetais.', 'Vou cozinhar alguns pratos.', 'Quero comer fruta.'] },
   { phraseId: 'a2-finish-work-question', choices: ['A que horas você sai do trabalho?', 'Em que dia você trabalha?', 'Onde fica o seu trabalho?'] },
   { phraseId: 'a2-new-computer-question', choices: ['Este é o seu computador novo?', 'Você gosta deste celular?', 'Onde está o notebook?'] },
   { phraseId: 'a2-read-not-write', choices: ['Eu sei escrever, mas não sei ler.', 'Eu sei ler este caractere, mas não sei escrevê-lo.', 'Como se pronuncia este caractere?'] },

@@ -4,7 +4,7 @@ import type { LessonPhrase, LessonTopic, VocabularyGroup } from './aula1Data';
 export const AULA6_KEY_PHRASES: LessonPhrase[] = [
   { id: 'a6-chair-whose', hanzi: '这把椅子是谁的？', spokenPinyin: 'zhè bá yǐzi | shì shéi de?', translation: 'De quem é esta cadeira?' },
   { id: 'a6-chair-mine', hanzi: '这把椅子是我的。', spokenPinyin: 'zhè bá yǐzi | shì wǒ de.', translation: 'Esta cadeira é minha.' },
-  { id: 'a6-cat-sleep', hanzi: '小猫在椅子上睡觉。', spokenPinyin: 'xiǎomāo | zài yǐzi shang shuìjiào.', translation: 'O gatinho dorme na cadeira.', note: '上 pode ficar neutro nesta expressão de posição, como a professora destacou. A leitura plena shàng também ocorre.' },
+  { id: 'a6-cat-sleep', hanzi: '小猫在椅子上睡觉。', spokenPinyin: 'xiǎomāo | zài yǐzi shang shuìjiào.', translation: 'O gatinho está dormindo em cima da cadeira.', note: '上 pode ficar neutro nesta expressão de posição, como a professora destacou. A leitura plena shàng também ocorre.' },
   { id: 'a6-table-what', hanzi: '桌子上有什么？', spokenPinyin: 'zhuōzi shang | yǒu shénme?', translation: 'O que há sobre a mesa?' },
   { id: 'a6-table-milk', hanzi: '桌子上有牛奶。', spokenPinyin: 'zhuōzi shang | yǒu niúnǎi.', translation: 'Há leite sobre a mesa.' },
   { id: 'a6-pen-where', hanzi: '你的笔在哪里？', spokenPinyin: 'nǐ de bǐ | zài nǎli?', translation: 'Onde está a sua caneta?' },
@@ -25,7 +25,7 @@ export const AULA6_KEY_PHRASES: LessonPhrase[] = [
   { id: 'a6-first-china', hanzi: '我第一次来中国。', spokenPinyin: 'wǒ dì yī cì | lái Zhōngguó.', translation: 'É a primeira vez que venho à China.', note: 'Em 第一, 一 permanece yī: não aplique a mudança usada em uma quantidade.' },
   { id: 'a6-second-time', hanzi: '这是我第二次来这里。', spokenPinyin: 'zhè shì wǒ dì èr cì | lái zhèli.', translation: 'Esta é a segunda vez que venho aqui.' },
   { id: 'a6-two-times', hanzi: '我已经来了两次了。', spokenPinyin: 'wó yǐjīng | lái le liǎng cì le.', translation: 'Eu já vim duas vezes.' },
-  { id: 'a6-learn-cook', hanzi: '他在家里学习做中国菜。', spokenPinyin: 'tā zài jiāli | xuéxí zuò Zhōngguó cài.', translation: 'Ele aprende a preparar comida chinesa em casa.', note: '学习做 é aprender a fazer, não duas ações independentes: estudar e cozinhar.' },
+  { id: 'a6-learn-cook', hanzi: '他在家里学习做中国菜。', spokenPinyin: 'tā zài jiāli | xuéxí zuò Zhōngguó cài.', translation: 'Ele está aprendendo a preparar comida chinesa em casa.', note: '学习做 é aprender a fazer, não duas ações independentes: estudar e cozinhar.' },
   { id: 'a6-learning-what', hanzi: '你在学习什么？', spokenPinyin: 'nǐ zài xuéxí shénme?', translation: 'O que você está aprendendo?' },
   { id: 'a6-learning-chinese', hanzi: '我在学习中文。', spokenPinyin: 'wǒ zài xuéxí Zhōngwén.', translation: 'Estou estudando chinês.' },
   { id: 'a6-learning-sing', hanzi: '我在学习唱歌。', spokenPinyin: 'wǒ zài xuéxí chànggē.', translation: 'Estou aprendendo a cantar.' },
@@ -33,7 +33,7 @@ export const AULA6_KEY_PHRASES: LessonPhrase[] = [
   { id: 'a6-day-two-classes', hanzi: '我白天有两节课。', spokenPinyin: 'wǒ báitiān | yǒu liǎng jié kè.', translation: 'Tenho duas aulas durante o dia.' },
   { id: 'a6-day-school', hanzi: '他们白天去学校。', spokenPinyin: 'tāmen báitiān | qù xuéxiào.', translation: 'Eles vão à escola durante o dia.' },
   { id: 'a6-like-read', hanzi: '你喜欢读书吗？', spokenPinyin: 'ní xǐhuan dúshū ma?', translation: 'Você gosta de ler?' },
-  { id: 'a6-read-every-day', hanzi: '我每天都读书。', spokenPinyin: 'wǒ | měitiān dōu dúshū.', translation: 'Eu leio todos os dias.' },
+  { id: 'a6-read-every-day', hanzi: '我每天都读书。', spokenPinyin: 'wǒ | měitiān dōu dúshū.', translation: 'Eu leio livros todos os dias.' },
   { id: 'a6-her-dog', hanzi: '她和小狗在外面。', spokenPinyin: 'tā hé xiáogǒu | zài wàimian.', translation: 'Ela e o cachorrinho estão lá fora.' },
   { id: 'a6-eat-with-who', hanzi: '你和谁去吃饭？', spokenPinyin: 'nǐ hé shéi | qù chīfàn?', translation: 'Com quem você vai comer?' },
   { id: 'a6-eat-with-friends', hanzi: '我和朋友去吃饭。', spokenPinyin: 'wǒ hé péngyou | qù chīfàn.', translation: 'Vou comer com meus amigos.' },
@@ -45,7 +45,7 @@ export const AULA6_KEY_PHRASES: LessonPhrase[] = [
   { id: 'a6-song-nice', hanzi: '非常好听。', spokenPinyin: 'fēicháng hǎotīng.', translation: 'É muito agradável de ouvir.' },
   { id: 'a6-sing-well', hanzi: '你唱歌很好听。', spokenPinyin: 'nǐ chànggē | hén hǎotīng.', translation: 'Você canta muito bem.' },
   { id: 'a6-evening-tv-q', hanzi: '你晚上看电视吗？', spokenPinyin: 'nǐ wǎnshang | kàn diànshì ma?', translation: 'Você assiste à televisão à noite?' },
-  { id: 'a6-half-hour-tv', hanzi: '我看半个小时。', spokenPinyin: 'wǒ kàn | bàn ge xiǎoshí.', translation: 'Eu assisto por meia hora.', note: '小时 é 3º + 2º tom. Não aplique a regra de dois terceiros tons aqui.' },
+  { id: 'a6-half-hour-tv', hanzi: '我看半个小时。', spokenPinyin: 'wǒ kàn | bàn ge xiǎoshí.', translation: 'Eu assisto por meia hora (duração, não horário).', note: '小时 é 3º + 2º tom. Não aplique a regra de dois terceiros tons aqui.' },
   { id: 'a6-like-animal-q', hanzi: '你喜欢什么动物？', spokenPinyin: 'ní xǐhuan shénme dòngwù?', translation: 'De que animal você gosta?' },
   { id: 'a6-like-dog', hanzi: '我喜欢小狗。', spokenPinyin: 'wó xǐhuan | xiáogǒu.', translation: 'Eu gosto de cachorrinhos.' },
   { id: 'a6-play-outside', hanzi: '我在外面玩。', spokenPinyin: 'wǒ zài wàimian wán.', translation: 'Eu brinco lá fora.' },
@@ -124,7 +124,7 @@ export const AULA6_HANZI_CORRECTIONS = [
 
 export const AULA6_WRITING_EXERCISES = [
   { id: 'a6-w-chair', prompt: 'De quem é esta cadeira?', answer: '这把椅子是谁的？', hint: 'Use o classificador do objeto e uma pergunta de posse.' },
-  { id: 'a6-w-sleep', prompt: 'O gatinho dorme na cadeira.', answer: '小猫在椅子上睡觉。', hint: 'Coloque a referência antes da posição; a ação vem por último.' },
+  { id: 'a6-w-sleep', prompt: 'O gatinho está dormindo em cima da cadeira.', answer: '小猫在椅子上睡觉。', hint: 'Coloque a referência antes da posição; a ação vem por último.' },
   { id: 'a6-w-books-q', prompt: 'Quantos livros você comprou?', answer: '你买了几本书？', hint: 'Pergunte a quantidade com o classificador de livros.' },
   { id: 'a6-w-books', prompt: 'Eu comprei dois livros.', answer: '我买了两本书。', hint: 'Use quantidade, não um ordinal.' },
   { id: 'a6-w-whose', prompt: 'De quem é aquele livro?', answer: '那是谁的书？', hint: 'Não pergunte apenas quem é a pessoa; pergunte a quem pertence o objeto.' },
@@ -145,7 +145,7 @@ export const AULA6_WRITING_EXERCISES = [
 
 export const AULA6_LISTENING_EXERCISES = [
   { phraseId: 'a6-chair-whose', choices: ['De quem é esta cadeira?', 'Onde está esta cadeira?', 'Quem está sentado na cadeira?'] },
-  { phraseId: 'a6-cat-sleep', choices: ['O gatinho dorme na cadeira.', 'O gatinho dorme debaixo da cadeira.', 'O cachorro sobe na cadeira.'] },
+  { phraseId: 'a6-cat-sleep', choices: ['O gatinho está dormindo em cima da cadeira.', 'O gatinho está dormindo debaixo da cadeira.', 'O cachorro sobe na cadeira.'] },
   { phraseId: 'a6-books-two', choices: ['Eu comprei dois livros.', 'Eu comprei o segundo livro.', 'Eu li dois livros.'] },
   { phraseId: 'a6-second-book', choices: ['Este é meu segundo livro de chinês.', 'Eu tenho dois livros de chinês.', 'Este é o segundo livro do professor.'] },
   { phraseId: 'a6-first-china', choices: ['É a primeira vez que venho à China.', 'Eu já vim duas vezes à China.', 'Vou à China com a primeira pessoa.'] },

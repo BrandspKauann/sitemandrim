@@ -74,6 +74,7 @@ import {
   AULA7_VOCABULARY_GROUPS, AULA7_WRITING_EXERCISES,
 } from './aula7Data';
 import styles from './page.module.css';
+import { checkWritingAnswer, writingFocus } from '../lib/writingPractice';
 
 type StudyMode = 'resumo' | 'escrever' | 'falar' | 'ouvir';
 type ExerciseStatus = 'idle' | 'correct' | 'incorrect' | 'revealed';
@@ -182,12 +183,6 @@ function getSpokenPinyin(phrase: LessonPhrase) {
   return phrase.spokenPinyin ?? getPinyin(phrase.hanzi);
 }
 
-function normalizedAnswer(value: string) {
-  return value
-    .normalize('NFKC')
-    .toLowerCase()
-    .replace(/[\s，。！？；：、,.!?;:'“”"‘’()（）]/g, '');
-}
 
 function MandarinButton({ phrase, slow = false, label }: { phrase: LessonPhrase; slow?: boolean; label?: string }) {
   const [playing, setPlaying] = useState(false);
@@ -397,7 +392,7 @@ export default function RevisionHome() {
 
   function checkWriting() {
     if (!writingValue.trim()) return;
-    setWritingStatus(normalizedAnswer(writingValue) === normalizedAnswer(writingExercise.answer) ? 'correct' : 'incorrect');
+    setWritingStatus(checkWritingAnswer(writingValue, writingExercise.answer) ? 'correct' : 'incorrect');
   }
 
   function nextWriting() {
@@ -601,7 +596,7 @@ export default function RevisionHome() {
               <div className={styles.exerciseIntro}>
                 <span>写 · prática de escrita</span>
                 <h3 id="writing-title">Monte a frase em caracteres</h3>
-                <p>Leia a frase em português, escreva em mandarim e confira. Pontuação e espaços não alteram o resultado.</p>
+                <p>Traduza o sentido completo da frase, não palavra por palavra. Observe lugar, tempo, quantidade e intenção. Pontuação e espaços são ignorados; alternativas revisadas também são aceitas.</p>
               </div>
               <div className={styles.exerciseProgress}><i style={{ width: `${((writingIndex + 1) / lesson.writingExercises.length) * 100}%` }} /></div>
               <div className={styles.writingCard}>
@@ -612,15 +607,16 @@ export default function RevisionHome() {
                   setWritingValue(event.target.value);
                   setWritingStatus('idle');
                 }} placeholder="Digite os caracteres aqui" autoComplete="off" />
-                <small>Dica: {writingExercise.hint}</small>
+                <small>Objetivo: {writingFocus(writingExercise.answer)}</small>
+                <small>Dica de construção: {writingExercise.hint}</small>
                 {writingStatus !== 'idle' && (
                   <div className={`${styles.writingFeedback} ${writingStatus === 'correct' ? styles.correct : writingStatus === 'incorrect' ? styles.incorrect : ''}`} role="status">
                     {writingStatus === 'correct' ? (
                       <><strong>Correto!</strong><span lang="zh-CN">{writingExercise.answer}</span></>
                     ) : writingStatus === 'incorrect' ? (
-                      <><strong>Ainda não.</strong><span>Confira a ordem, os classificadores e tente novamente.</span></>
+                      <><strong>Ainda não coincide com as respostas revisadas.</strong><span>Isso não prova que sua frase esteja errada. Confira o objetivo e o sentido completo; depois compare com um modelo.</span></>
                     ) : (
-                      <><strong>Resposta</strong><span lang="zh-CN">{writingExercise.answer}</span><small>{getPinyin(writingExercise.answer)}</small></>
+                      <><strong>Um modelo possível</strong><span lang="zh-CN">{writingExercise.answer}</span><small>{getPinyin(writingExercise.answer)}</small></>
                     )}
                   </div>
                 )}
