@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Vocabulário HSK 1 | Tons de Mandarim',
-  description: 'Pratique palavras do HSK 1 por assunto, com áudio, repetição e intervalo ajustável.',
+  title: 'Lição 11 · Novo HSK | Tons de Mandarim',
+  description: 'Prepare a lição 11 completa: vocabulário, três diálogos, gramática, escrita e prática oral com áudio em mandarim e português.',
 };
 
 export default function Hsk1Layout({ children }: Readonly<{ children: React.ReactNode }>) {

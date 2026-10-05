@@ -6,166 +6,13 @@ import type { ChangeEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useClientSession } from '../components/ClientSession';
 import { deleteLocalImage, listLocalImages, saveLocalImage } from './imageStore';
-import RealMandarinDialogues, { type RealMandarinDialoguesHandle } from './RealMandarinDialogues';
+import { LESSON11_GROUPS, type StudyItem as VocabularyItem } from './lesson11Data';
+import LessonPreparation from './LessonPreparation';
 import styles from './page.module.css';
-
-type VocabularyItem = {
-  id: string;
-  hanzi: string;
-  pinyin: string;
-  meaning: string;
-};
-
-type VocabularyGroup = {
-  id: string;
-  name: string;
-  label: string;
-  description: string;
-  items: VocabularyItem[];
-};
 
 type Speed = 'natural' | 'slow';
 type PlaybackLanguage = 'mandarin' | 'portuguese';
-
-const GROUPS: VocabularyGroup[] = [
-  {
-    id: 'comidas',
-    name: 'Comidas',
-    label: '食物 · shíwù',
-    description: 'Alimentos, bebidas, ações e refeições para reconhecer, escutar e repetir.',
-    items: [
-      { id: 'baozi', hanzi: '包子', pinyin: 'bāozi', meaning: 'pão' },
-      { id: 'cai', hanzi: '菜', pinyin: 'cài', meaning: 'prato de comida' },
-      { id: 'fan', hanzi: '饭', pinyin: 'fàn', meaning: 'refeição' },
-      { id: 'jiaozi', hanzi: '饺子', pinyin: 'jiǎozi', meaning: 'bolinho chinês' },
-      { id: 'jidan', hanzi: '鸡蛋', pinyin: 'jīdàn', meaning: 'ovo' },
-      { id: 'mianbao', hanzi: '面包', pinyin: 'miànbāo', meaning: 'pão' },
-      { id: 'miantiaor', hanzi: '面条儿', pinyin: 'miàntiáor', meaning: 'macarrão' },
-      { id: 'mifan', hanzi: '米饭', pinyin: 'mǐfàn', meaning: 'arroz' },
-      { id: 'pingguo', hanzi: '苹果', pinyin: 'píngguǒ', meaning: 'maçã' },
-      { id: 'shuiguo', hanzi: '水果', pinyin: 'shuǐguǒ', meaning: 'fruta' },
-      { id: 'shui', hanzi: '水', pinyin: 'shuǐ', meaning: 'água' },
-      { id: 'cha', hanzi: '茶', pinyin: 'chá', meaning: 'chá' },
-      { id: 'niunai', hanzi: '牛奶', pinyin: 'niúnǎi', meaning: 'leite' },
-      { id: 'chi', hanzi: '吃', pinyin: 'chī', meaning: 'comer' },
-      { id: 'he', hanzi: '喝', pinyin: 'hē', meaning: 'beber' },
-      { id: 'haochi', hanzi: '好吃', pinyin: 'hǎochī', meaning: 'gostoso' },
-      { id: 'zuofan', hanzi: '做饭', pinyin: 'zuòfàn', meaning: 'cozinhar' },
-      { id: 'fandian', hanzi: '饭店', pinyin: 'fàndiàn', meaning: 'restaurante' },
-      { id: 'zaofan', hanzi: '早饭', pinyin: 'zǎofàn', meaning: 'café da manhã' },
-      { id: 'wufan', hanzi: '午饭', pinyin: 'wǔfàn', meaning: 'almoço' },
-      { id: 'wanfan', hanzi: '晚饭', pinyin: 'wǎnfàn', meaning: 'jantar' },
-    ],
-  },
-  {
-    id: 'verbos',
-    name: 'Verbos',
-    label: '动词 · dòngcí',
-    description: 'Ações essenciais para reconhecer, escutar e repetir.',
-    items: [
-      { id: 'ai', hanzi: '爱', pinyin: 'ài', meaning: 'amar' },
-      { id: 'bing', hanzi: '病', pinyin: 'bìng', meaning: 'estar doente' },
-      { id: 'chang', hanzi: '唱', pinyin: 'chàng', meaning: 'cantar' },
-      { id: 'chi', hanzi: '吃', pinyin: 'chī', meaning: 'comer' },
-      { id: 'chuan', hanzi: '穿', pinyin: 'chuān', meaning: 'vestir' },
-      { id: 'dadianhua', hanzi: '打电话', pinyin: 'dǎ diànhuà', meaning: 'telefonar' },
-      { id: 'dao', hanzi: '到', pinyin: 'dào', meaning: 'chegar' },
-      { id: 'du', hanzi: '读', pinyin: 'dú', meaning: 'ler' },
-      { id: 'dushu', hanzi: '读书', pinyin: 'dúshū', meaning: 'ler livros' },
-      { id: 'duibuqi', hanzi: '对不起', pinyin: 'duìbuqǐ', meaning: 'desculpar-se' },
-      { id: 'fen', hanzi: '分', pinyin: 'fēn', meaning: 'dividir' },
-      { id: 'gei', hanzi: '给', pinyin: 'gěi', meaning: 'dar' },
-      { id: 'gongzuo', hanzi: '工作', pinyin: 'gōngzuò', meaning: 'trabalhar' },
-      { id: 'he', hanzi: '喝', pinyin: 'hē', meaning: 'beber' },
-      { id: 'hui-voltar', hanzi: '回', pinyin: 'huí', meaning: 'voltar' },
-      { id: 'hui-saber', hanzi: '会', pinyin: 'huì', meaning: 'saber fazer' },
-      { id: 'jian', hanzi: '见', pinyin: 'jiàn', meaning: 'encontrar alguém' },
-      { id: 'jiao', hanzi: '叫', pinyin: 'jiào', meaning: 'chamar' },
-      { id: 'juede', hanzi: '觉得', pinyin: 'juéde', meaning: 'achar' },
-      { id: 'kai', hanzi: '开', pinyin: 'kāi', meaning: 'abrir' },
-      { id: 'kaiche', hanzi: '开车', pinyin: 'kāichē', meaning: 'dirigir' },
-      { id: 'kan', hanzi: '看', pinyin: 'kàn', meaning: 'olhar ou assistir' },
-      { id: 'kanbing', hanzi: '看病', pinyin: 'kànbìng', meaning: 'ir ao médico' },
-      { id: 'kanjian', hanzi: '看见', pinyin: 'kànjiàn', meaning: 'avistar' },
-      { id: 'keyi', hanzi: '可以', pinyin: 'kěyǐ', meaning: 'poder' },
-      { id: 'lai', hanzi: '来', pinyin: 'lái', meaning: 'vir' },
-      { id: 'mai-comprar', hanzi: '买', pinyin: 'mǎi', meaning: 'comprar' },
-      { id: 'mai-vender', hanzi: '卖', pinyin: 'mài', meaning: 'vender' },
-      { id: 'meishi', hanzi: '没事', pinyin: 'méishì', meaning: 'tudo bem' },
-      { id: 'meiyou', hanzi: '没有', pinyin: 'méiyǒu', meaning: 'não ter' },
-      { id: 'neng', hanzi: '能', pinyin: 'néng', meaning: 'conseguir' },
-      { id: 'qichuang', hanzi: '起床', pinyin: 'qǐchuáng', meaning: 'levantar' },
-      { id: 'qing', hanzi: '请', pinyin: 'qǐng', meaning: 'pedir' },
-      { id: 'qingwen', hanzi: '请问', pinyin: 'qǐngwèn', meaning: 'pedir informação' },
-      { id: 'qu', hanzi: '去', pinyin: 'qù', meaning: 'ir' },
-      { id: 'renshi', hanzi: '认识', pinyin: 'rènshi', meaning: 'conhecer' },
-      { id: 'shang', hanzi: '上', pinyin: 'shàng', meaning: 'subir' },
-      { id: 'shangban', hanzi: '上班', pinyin: 'shàngbān', meaning: 'ir trabalhar' },
-      { id: 'shangke', hanzi: '上课', pinyin: 'shàngkè', meaning: 'ter aula' },
-      { id: 'shangxue', hanzi: '上学', pinyin: 'shàngxué', meaning: 'ir à escola' },
-      { id: 'shengbing', hanzi: '生病', pinyin: 'shēngbìng', meaning: 'ficar doente' },
-      { id: 'shi', hanzi: '是', pinyin: 'shì', meaning: 'ser' },
-      { id: 'shui-dormir', hanzi: '睡', pinyin: 'shuì', meaning: 'dormir por um tempo' },
-      { id: 'shuijiao', hanzi: '睡觉', pinyin: 'shuìjiào', meaning: 'ir dormir' },
-      { id: 'shuo', hanzi: '说', pinyin: 'shuō', meaning: 'falar' },
-      { id: 'shuohua', hanzi: '说话', pinyin: 'shuōhuà', meaning: 'conversar' },
-      { id: 'ting', hanzi: '听', pinyin: 'tīng', meaning: 'ouvir' },
-      { id: 'tingjian', hanzi: '听见', pinyin: 'tīngjiàn', meaning: 'escutar' },
-      { id: 'wan', hanzi: '玩', pinyin: 'wán', meaning: 'brincar' },
-      { id: 'wen', hanzi: '问', pinyin: 'wèn', meaning: 'fazer uma pergunta' },
-      { id: 'xihuan', hanzi: '喜欢', pinyin: 'xǐhuan', meaning: 'gostar' },
-      { id: 'xia', hanzi: '下', pinyin: 'xià', meaning: 'descer' },
-      { id: 'xiayu', hanzi: '下雨', pinyin: 'xiàyǔ', meaning: 'chover' },
-      { id: 'xiaban', hanzi: '下班', pinyin: 'xiàbān', meaning: 'sair do trabalho' },
-      { id: 'xiake', hanzi: '下课', pinyin: 'xiàkè', meaning: 'terminar a aula' },
-      { id: 'xiang', hanzi: '想', pinyin: 'xiǎng', meaning: 'pensar ou ter vontade' },
-      { id: 'xie', hanzi: '写', pinyin: 'xiě', meaning: 'escrever' },
-      { id: 'xiexie', hanzi: '谢谢', pinyin: 'xièxie', meaning: 'agradecer' },
-      { id: 'xiuxi', hanzi: '休息', pinyin: 'xiūxi', meaning: 'descansar' },
-      { id: 'xue', hanzi: '学', pinyin: 'xué', meaning: 'aprender' },
-      { id: 'xuexi', hanzi: '学习', pinyin: 'xuéxí', meaning: 'estudar uma matéria' },
-      { id: 'yao', hanzi: '要', pinyin: 'yào', meaning: 'querer ou precisar' },
-      { id: 'you', hanzi: '有', pinyin: 'yǒu', meaning: 'ter' },
-      { id: 'zai', hanzi: '在', pinyin: 'zài', meaning: 'estar' },
-      { id: 'zaijian', hanzi: '再见', pinyin: 'zàijiàn', meaning: 'despedir-se' },
-      { id: 'zhao', hanzi: '找', pinyin: 'zhǎo', meaning: 'procurar' },
-      { id: 'zhidao', hanzi: '知道', pinyin: 'zhīdào', meaning: 'saber' },
-      { id: 'zhu', hanzi: '住', pinyin: 'zhù', meaning: 'morar' },
-      { id: 'zuo-sentar', hanzi: '坐', pinyin: 'zuò', meaning: 'sentar' },
-      { id: 'zuo-fazer', hanzi: '做', pinyin: 'zuò', meaning: 'fazer' },
-      { id: 'zuofan-verbo', hanzi: '做饭', pinyin: 'zuòfàn', meaning: 'cozinhar' },
-    ],
-  },
-  {
-    id: 'nacionalidades',
-    name: 'Nacionalidades',
-    label: '国籍 · guójí',
-    description: 'Países, nacionalidades e idiomas para dizer de onde uma pessoa é e qual língua ela fala.',
-    items: [
-      { id: 'zhongguo', hanzi: '中国', pinyin: 'zhōngguó', meaning: 'China' },
-      { id: 'zhongguoren', hanzi: '中国人', pinyin: 'zhōngguó rén', meaning: 'chinês' },
-      { id: 'zhongwen', hanzi: '中文', pinyin: 'zhōngwén', meaning: 'língua chinesa' },
-      { id: 'baxi', hanzi: '巴西', pinyin: 'bāxī', meaning: 'Brasil' },
-      { id: 'baxiren', hanzi: '巴西人', pinyin: 'bāxī rén', meaning: 'brasileiro' },
-      { id: 'putaoyayu', hanzi: '葡萄牙语', pinyin: 'pútáoyáyǔ', meaning: 'língua portuguesa' },
-      { id: 'meiguo', hanzi: '美国', pinyin: 'měiguó', meaning: 'Estados Unidos' },
-      { id: 'meiguoren', hanzi: '美国人', pinyin: 'měiguó rén', meaning: 'americano' },
-      { id: 'yingyu-meiguo', hanzi: '英语', pinyin: 'yīngyǔ', meaning: 'língua inglesa' },
-      { id: 'yingguo', hanzi: '英国', pinyin: 'yīngguó', meaning: 'Reino Unido' },
-      { id: 'yingguoren', hanzi: '英国人', pinyin: 'yīngguó rén', meaning: 'britânico' },
-      { id: 'yingyu-yingguo', hanzi: '英语', pinyin: 'yīngyǔ', meaning: 'língua inglesa' },
-      { id: 'faguo', hanzi: '法国', pinyin: 'fǎguó', meaning: 'França' },
-      { id: 'faguoren', hanzi: '法国人', pinyin: 'fǎguó rén', meaning: 'francês' },
-      { id: 'fayu', hanzi: '法语', pinyin: 'fǎyǔ', meaning: 'língua francesa' },
-      { id: 'riben', hanzi: '日本', pinyin: 'rìběn', meaning: 'Japão' },
-      { id: 'ribenren', hanzi: '日本人', pinyin: 'rìběn rén', meaning: 'japonês' },
-      { id: 'riyu', hanzi: '日语', pinyin: 'rìyǔ', meaning: 'língua japonesa' },
-      { id: 'hanguo', hanzi: '韩国', pinyin: 'hánguó', meaning: 'Coreia do Sul' },
-      { id: 'hanguoren', hanzi: '韩国人', pinyin: 'hánguó rén', meaning: 'sul-coreano' },
-      { id: 'hanyu', hanzi: '韩语', pinyin: 'hányǔ', meaning: 'língua coreana' },
-    ],
-  },
-];
+const GROUPS = LESSON11_GROUPS;
 
 const PAUSE_STORAGE_KEY = 'hsk1:pause-seconds';
 const MAX_IMAGE_BYTES = 100 * 1024 * 1024;
@@ -205,7 +52,8 @@ export default function Hsk1Client() {
   const speedRef = useRef<Speed>('slow');
   const pauseSecondsRef = useRef(pauseSeconds);
   const objectUrlsRef = useRef(new Set<string>());
-  const realDialogueRef = useRef<RealMandarinDialoguesHandle>(null);
+  const [withPortuguese, setWithPortuguese] = useState(true);
+  const portugueseRef = useRef(true);
 
   const selectedGroup = useMemo(
     () => GROUPS.find((group) => group.id === selectedGroupId) ?? GROUPS[0],
@@ -285,7 +133,6 @@ export default function Hsk1Client() {
       return;
     }
 
-    realDialogueRef.current?.stop();
     stop();
     setLoopEnabled(shouldLoop);
     const activeRun = runId.current + 1;
@@ -331,7 +178,7 @@ export default function Hsk1Client() {
         if (runId.current !== activeRun) return;
         const translation = new SpeechSynthesisUtterance(item.meaning);
         translation.lang = portugueseVoice?.lang ?? 'pt-BR';
-        translation.rate = speedRef.current === 'slow' ? 0.72 : 0.96;
+        translation.rate = 1.05;
         translation.pitch = 1;
         if (portugueseVoice) translation.voice = portugueseVoice;
         translation.onstart = () => {
@@ -354,7 +201,11 @@ export default function Hsk1Client() {
         setActiveLanguage('mandarin');
         setMessage('');
       };
-      mandarin.onend = playPortuguese;
+      mandarin.onend = () => {
+        if (runId.current !== activeRun) return;
+        if (portugueseRef.current) timer.current = window.setTimeout(playPortuguese, 1000);
+        else scheduleNext();
+      };
       mandarin.onerror = handleError;
       window.speechSynthesis.speak(mandarin);
     };
@@ -370,7 +221,6 @@ export default function Hsk1Client() {
   }
 
   function changeGroup(groupId: string) {
-    realDialogueRef.current?.stop();
     stop();
     setLoopEnabled(false);
     setSelectedGroupId(groupId);
@@ -496,9 +346,9 @@ export default function Hsk1Client() {
 
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
-          <span className={styles.eyebrow}>Vocabulário por assunto</span>
-          <h1>Aprenda em grupos.<br /><em>Escute em sequência.</em></h1>
-          <p>Pratique palavras do HSK 1 em blocos menores. Ouça, acompanhe o destaque e repita no seu próprio ritmo.</p>
+          <span className={styles.eyebrow}>Novo HSK · Volume 1 · Lição 11</span>
+          <h1>我读大学呢<br /><em>Prepare-se para a aula.</em></h1>
+          <p>Estou cursando a universidade. Estude a lição completa: páginas 78–85 do livro, 25 palavras, três diálogos e os três pontos gramaticais. As próximas lições entram quando você pedir.</p>
         </div>
         <aside className={styles.player} aria-live="polite">
           <div className={styles.playerStatus}>
@@ -509,12 +359,12 @@ export default function Hsk1Client() {
           </div>
           <div className={styles.stage}>
             <strong lang="zh-CN">{activeItem?.hanzi ?? selectedGroup.label.split('·')[0].trim()}</strong>
-            <span>{activeItem?.pinyin ?? selectedGroup.label.split('·')[1].trim()}</span>
+            <span>{activeItem?.pinyin ?? selectedGroup.label.split('·')[1]?.trim()}</span>
             <p>{activeItem?.meaning ?? selectedGroup.name}</p>
           </div>
           <div className={styles.mainControls}>
             <button className={styles.playButton} type="button" onClick={() => startQueue(selectedGroup.items, false)}>
-              ▶ Chinês + português
+              ▶ Ouvir sequência
             </button>
             <button className={`${styles.loopButton} ${loopEnabled && status === 'playing' ? styles.activeLoop : ''}`}
               type="button" onClick={() => loopEnabled && status === 'playing' ? stop() : startQueue(selectedGroup.items, true)}>
@@ -531,6 +381,7 @@ export default function Hsk1Client() {
                 onClick={() => changeSpeed('natural')} aria-pressed={speed === 'natural'}>Natural</button>
             </div>
           </div>
+        <label><input type="checkbox" checked={withPortuguese} onChange={(event) => { stop(); portugueseRef.current = event.target.checked; setWithPortuguese(event.target.checked); }} /> Ouvir significado em português (1s depois)</label>
         </aside>
       </section>
 
@@ -539,7 +390,7 @@ export default function Hsk1Client() {
           {GROUPS.map((group) => (
             <button type="button" role="tab" key={group.id} aria-selected={selectedGroup.id === group.id}
               className={selectedGroup.id === group.id ? styles.activeTab : ''} onClick={() => changeGroup(group.id)}>
-              <span>{group.name}</span><small>{group.items.length} palavras</small>
+              <span>{group.name}</span><small>{group.items.length} itens</small>
             </button>
           ))}
         </div>
@@ -548,9 +399,9 @@ export default function Hsk1Client() {
           <div className={styles.groupHeading}>
             <div><span>{selectedGroup.label}</span><h2>{selectedGroup.name}</h2><p>{selectedGroup.description}</p></div>
             <div className={styles.pauseControl}>
-              <div><span>Intervalo entre palavras</span><strong>{pauseDraft}s</strong></div>
+              <div><span>Intervalo entre itens</span><strong>{pauseDraft}s</strong></div>
               <input type="range" min="1" max="8" step="1" value={pauseDraft}
-                onChange={(event) => setPauseDraft(Number(event.target.value))} aria-label="Segundos entre as palavras" />
+                onChange={(event) => setPauseDraft(Number(event.target.value))} aria-label="Segundos entre itens" />
               <button type="button" onClick={savePause}>Salvar intervalo</button>
               <small>Em uso: {pauseSeconds}s</small>
             </div>
@@ -560,7 +411,7 @@ export default function Hsk1Client() {
             <div className={styles.groupPlayerCopy}>
               <span>Reprodução deste grupo</span>
               <strong>{selectedGroup.name}</strong>
-              <small>{selectedGroup.items.length} {selectedGroup.items.length === 1 ? 'palavra' : 'palavras'} · mandarim + português</small>
+              <small>{selectedGroup.items.length} {selectedGroup.items.length === 1 ? 'item' : 'itens'} · {withPortuguese ? 'mandarim + português' : 'só mandarim'}</small>
             </div>
             <div className={styles.groupPlayerControls}>
               <button className={styles.groupPlayButton} type="button" onClick={() => startQueue(selectedGroup.items, false)}>
@@ -579,7 +430,7 @@ export default function Hsk1Client() {
 
           {message && <p className={styles.message} role="status">{message}</p>}
 
-          <ol className={styles.wordList}>
+          <ol className={`${styles.wordList} ${selectedGroup.id !== 'l11-vocabulary' ? styles.sentenceList : ''}`}>
             {selectedGroup.items.map((item, index) => {
               const active = status === 'playing' && activeItem?.id === item.id;
               const loopingThisItem = active && loopEnabled && progress.total === 1;
@@ -590,8 +441,8 @@ export default function Hsk1Client() {
                 <li className={active ? styles.activeWord : ''} key={item.id}>
                   <span className={styles.number}>{String(index + 1).padStart(2, '0')}</span>
                   <strong lang="zh-CN">{item.hanzi}</strong>
-                  <div className={styles.wordDetails}><b>{item.pinyin}</b><p>{item.meaning}</p></div>
-                  <div className={styles.wordImage}>
+                  <div className={styles.wordDetails}>{item.speaker && <small>{item.speaker}</small>}<b>{item.pinyin}</b><p>{item.meaning}</p></div>
+                  {selectedGroup.id === 'l11-vocabulary' && <div className={styles.wordImage}>
                     {imageUrl ? (
                       <div className={styles.savedImage}>
                         {/* User-selected images are displayed from this session's private storage. */}
@@ -615,7 +466,7 @@ export default function Hsk1Client() {
                         <small>até 100 MB</small>
                       </label>
                     )}
-                  </div>
+                  </div>}
                   <div className={styles.wordActions}>
                     <button type="button" onClick={() => active ? stop() : startQueue([item], false)}
                       aria-label={`Ouvir ${item.hanzi}, ${item.pinyin}, e o significado ${item.meaning}`}>
@@ -635,11 +486,11 @@ export default function Hsk1Client() {
         </div>
       </section>
 
-      <RealMandarinDialogues ref={realDialogueRef} onBeforePlay={stop} />
+      <LessonPreparation sessionId={sessionId} onPlay={startQueue} onStop={stop} />
 
       <footer className={styles.footer}>
         <span className={styles.brandMark} aria-hidden="true">词</span>
-        <p>Novos grupos poderão ser acrescentados sem misturar os assuntos.</p>
+        <p>Uma lição por vez. A próxima será preparada quando você pedir.</p>
         <Link href="/">Voltar para frases →</Link>
       </footer>
     </main>
