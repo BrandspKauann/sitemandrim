@@ -5,9 +5,10 @@ import { useState } from 'react';
 import { useClientSession } from '../components/ClientSession';
 import Lesson11Client from './Lesson11Client';
 import styles from './page.module.css';
+import { LESSON11, LESSON12 } from './lessons';
 
 // Each lesson owns its study content and playback state. Add new lessons here.
-const LESSONS = [{ id: 'lesson-11', name: 'Lição 11', title: '我读大学呢', description: 'Estou cursando a universidade · páginas 78–85', Content: Lesson11Client }];
+const LESSONS = [LESSON11, LESSON12].map(lesson => ({id: `lesson-${lesson.number}`, name: `Lição ${lesson.number}`, ...lesson}));
 
 export default function Hsk1Client() {
   const { shortId } = useClientSession();
@@ -23,10 +24,10 @@ export default function Hsk1Client() {
     </header>
     {selectedLesson ? <>
       <div className={styles.lessonNavigation}><button type="button" onClick={() => setSelectedLessonId(null)}>← Todas as lições</button><strong>HSK1 / {selectedLesson.name}</strong></div>
-      <selectedLesson.Content key={selectedLesson.id} />
+      <Lesson11Client key={selectedLesson.id} lesson={selectedLesson} />
     </> : <section className={styles.lessonCatalog} aria-label="Lições do HSK1">
       <span className={styles.eyebrow}>Novo HSK · Volume 1</span><h1>Estude por lição.</h1><p>Escolha uma lição para abrir seu vocabulário, diálogos, áudio e exercícios. Cada lição fica separada das outras.</p>
-      <div className={styles.lessonCards}>{LESSONS.map(lesson => <button key={lesson.id} type="button" onClick={() => setSelectedLessonId(lesson.id)} aria-label={'Abrir ' + lesson.name}><span>{lesson.name}</span><strong lang="zh-CN">{lesson.title}</strong><p>{lesson.description}</p><small>25 palavras · 3 diálogos · gramática · escrita · prática oral</small><b>Abrir lição →</b></button>)}</div>
+      <div className={styles.lessonCards}>{LESSONS.map(lesson => <button key={lesson.id} type="button" onClick={() => setSelectedLessonId(lesson.id)} aria-label={'Abrir ' + lesson.name}><span>{lesson.name}</span><strong lang="zh-CN">{lesson.title}</strong><p>{lesson.description}</p><small>{lesson.groups[0].items.length} palavras · 3 diálogos · gramática · escrita · prática oral</small><b>Abrir lição →</b></button>)}</div>
       <p>As próximas lições serão adicionadas quando você pedir.</p>
     </section>}
     <footer className={styles.footer}><span className={styles.brandMark} aria-hidden="true">词</span><p>Seu estudo organizado por lições.</p><Link href="/">Voltar para frases →</Link></footer>

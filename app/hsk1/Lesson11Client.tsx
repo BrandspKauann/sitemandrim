@@ -5,13 +5,13 @@ import type { ChangeEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useClientSession } from '../components/ClientSession';
 import { deleteLocalImage, listLocalImages, saveLocalImage } from './imageStore';
-import { LESSON11_GROUPS, type StudyItem as VocabularyItem } from './lesson11Data';
+import type { StudyItem as VocabularyItem } from './lesson11Data';
+import { LESSON11, type Lesson } from './lessons';
 import LessonPreparation from './LessonPreparation';
 import styles from './page.module.css';
 
 type Speed = 'natural' | 'slow';
 type PlaybackLanguage = 'mandarin' | 'portuguese';
-const GROUPS = LESSON11_GROUPS;
 
 const PAUSE_STORAGE_KEY = 'hsk1:pause-seconds';
 const MAX_IMAGE_BYTES = 100 * 1024 * 1024;
@@ -32,7 +32,8 @@ function storedPauseSeconds() {
   return Number.isFinite(saved) && saved >= 1 && saved <= 8 ? saved : 1;
 }
 
-export default function Lesson11Client() {
+export default function Lesson11Client({ lesson = LESSON11 }: { lesson?: Lesson }) {
+  const GROUPS = lesson.groups;
   const { sessionId } = useClientSession();
   const [selectedGroupId, setSelectedGroupId] = useState(GROUPS[0].id);
   const [speed, setSpeed] = useState<Speed>('slow');
@@ -56,7 +57,7 @@ export default function Lesson11Client() {
 
   const selectedGroup = useMemo(
     () => GROUPS.find((group) => group.id === selectedGroupId) ?? GROUPS[0],
-    [selectedGroupId],
+    [selectedGroupId, GROUPS],
   );
 
   useEffect(() => {
@@ -323,13 +324,13 @@ export default function Lesson11Client() {
   }
 
   return (
-    <section aria-label="Conteúdo da Lição 11">
+    <section aria-label={`Conteúdo da Lição ${lesson.number}`}>
 
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
-          <span className={styles.eyebrow}>Novo HSK · Volume 1 · Lição 11</span>
-          <h1>我读大学呢<br /><em>Prepare-se para a aula.</em></h1>
-          <p>Estou cursando a universidade. Estude a lição completa: páginas 78–85 do livro, 25 palavras, três diálogos e os três pontos gramaticais. As próximas lições entram quando você pedir.</p>
+          <span className={styles.eyebrow}>Novo HSK · Volume 1 · Lição {lesson.number}</span>
+          <h1>{lesson.title}<br /><em>Prepare-se para a aula.</em></h1>
+          <p>{lesson.description} As próximas lições entram quando você pedir.</p>
         </div>
         <aside className={styles.player} aria-live="polite">
           <div className={styles.playerStatus}>
@@ -411,7 +412,7 @@ export default function Lesson11Client() {
 
           {message && <p className={styles.message} role="status">{message}</p>}
 
-          <ol className={`${styles.wordList} ${selectedGroup.id !== 'l11-vocabulary' ? styles.sentenceList : ''}`}>
+          <ol className={`${styles.wordList} ${selectedGroup.id !== `l${lesson.number}-vocabulary` ? styles.sentenceList : ''}`}>
             {selectedGroup.items.map((item, index) => {
               const active = status === 'playing' && activeItem?.id === item.id;
               const loopingThisItem = active && loopEnabled && progress.total === 1;
@@ -423,7 +424,7 @@ export default function Lesson11Client() {
                   <span className={styles.number}>{String(index + 1).padStart(2, '0')}</span>
                   <strong lang="zh-CN">{item.hanzi}</strong>
                   <div className={styles.wordDetails}>{item.speaker && <small>{item.speaker}</small>}<b>{item.pinyin}</b><p>{item.meaning}</p></div>
-                  {selectedGroup.id === 'l11-vocabulary' && <div className={styles.wordImage}>
+                  {selectedGroup.id === `l${lesson.number}-vocabulary` && <div className={styles.wordImage}>
                     {imageUrl ? (
                       <div className={styles.savedImage}>
                         {/* User-selected images are displayed from this session's private storage. */}
@@ -467,7 +468,7 @@ export default function Lesson11Client() {
         </div>
       </section>
 
-      <LessonPreparation sessionId={sessionId} onPlay={startQueue} onStop={stop} />
+      <LessonPreparation lesson={lesson} sessionId={sessionId} onPlay={startQueue} onStop={stop} />
 
     </section>
   );
