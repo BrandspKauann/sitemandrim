@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Lição 11 · Novo HSK | Tons de Mandarim',
+  title: 'Lições · Novo HSK | Tons de Mandarim',
   description: 'Prepare a lição 11 completa: vocabulário, três diálogos, gramática, escrita e prática oral com áudio em mandarim e português.',
 };
 

@@ -68,6 +68,20 @@
 .wordDetails small { display: block; margin-bottom: 8px; color: #877670; }
 .stage strong { overflow-wrap: anywhere; font-size: clamp(26px, 3vw, 46px); }
 .groupTabs { flex-wrap: wrap; }
+.lessonCatalog, .lessonNavigation { width: min(1180px, calc(100% - 30px)); margin: 32px auto; }
+.lessonCatalog { min-height: 65vh; padding: 20px 0; }
+.lessonCatalog h1 { font-family: Georgia, serif; font-size: clamp(32px, 5vw, 52px); }
+.lessonCatalog > p { max-width: 650px; line-height: 1.7; color: #756967; }
+.lessonCards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 18px; margin: 30px 0; }
+.lessonCards button { max-width: 560px; text-align: left; padding: 28px; background: #fffaf4; border: 1px solid #dfcec0; border-top: 4px solid var(--red); border-radius: 6px; cursor: pointer; color: var(--ink); }
+.lessonCards span, .lessonCards strong, .lessonCards small, .lessonCards b { display: block; }
+.lessonCards span { color: var(--red); font-size: 20px; font-weight: 750; }
+.lessonCards strong { font-size: 32px; margin: 18px 0; }
+.lessonCards small { line-height: 1.6; color: #756967; }
+.lessonCards b { margin-top: 24px; color: var(--red); }
+.lessonCards button:hover { box-shadow: 0 8px 22px #a55b3920; }
+.lessonNavigation { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.lessonNavigation button { padding: 12px 18px; border: 1px solid #cfb7a8; border-radius: 5px; background: #fffaf4; color: var(--red); cursor: pointer; }
 .number { color: #a39590; font-size: 11px; font-variant-numeric: tabular-nums; }
 .wordList li > strong { min-width: 76px; font-family: 'Noto Serif SC', 'Songti SC', SimSun, serif; font-size: 31px; font-weight: 540; }
 .wordDetails b { color: var(--red-dark); font-size: 15px; }
