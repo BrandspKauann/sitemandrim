@@ -68,11 +68,16 @@ import {
   AULA6_LISTENING_EXERCISES, AULA6_NUMBER_ROWS, AULA6_PINYIN_NOTES,
   AULA6_VOCABULARY_GROUPS, AULA6_WRITING_EXERCISES,
 } from './aula6Data';
+import {
+  AULA7_HANZI_CORRECTIONS, AULA7_HOMEWORK, AULA7_KEY_PHRASES, AULA7_LESSON_TOPICS,
+  AULA7_LISTENING_EXERCISES, AULA7_NUMBER_ROWS, AULA7_PINYIN_NOTES,
+  AULA7_VOCABULARY_GROUPS, AULA7_WRITING_EXERCISES,
+} from './aula7Data';
 import styles from './page.module.css';
 
 type StudyMode = 'resumo' | 'escrever' | 'falar' | 'ouvir';
 type ExerciseStatus = 'idle' | 'correct' | 'incorrect' | 'revealed';
-type LessonId = 'aula1' | 'aula2' | 'aula3' | 'aula4' | 'aula5' | 'aula6';
+type LessonId = 'aula1' | 'aula2' | 'aula3' | 'aula4' | 'aula5' | 'aula6' | 'aula7';
 
 const LESSONS = {
   aula1: {
@@ -140,6 +145,17 @@ const LESSONS = {
     numbersTitle: 'Quantidade, ordem e duração',
     numbersDescription: 'Compare 两本书 com 第二本书 e 两次 com 第二次. O classificador depende do que está sendo contado.',
     numberRule: <><b>Quantidade:</b> 两本书 = dois livros. <b>Ordem:</b> 第二本书 = o segundo livro. <b>Duração:</b> 半个小时 = meia hora.</>,
+  },
+  aula7: {
+    number: '07', tabTitle: 'Aula 7', tabSubtitle: 'Compras, preços e roupas', title: 'Compras, preços e opiniões',
+    objective: 'Perguntar preços, indicar quantidades e peso, localizar produtos e descrever o que você acha deles.',
+    description: 'A aula de 5 de outubro trabalhou copos, pessoas da loja, 这边/旁边, 这些/那些, dinheiro, 斤, frutas, tipos de lojas, roupas, adjetivos e 怎么样. Erros evidentes da transcrição foram corrigidos; conversas pessoais ficaram de fora.',
+    topics: AULA7_LESSON_TOPICS, pinyinNotes: AULA7_PINYIN_NOTES, numberRows: AULA7_NUMBER_ROWS, vocabularyGroups: AULA7_VOCABULARY_GROUPS,
+    hanziCorrections: AULA7_HANZI_CORRECTIONS, keyPhrases: AULA7_KEY_PHRASES, homework: AULA7_HOMEWORK,
+    writingExercises: AULA7_WRITING_EXERCISES, listeningExercises: AULA7_LISTENING_EXERCISES,
+    numbersTitle: 'Preços, dinheiro e peso',
+    numbersDescription: 'Compare total, preço de cada unidade e preço por jin. Os valores abaixo são exemplos de leitura.',
+    numberRule: <><b>Dinheiro:</b> 1 元 = 10 角 = 100 分; na fala, 元 = 块 e 角 = 毛. <b>Peso:</b> na China continental, 1 斤 = 500 g.</>,
   },
 } as const;
 
