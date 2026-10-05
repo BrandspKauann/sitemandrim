@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 
 const Hsk1Client = dynamic(() => import('./Hsk1Client'), {
   ssr: false,
-  loading: () => <main className="page-loading">Preparando a Lição 11…</main>,
+  loading: () => <main className="page-loading">Preparando suas lições…</main>,
 });
 
 export default function Hsk1Page() {

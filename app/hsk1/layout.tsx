@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Lições · Novo HSK | Tons de Mandarim',
-  description: 'Prepare a lição 11 completa: vocabulário, três diálogos, gramática, escrita e prática oral com áudio em mandarim e português.',
+  description: 'Estude as lições 11 e 12 separadamente, com vocabulário, diálogos, gramática, escrita e prática oral em mandarim e português.',
 };
 
 export default function Hsk1Layout({ children }: Readonly<{ children: React.ReactNode }>) {
