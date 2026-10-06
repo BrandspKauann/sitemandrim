@@ -49,8 +49,8 @@ export default function UsageReport({ records, today, liveMs, paused, preference
         <div className={styles.summaryCard}><span>Período selecionado</span><strong>{formatDuration(report.total)}</strong></div>
         <div className={styles.summaryCard}><span>Dias estudados</span><strong>{report.days.length}</strong></div>
       </div>
-      <div className={styles.goal}><span>Meta de hoje: {preferences.goal} min · {Math.round(goalPercent)}%</span><progress value={goalPercent} max={100} aria-label="Progresso da meta diária" /></div>
-      <p className={styles.definition}>Só conta com a página visível e em foco. Trocar de aba ou bloquear a tela pausa a contagem. Atualizações e recarregamentos preservam o histórico.</p>
+      <div className={styles.goal}><span>Meta de hoje: {preferences.goal % 60 === 0 ? `${preferences.goal / 60} horas` : `${preferences.goal} min`} · {Math.round(goalPercent)}%</span><progress value={goalPercent} max={100} aria-label="Progresso da meta diária" /></div>
+      <p className={styles.definition}>Conta enquanto o site permanece aberto, mesmo em outra aba ou sem interação. A pausa manual interrompe a contagem. Fechar o site não conta tempo; atualizações e recarregamentos preservam o histórico. Se o navegador suspender a página, o total é atualizado quando ela voltar.</p>
       <nav className={styles.reportTabs} aria-label="Estatísticas de estudo">{([['days','Por dia'],['areas','Por área'],['settings','Configurar']] as const).map(([id,label]) => <button key={id} aria-pressed={view === id} onClick={() => setView(id)}>{label}</button>)}</nav>
       {view !== 'settings' ? <>
         <div className={styles.filters}><div>{[[1,'Hoje'],[7,'7 dias'],[30,'30 dias'],[null,'Tudo']].map(([days,label]) => <button key={String(label)} onClick={() => period(days as number | null)}>{label}</button>)}</div>

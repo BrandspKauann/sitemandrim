@@ -13,13 +13,10 @@ type NumericMap = Record<string, number>;
 const OWNER_KEY = 'tons-de-mandarim:usage-owner';
 const RECORD_PREFIX = 'tons-de-mandarim:usage-session:';
 const PREFS_KEY = 'tons-de-mandarim:study-preferences';
+const GOAL_VERSION_KEY = 'tons-de-mandarim:study-goal-v2';
 const PAUSE_KEY = 'tons-de-mandarim:study-paused';
 const REPORT_ENDPOINT = '/api/usage';
 let memoryOwnerId = '';
-
-function pageIsActive() {
-  return document.visibilityState === 'visible' && document.hasFocus();
-}
 
 function newId() {
   if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
@@ -104,7 +101,7 @@ export default function SessionUsageTracker() {
   const { sessionId } = useClientSession();
   const pathname = usePathname();
   const [reportOpen, setReportOpen] = useState(false);
-  const [preferences, setPreferences] = useState<StudyPreferences>({ goal: 30, tenths: true });
+  const [preferences, setPreferences] = useState<StudyPreferences>({ goal: 360, tenths: true });
   const [paused, setPaused] = useState(false);
   const pausedRef = useRef(false);
   const [liveActiveMs, setLiveActiveMs] = useState(0);
@@ -121,7 +118,11 @@ export default function SessionUsageTracker() {
     if (!sessionId) return;
     try {
       const settings = JSON.parse(localStorage.getItem(PREFS_KEY) ?? 'null');
-      if (settings && Number.isInteger(settings.goal) && settings.goal >= 1 && settings.goal <= 1440) queueMicrotask(() => setPreferences({ goal: settings.goal, tenths: Boolean(settings.tenths) }));
+      const migrated = localStorage.getItem(GOAL_VERSION_KEY) === 'true';
+      const next = { goal: migrated && settings && Number.isInteger(settings.goal) && settings.goal >= 1 && settings.goal <= 1440 ? settings.goal : 360, tenths: settings ? Boolean(settings.tenths) : true };
+      queueMicrotask(() => setPreferences(next));
+      localStorage.setItem(PREFS_KEY, JSON.stringify(next));
+      localStorage.setItem(GOAL_VERSION_KEY, 'true');
       pausedRef.current = sessionStorage.getItem(PAUSE_KEY) === 'true';
       const isPaused = pausedRef.current;
       queueMicrotask(() => setPaused(isPaused));
@@ -147,7 +148,7 @@ export default function SessionUsageTracker() {
     record.studyDays ??= {};
     recordRef.current = record;
     openAnchorRef.current = now;
-    visibleAnchorRef.current = pageIsActive() && !pausedRef.current ? now : null;
+    visibleAnchorRef.current = !pausedRef.current ? now : null;
     pageRef.current = window.location.pathname;
     writeRecord(record);
 
@@ -214,14 +215,21 @@ export default function SessionUsageTracker() {
 
     const onActivityChange = () => {
       checkpoint(false, true);
-      visibleAnchorRef.current = pageIsActive() && !pausedRef.current ? Date.now() : null;
     };
-    const onPageHide = () => { checkpoint(true, true); };
+    const onPageHide = () => {
+      checkpoint(true, true);
+      visibleAnchorRef.current = null;
+    };
+    const onPageShow = () => {
+      openAnchorRef.current = Date.now();
+      visibleAnchorRef.current = !pausedRef.current ? Date.now() : null;
+    };
     document.addEventListener('visibilitychange', onActivityChange);
     window.addEventListener('focus', onActivityChange);
     window.addEventListener('blur', onActivityChange);
     window.addEventListener('pagehide', onPageHide);
     window.addEventListener('beforeunload', onPageHide);
+    window.addEventListener('pageshow', onPageShow);
 
     return () => {
       window.clearInterval(displayTimer);
@@ -231,6 +239,7 @@ export default function SessionUsageTracker() {
       window.removeEventListener('blur', onActivityChange);
       window.removeEventListener('pagehide', onPageHide);
       window.removeEventListener('beforeunload', onPageHide);
+      window.removeEventListener('pageshow', onPageShow);
       checkpoint(true, true);
       if (recordRef.current?.sessionId === sessionId) recordRef.current = null;
     };
@@ -299,7 +308,7 @@ export default function SessionUsageTracker() {
           setRecords(localRecords(ownerRef.current).sort((a, b) => b.startedAt - a.startedAt));
           pausedRef.current = !pausedRef.current;
           setPaused(pausedRef.current);
-          visibleAnchorRef.current = !pausedRef.current && pageIsActive() ? Date.now() : null;
+          visibleAnchorRef.current = !pausedRef.current ? Date.now() : null;
           try { sessionStorage.setItem(PAUSE_KEY, String(pausedRef.current)); } catch { /* In-memory pause remains usable. */ }
         }} />}
 
