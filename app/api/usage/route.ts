@@ -111,8 +111,8 @@ export async function POST(request: Request) {
       started_at = MIN(usage_sessions.started_at, excluded.started_at),
       last_seen_at = MAX(usage_sessions.last_seen_at, excluded.last_seen_at),
       ended_at = excluded.ended_at,
-      open_ms = MAX(usage_sessions.open_ms, excluded.open_ms),
-      visible_ms = MAX(usage_sessions.visible_ms, excluded.visible_ms),
+      open_ms = excluded.open_ms,
+      visible_ms = excluded.visible_ms,
       daily_json = excluded.daily_json,
       daily_visible_json = excluded.daily_visible_json,
       pages_json = excluded.pages_json

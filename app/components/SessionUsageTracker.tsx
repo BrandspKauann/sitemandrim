@@ -301,6 +301,33 @@ export default function SessionUsageTracker() {
       </button>
 
       {reportOpen && <UsageReport records={records} today={currentDay} liveMs={liveActiveMs} paused={paused}
+        onResetToday={() => {
+          if (!window.confirm('Zerar somente o tempo de hoje? Os outros dias serão preservados.')) return;
+          checkpointRef.current(false, false);
+          const timestamp = Date.now();
+          const today = dayKey(timestamp);
+          const all = mergeRecords(records, localRecords(ownerRef.current));
+          if (recordRef.current) {
+            const index = all.findIndex(item => item.sessionId === recordRef.current?.sessionId);
+            if (index >= 0) all[index] = recordRef.current;
+            else all.push(recordRef.current);
+          }
+          try { localStorage.setItem(`tons-de-mandarim:usage-reset-backup:${timestamp}`, JSON.stringify(all)); } catch { /* Reset still works in memory. */ }
+          for (const item of all) {
+            item.openMs = Math.max(0, item.openMs - (item.dailyMs[today] ?? 0));
+            item.visibleMs = Math.max(0, item.visibleMs - (item.dailyVisibleMs[today] ?? 0));
+            for (const [page, amount] of Object.entries(item.studyDays?.[today]?.pages ?? {})) item.pages[page] = Math.max(0, (item.pages[page] ?? 0) - amount);
+            delete item.dailyMs[today]; delete item.dailyVisibleMs[today];
+            if (item.studyDays) delete item.studyDays[today];
+            item.lastSeenAt = timestamp;
+            writeRecord(item);
+            void fetch(REPORT_ENDPOINT, {method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(item)}).catch(() => undefined);
+          }
+          openAnchorRef.current = timestamp;
+          visibleAnchorRef.current = pausedRef.current ? null : timestamp;
+          setLiveActiveMs(recordRef.current?.visibleMs ?? 0);
+          setRecords(all);
+        }}
         preferences={preferences} onClose={() => setReportOpen(false)}
         onPreferences={(next) => { setPreferences(next); try { localStorage.setItem(PREFS_KEY, JSON.stringify(next)); } catch { /* In-memory settings remain usable. */ } }}
         onPause={() => {

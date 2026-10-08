@@ -7,9 +7,10 @@ export type StudyPreferences = { goal: number; tenths: boolean };
 function dateLabel(day: string) { return new Date(`${day}T12:00:00`).toLocaleDateString('pt-BR'); }
 function clock(timestamp: number) { return new Date(timestamp).toLocaleTimeString('pt-BR'); }
 
-export default function UsageReport({ records, today, liveMs, paused, preferences, onPreferences, onPause, onClose }: {
+export default function UsageReport({ records, today, liveMs, paused, preferences, onPreferences, onPause, onClose, onResetToday }: {
   records: UsageRecord[]; today: string; liveMs: number; paused: boolean; preferences: StudyPreferences;
   onPreferences: (next: StudyPreferences) => void; onPause: () => void; onClose: () => void;
+  onResetToday: () => void;
 }) {
   const [view, setView] = useState<'days' | 'areas' | 'settings'>('days');
   const [from, setFrom] = useState(today);
@@ -50,6 +51,7 @@ export default function UsageReport({ records, today, liveMs, paused, preference
         <div className={styles.summaryCard}><span>Dias estudados</span><strong>{report.days.length}</strong></div>
       </div>
       <div className={styles.goal}><span>Meta de hoje: {preferences.goal % 60 === 0 ? `${preferences.goal / 60} horas` : `${preferences.goal} min`} · {Math.round(goalPercent)}%</span><progress value={goalPercent} max={100} aria-label="Progresso da meta diária" /></div>
+      <button onClick={onResetToday}>Zerar tempo de hoje</button>
       <p className={styles.definition}>Conta enquanto o site permanece aberto, mesmo em outra aba ou sem interação. A pausa manual interrompe a contagem. Fechar o site não conta tempo; atualizações e recarregamentos preservam o histórico. Se o navegador suspender a página, o total é atualizado quando ela voltar.</p>
       <nav className={styles.reportTabs} aria-label="Estatísticas de estudo">{([['days','Por dia'],['areas','Por área'],['settings','Configurar']] as const).map(([id,label]) => <button key={id} aria-pressed={view === id} onClick={() => setView(id)}>{label}</button>)}</nav>
       {view !== 'settings' ? <>
