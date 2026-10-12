@@ -32,7 +32,7 @@
 .reviewHeading h1 { margin-bottom: 14px; font-size: clamp(43px, 5vw, 64px); }
 .leaveButton { min-height: 39px; padding: 0 14px; flex: 0 0 auto; border: 1px solid #cabaae; border-radius: 3px; background: transparent; color: #756864; font-size: 12px; font-weight: 720; cursor: pointer; }
 .leaveButton:hover { border-color: var(--red); color: var(--red); }
-.lessonTabs { margin-top: 42px; padding-bottom: 12px; display: flex; gap: 8px; border-bottom: 1px solid #d7cabc; }
+.lessonTabs { margin-top: 42px; padding-bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid #d7cabc; }
 .lessonTabs button { min-width: 170px; min-height: 55px; padding: 8px 16px; display: grid; gap: 3px; border: 1px solid #d5c7ba; border-radius: 3px; background: #fffaf4; color: #756966; text-align: left; }
 .lessonTabs button span { font-size: 15px; font-weight: 760; }
 .lessonTabs button small { font-size: 11px; }
