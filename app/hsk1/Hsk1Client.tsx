@@ -5,10 +5,10 @@ import { useState } from 'react';
 import { useClientSession } from '../components/ClientSession';
 import Lesson11Client from './Lesson11Client';
 import styles from './page.module.css';
-import { LESSON11, LESSON12, LESSON13, LESSON14 } from './lessons';
+import { LESSON11, LESSON12, LESSON13, LESSON14, LESSON15 } from './lessons';
 
 // Each lesson owns its study content and playback state. Add new lessons here.
-const LESSONS = [LESSON11, LESSON12, LESSON13, LESSON14].map(lesson => ({id: `lesson-${lesson.number}`, name: `Lição ${lesson.number}`, ...lesson}));
+const LESSONS = [LESSON11, LESSON12, LESSON13, LESSON14, LESSON15].map(lesson => ({id: `lesson-${lesson.number}`, name: `Lição ${lesson.number}`, ...lesson}));
 
 export default function Hsk1Client() {
   const { shortId } = useClientSession();

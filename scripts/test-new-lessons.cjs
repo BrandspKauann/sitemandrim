@@ -12,12 +12,12 @@ function load(file){
 }
 const root=path.resolve(__dirname,'..');
 const ids=new Set();
-for(const n of [13,14]){
+for(const n of [13,14,15]){
  const data=load(path.join(root,`app/hsk1/lesson${n}Data.ts`));
  const groups=data[`LESSON${n}_GROUPS`];
  const entries=groups.flatMap(g=>g.items);
- assert.equal(groups[0].items.length,n===13?20:26);
- assert.deepEqual(groups.filter(g=>/-text[123]$/.test(g.id)).map(g=>g.items.length),n===13?[4,4,6]:[4,5,6]);
+ assert.equal(groups[0].items.length,n===13?20:n===14?26:17);
+ assert.deepEqual(groups.filter(g=>/-text[123]$/.test(g.id)).map(g=>g.items.length),n===14?[4,5,6]:[4,4,6]);
  for(const e of entries){assert.ok(e.hanzi&&e.pinyin&&e.meaning);assert.ok(!ids.has(e.id));ids.add(e.id);}
  for(const g of data[`LESSON${n}_GRAMMAR`])for(const ex of g.examples)assert.ok(entries.some(e=>e.hanzi===ex),ex);
  assert.equal(data[`LESSON${n}_QUIZ`].length,20);
@@ -38,5 +38,5 @@ for(const n of [8,9]){
 const lessonSource=fs.readFileSync(path.join(root,'app/revisao/RevisionHome.tsx'),'utf8');
 assert.ok(lessonSource.indexOf('aula7: {')<lessonSource.indexOf('aula8: {'));
 const bookSource=fs.readFileSync(path.join(root,'app/hsk1/Hsk1Client.tsx'),'utf8');
-assert.ok(bookSource.includes('[LESSON11, LESSON12, LESSON13, LESSON14]'));
+assert.ok(bookSource.includes('[LESSON11, LESSON12, LESSON13, LESSON14, LESSON15]'));
 console.log('Catálogos mantêm a ordem anterior e isolam cada novo conteúdo.');
