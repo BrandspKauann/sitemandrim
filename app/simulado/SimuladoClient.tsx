@@ -148,7 +148,7 @@ export default function SimuladoClient(){
   }
   const profile=PROFILES[level];
   return <div className={styles.page}>
-    <header className={styles.header}><Link className={styles.brand} href="/"><span>考</span>Tons de Mandarim</Link><nav aria-label="Navegação principal">{[['/','Frases'],['/letras-e-silabas','Letras e sílabas'],['/exercicios','Exercícios'],['/tons','Tons'],['/hsk1','HSK1'],['/revisao','Revisão'],['/simulado','Simulado HSK']].map(([href,label])=><Link key={href} href={href} aria-current={href==='/simulado'?'page':undefined}>{label}</Link>)}</nav></header>
+    <header className={styles.header}><Link className={styles.brand} href="/"><span>考</span>Tons de Mandarim</Link><nav aria-label="Navegação principal">{[['/','Frases'],['/letras-e-silabas','Letras e sílabas'],['/exercicios','Exercícios'],['/tons','Tons'],['/hsk','HSK'],['/revisao','Revisão'],['/simulado','Simulado HSK']].map(([href,label])=><Link key={href} href={href} aria-current={href==='/simulado'?'page':undefined}>{label}</Link>)}</nav></header>
     <main className={styles.main}>
       {!attempt&&<>
         <div className={styles.hero}><div><p className={styles.eyebrow}>模拟考试 · NOVO HSK 3.0</p><h1>Treine como se fosse<br/><em>o dia da prova.</em></h1><p>Ouça, leia e responda no seu ritmo — ou coloque o relógio para correr. Três provas completas para descobrir o que já sabe e o que precisa revisar.</p></div><div className={styles.heroStamp}><span>汉语</span><strong>1 / 2 / 3</strong><small>170 questões autorais<br/>27 cenas · áudio em mandarim</small></div></div>

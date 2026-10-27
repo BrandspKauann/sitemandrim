@@ -13,7 +13,7 @@ export default function RevisionHeader() {
         <Link href="/letras-e-silabas">Letras e sílabas</Link>
         <Link href="/exercicios">Exercícios</Link>
         <Link href="/tons">Tons</Link>
-        <Link href="/hsk1">HSK1</Link>
+        <Link href="/hsk">HSK</Link>
         <Link className={styles.activeNav} href="/revisao">Revisão</Link>
         <Link href="/simulado">Simulado HSK</Link>
       </nav>
