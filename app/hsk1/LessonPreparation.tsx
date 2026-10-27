@@ -9,7 +9,7 @@ import { checkWritingAnswer, writingFocus } from '../lib/writingPractice';
 
 
 export default function LessonPreparation({ lesson = LESSON11, sessionId, onPlay, onStop }: {lesson?: Lesson; sessionId: string; onPlay: (items: StudyItem[], loop: boolean) => void; onStop: () => void}) {
-  const lines = lesson.groups.filter(g => g.id.startsWith(`l${lesson.number}-text`)).flatMap(g => g.items);
+  const lines = lesson.groups.filter(g => g.id.includes('-text')).flatMap(g => g.items);
   const checklist = lesson.checklist;
   const [question, setQuestion] = useState(0);
   const [answer, setAnswer] = useState<number | null>(null);
@@ -33,12 +33,12 @@ export default function LessonPreparation({ lesson = LESSON11, sessionId, onPlay
     setOrder(shuffled);
   }
   return <section className={styles.study} aria-label={`Preparação completa da lição ${lesson.number}`}>
-    <header><span>ENTENDA ANTES DE DECORAR</span><h2>Os três pontos da lição</h2><p>Use os controles do player acima para velocidade e intervalo. Os exemplos abaixo também podem ser repetidos em loop.</p></header>
+    <header><span>ENTENDA ANTES DE DECORAR</span><h2>Os pontos da lição</h2><p>Use os controles do player acima para velocidade e intervalo. Os exemplos abaixo também podem ser repetidos em loop.</p></header>
     <div className={styles.cards}>{lesson.grammar.map(topic => {
       const examples = lesson.groups.flatMap(g => g.items).filter(item => topic.examples.includes(item.hanzi));
       return <article key={topic.title}><h3>{topic.title}</h3><p>{topic.text}</p><aside>{topic.tip}</aside><ul>{examples.map(item => <li key={item.id}><strong lang="zh-CN">{item.hanzi}</strong><br />{item.pinyin}<br />{item.meaning}</li>)}</ul><button onClick={() => onPlay(examples, false)}>▶ Ouvir exemplos</button><button onClick={() => onPlay(examples, true)}>↻ Loop</button></article>;
     })}</div>
-    <article className={styles.panel}><h2>1. Compreensão e gramática</h2><p>20 questões sobre os três diálogos e as estruturas da lição.</p>
+    <article className={styles.panel}><h2>1. Compreensão e gramática</h2><p>{lesson.quiz.length} questões sobre os textos e as estruturas da lição.</p>
       {finished ? <><h3>Resultado: {score} / {lesson.quiz.length}</h3><p>Volte aos exemplos das perguntas que errou e tente novamente.</p><button onClick={() => { setQuestion(0); setAnswer(null); setScore(0); setFinished(false); }}>Recomeçar</button></> : <>
         <small>Questão {question + 1} / {lesson.quiz.length} · {score} acertos</small><h3 lang="zh-CN">{quiz.q}</h3>
         <div className={styles.answers}>{order.map(index => <button key={index} disabled={answer !== null} className={answer !== null && index === quiz.correct ? styles.correct : answer === index ? styles.wrong : ''} onClick={() => { setAnswer(index); if (index === quiz.correct) setScore(score + 1); }}>{quiz.options[index]}</button>)}</div>
@@ -50,6 +50,6 @@ export default function LessonPreparation({ lesson = LESSON11, sessionId, onPlay
     <article className={styles.panel}><h2>3. Ouça, fale e compare</h2><p>Escolha uma fala, ouça o modelo e depois grave até três tentativas de 30 segundos. A gravação só começa quando você autorizar seu microfone.</p><label htmlFor="lesson11-line">Fala do diálogo</label><select id="lesson11-line" value={line} onChange={event => { onStop(); setLine(Number(event.target.value)); }}>{lines.map((item, index) => <option key={item.id} value={index}>{index + 1}. {item.hanzi}</option>)}</select><h3 lang="zh-CN">{speech.hanzi}</h3><p>{speech.pinyin}</p><p>{speech.meaning}</p><button onClick={() => onPlay([speech], false)}>▶ Ouvir modelo</button><button onClick={() => onPlay([speech], true)}>↻ Repetir modelo</button><button onClick={onStop}>Parar áudio</button><PracticeRecorder key={speech.id} phrase={speech.hanzi} pinyin={speech.pinyin} sessionId={sessionId} storageScope={'hsk1-' + speech.id} maxSeconds={30} onBeforeRecord={onStop} />
     </article>
     <article className={styles.panel}><h2>4. Responda com a sua vida</h2><p>{lesson.prompts}</p><p lang="zh-CN">{lesson.promptsChinese}</p><p>Não basta repetir o livro: tente responder sem ler e leve suas dúvidas para a professora.</p><h3>Atenção ao significado</h3><p>{lesson.notes}</p></article>
-    <article className={styles.panel}><h2>Pronto para a aula?</h2>{checklist.map((text, index) => <label className={styles.check} key={text}><input type="checkbox" checked={!!checked[index]} onChange={event => { const next = [...checked]; next[index] = event.target.checked; setChecked(next); }} />{text}</label>)}<p>Este conteúdo pertence à Lição {lesson.number}. Outras lições ficam separadas na lista do HSK1.</p></article>
+    <article className={styles.panel}><h2>Pronto para a aula?</h2>{checklist.map((text, index) => <label className={styles.check} key={text}><input type="checkbox" checked={!!checked[index]} onChange={event => { const next = [...checked]; next[index] = event.target.checked; setChecked(next); }} />{text}</label>)}<p>Este conteúdo pertence à Lição {lesson.number} do {lesson.course ?? 'HSK1'}. Outras lições ficam separadas no catálogo.</p></article>
   </section>;
 }

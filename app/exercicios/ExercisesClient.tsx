@@ -8,6 +8,7 @@ import HskDialoguePractice from './HskDialoguePractice';
 import ToneRulesGame from './ToneRulesGame';
 import TranslationGame, { TRANSLATION_PHRASE_COUNT } from './TranslationGame';
 import ImageVocabularyGame, { IMAGE_WORD_COUNT } from './ImageVocabularyGame';
+import Hsk2Lessons from './Hsk2Lessons';
 import styles from './page.module.css';
 
 type Challenge = {
@@ -113,7 +114,7 @@ function shuffledChallenges() {
 
 export default function ExercisesPage() {
   const { sessionId, shortId } = useClientSession();
-  const [exerciseTab, setExerciseTab] = useState<'rules' | 'listening' | 'translation' | 'images'>('rules');
+  const [exerciseTab, setExerciseTab] = useState<'rules' | 'listening' | 'translation' | 'images' | 'hsk2'>(() => typeof window !== 'undefined' && window.location.hash === '#hsk2' ? 'hsk2' : 'rules');
   const [phase, setPhase] = useState<Phase>('intro');
   const [deck, setDeck] = useState<Challenge[]>([]);
   const [roundIndex, setRoundIndex] = useState(0);
@@ -226,6 +227,9 @@ export default function ExercisesPage() {
       </header>
 
       <div className={styles.exerciseTabs} role="tablist" aria-label="Tipos de exercício">
+        <button type="button" role="tab" aria-selected={exerciseTab === 'hsk2'} className={exerciseTab === 'hsk2' ? styles.activeExerciseTab : ''} onClick={() => { window.speechSynthesis?.cancel(); setSpeaking(false); setExerciseTab('hsk2'); }}>
+          <span>HSK2</span><strong>Lições 1, 2, 3 e 4</strong><small>Áudio, diálogos, escrita e revisão</small>
+        </button>
         <button type="button" role="tab" aria-selected={exerciseTab === 'rules'} className={exerciseTab === 'rules' ? styles.activeExerciseTab : ''} onClick={() => setExerciseTab('rules')}>
           <span>01</span><strong>Sequências de 3º tom</strong><small>36 exercícios</small>
         </button>
@@ -241,6 +245,7 @@ export default function ExercisesPage() {
       </div>
 
       {exerciseTab === 'images' && <ImageVocabularyGame />}
+      {exerciseTab === 'hsk2' && <Hsk2Lessons />}
       {exerciseTab === 'rules' && <ToneRulesGame />}
 
       {exerciseTab === 'translation' && <TranslationGame />}
@@ -373,10 +378,10 @@ export default function ExercisesPage() {
       </section>
       </>}
 
-      <HskDialoguePractice sessionId={sessionId} onBeforePlay={() => {
+      {exerciseTab !== 'hsk2' && <HskDialoguePractice sessionId={sessionId} onBeforePlay={() => {
         setSpeaking(false);
         setMessage('');
-      }} />
+      }} />}
 
       <footer className={styles.footer}>
         <span className={styles.brandMark} aria-hidden="true">声</span>

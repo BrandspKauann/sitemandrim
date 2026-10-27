@@ -328,7 +328,7 @@ export default function Lesson11Client({ lesson = LESSON11 }: { lesson?: Lesson 
 
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
-          <span className={styles.eyebrow}>Novo HSK · Volume 1 · Lição {lesson.number}</span>
+          <span className={styles.eyebrow}>Novo HSK · Volume {lesson.course === 'HSK2' ? 2 : 1} · Lição {lesson.number}</span>
           <h1>{lesson.title}<br /><em>Prepare-se para a aula.</em></h1>
           <p>{lesson.description} As próximas lições entram quando você pedir.</p>
         </div>
@@ -368,7 +368,7 @@ export default function Lesson11Client({ lesson = LESSON11 }: { lesson?: Lesson 
       </section>
 
       <section className={styles.workspace}>
-        <div className={styles.groupTabs} role="tablist" aria-label="Grupos de vocabulário HSK 1">
+      <div className={styles.groupTabs} role="tablist" aria-label={`Grupos de estudo ${lesson.course ?? 'HSK1'}`}>
           {GROUPS.map((group) => (
             <button type="button" role="tab" key={group.id} aria-selected={selectedGroup.id === group.id}
               className={selectedGroup.id === group.id ? styles.activeTab : ''} onClick={() => changeGroup(group.id)}>
@@ -424,7 +424,7 @@ export default function Lesson11Client({ lesson = LESSON11 }: { lesson?: Lesson 
                   <span className={styles.number}>{String(index + 1).padStart(2, '0')}</span>
                   <strong lang="zh-CN">{item.hanzi}</strong>
                   <div className={styles.wordDetails}>{item.speaker && <small>{item.speaker}</small>}<b>{item.pinyin}</b><p>{item.meaning}</p></div>
-                  {selectedGroup.id === `l${lesson.number}-vocabulary` && <div className={styles.wordImage}>
+                  {selectedGroup.id.endsWith('-vocabulary') && <div className={styles.wordImage}>
                     {imageUrl ? (
                       <div className={styles.savedImage}>
                         {/* User-selected images are displayed from this session's private storage. */}
