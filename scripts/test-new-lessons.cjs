@@ -26,7 +26,7 @@ for(const n of [13,14,15]){
  for(const [pt,zh,hint] of data[`LESSON${n}_WRITING`]){assert.ok(pt&&zh&&hint);assert.ok(!hint.includes(zh));}
  console.log(`Lição ${n}: vocabulário, três diálogos, 20 questões e 12 exercícios válidos.`);
 }
-for(const n of [8,9]){
+for(const n of [8,9,10,11]){
  const data=load(path.join(root,`app/revisao/aula${n}Data.ts`))[`AULA${n}`];
  assert.ok(data.keyPhrases.length>=40);assert.equal(data.topics.length,8);
  for(const p of data.keyPhrases){assert.ok(p.hanzi&&p.translation&&p.spokenPinyin);assert.ok(!ids.has(p.id));ids.add(p.id);}

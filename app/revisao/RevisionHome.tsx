@@ -76,11 +76,13 @@ import {
 import styles from './page.module.css';
 import { AULA8 } from './aula8Data';
 import { AULA9 } from './aula9Data';
+import { AULA10 } from './aula10Data';
+import { AULA11 } from './aula11Data';
 import { checkWritingAnswer, writingFocus } from '../lib/writingPractice';
 
 type StudyMode = 'resumo' | 'escrever' | 'falar' | 'ouvir';
 type ExerciseStatus = 'idle' | 'correct' | 'incorrect' | 'revealed';
-type LessonId = 'aula1' | 'aula2' | 'aula3' | 'aula4' | 'aula5' | 'aula6' | 'aula7' | 'aula8' | 'aula9';
+type LessonId = 'aula1' | 'aula2' | 'aula3' | 'aula4' | 'aula5' | 'aula6' | 'aula7' | 'aula8' | 'aula9' | 'aula10' | 'aula11';
 
 const LESSONS = {
   aula1: {
@@ -162,6 +164,8 @@ const LESSONS = {
   },
   aula8: {...AULA8, numberRule: <><b>Ordem:</b> sujeito, horário e ação. <b>Modelo:</b> 我六点下班.</>},
   aula9: {...AULA9, numberRule: <><b>Duração:</b> 半天 = meio dia. <b>Horário:</b> 十二点了 = já são doze horas.</>},
+  aula10: {...AULA10, numberRule: <><b>Duração:</b> 半个小时 = meia hora. <b>Horário:</b> 早上八点 = oito da manhã.</>},
+  aula11: {...AULA11, numberRule: <><b>Quantidade:</b> 两次 = duas vezes. <b>Ordem:</b> 第一次 = primeira vez.</>},
 } as const;
 
 const MODES: Array<{ id: StudyMode; marker: string; name: string; description: string }> = [
